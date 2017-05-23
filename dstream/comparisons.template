@@ -1,0 +1,79 @@
+package dstream
+
+import (
+        "fmt"
+	"os"
+)
+
+// EqualReport compares two Dstream values.  If they are not equal
+// further information is written to the standard error stream.
+func EqualReport(x, y Dstream, report bool) bool {
+
+	x.Reset()
+	y.Reset()
+
+	if !aequalstring(x.Names(), y.Names()) {
+		if report {
+			msg := fmt.Sprintf("Names are not equal:\nx: %v\ny: %v\n",
+				x.Names(), y.Names())
+			os.Stderr.WriteString(msg)
+		}
+		return false
+	}
+
+	if x.NumVar() != y.NumVar() {
+		if report {
+			msg := fmt.Sprintf("Number of variables are not equal:\nx: %d\ny: %d\n",
+				x.NumVar(), y.NumVar())
+			os.Stderr.WriteString(msg)
+		}
+		return false
+	}
+
+	for chunk := 0; x.Next(); chunk++ {
+		if !y.Next() {
+			if report {
+				msg := fmt.Sprintf("uneqal numbers of chunks\n")
+				print(msg)
+			}
+			return false
+		}
+		for j := 0; j < x.NumVar(); j++ {
+			switch v := x.GetPos(j).(type) {
+                        {{ range . }}
+                        case []{{ .Type }}:
+				u, ok := y.GetPos(j).([]{{ .Type }})
+				if !ok || !aequal{{ .Type }}(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+			{{ end }}
+			default:
+				if report {
+					print("mismatched types")
+				}
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+
+{{ range . }}
+func aequal{{ .Type}}(x, y []{{ .Type }}) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	for i, v := range x {
+		if v != y[i] {
+			return false
+		}
+	}
+	return true
+}
+{{ end }}

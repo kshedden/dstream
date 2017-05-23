@@ -1,0 +1,21 @@
+package main
+
+import (
+	"encoding/binary"
+	"io"
+)
+
+func writeuint64(n int, wtr io.Writer) {
+
+	for k := 0; k < 20; k++ {
+		x := uint64(k * k)
+		err := binary.Write(wtr, binary.LittleEndian, x)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func main() {
+
+}

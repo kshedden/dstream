@@ -1,0 +1,83 @@
+package dstream
+
+import (
+        "fmt"
+)
+
+{{ range . }}
+func resize{{ .Type }}(x []{{ .Type }}, n int) []{{ .Type }} {
+	if cap(x) < n {
+		x = make([]{{ .Type }}, n)
+	}
+	return x[0:n]
+}
+{{ end }}
+
+func ilen(x interface{}) int {
+	switch x := x.(type) {
+        {{- range . }}
+	case []{{ .Type }}:
+		return len(x)
+        {{- end }}
+        case nil:
+		return 0
+	default:
+		msg := fmt.Sprintf("unknown type: %T", x)
+		panic(msg)
+	}
+}
+
+func truncate(z []interface{}) {
+	for j, x := range z {
+		if x != nil {
+			switch x := x.(type) {
+			{{ range . }}
+			case []{{ .Type }}:
+				z[j] = x[0:0]
+                        {{ end }}
+                        default:
+				msg := fmt.Sprintf("unknown type %T", x)
+				panic(msg)
+			}
+		}
+	}
+}
+
+// GetCol returns a copy of the data for one variable.  The data
+// are returned as a slice.
+func GetCol(da Dstream, na string) interface{} {
+
+        vn := da.Names()
+	for j, x := range vn {
+                if na == x {
+                        return GetColPos(da, j)
+                }
+        }
+        panic(fmt.Sprintf("Variable '%s' not found", na))
+        return nil
+}
+
+// GetColPos returns a copy of the data for one variable.
+// The data are returned as a slice.
+func GetColPos(da Dstream, j int) interface{} {
+
+        da.Reset()
+        da.Next()
+        v := da.GetPos(j)
+
+	switch v := v.(type) {
+	    {{- range . }}
+	    case []{{ .Type }}:
+	        var x []{{ .Type }}
+		x = append(x, v...)
+		for da.Next() {
+		        y := da.GetPos(j).([]{{ .Type }})
+                        x = append(x, y...)
+                }
+		return x
+            {{- end }}
+	}
+
+        panic("GetColPos: unknown type")
+        return nil
+}

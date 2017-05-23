@@ -1,0 +1,38 @@
+package dstream
+
+// MemCopy returns a Dstream that copies the provided Dstream into
+// in-memory storage.  The provided Dstream is copied from its current
+// position.  To copy an entire Dstream either pass a newly-created
+// Dstream or call Reset before calling MemCopy.
+func MemCopy(data Dstream) Dstream {
+
+	nvar := data.NumVar()
+	bdata := make([][]interface{}, nvar)
+
+	for data.Next() {
+		for j := 0; j < nvar; j++ {
+			var y interface{}
+			v := data.GetPos(j)
+			switch v := v.(type) {
+			        {{- range . }}
+                                        case []{{ .Type }}:
+				        z := make([]{{ .Type }}, len(v))
+				        copy(z, v)
+				        y = z
+			        {{- end }}
+			}
+		        bdata[j] = append(bdata[j], y)
+		}
+	}
+
+	da := &dataArrays{
+		rawData: bdata,
+		xform: xform{
+			names: data.Names(),
+		},
+	}
+
+	da.init()
+
+	return da
+}

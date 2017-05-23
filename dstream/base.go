@@ -1,0 +1,130 @@
+package dstream
+
+import "fmt"
+
+// Dstream streams chunks of data to a consumer.
+type Dstream interface {
+
+	// Next attempts to advance to the next chunk and returns true
+	// if successful.
+	Next() bool
+
+	// Names returns the variable names.
+	Names() []string
+
+	// Get returns the values for one variable in the current
+	// chunk, referring to the variable by name
+	Get(string) interface{}
+
+	// Get returns the values for one variable for the current
+	// chunk, referring to the variable by position.
+	GetPos(int) interface{}
+
+	// NumVar returns the number of variables in the data set.
+	NumVar() int
+
+	// NumObs returns the number of rows in the data set, it may
+	// return -1 if not known.
+	NumObs() int
+
+	// Reset sets the provider so that the data are read from the
+	// beginning of the dataset.
+	Reset()
+}
+
+// dataArrays is an implementation of Dstream based on sharded arrays.
+type dataArrays struct {
+	xform
+
+	// rawData is the underlying data to be passed to the
+	// consumer.
+	rawData [][]interface{}
+
+	chunk int // 1-based
+	done  bool
+	nobs  int
+}
+
+func (da *dataArrays) Next() bool {
+
+	da.chunk++
+	if da.chunk <= len(da.rawData[0]) {
+		return true
+	}
+	da.done = true
+	return false
+}
+
+func (da *dataArrays) NumObs() int {
+
+	if da.nobs > 0 {
+		return da.nobs
+	}
+
+	if da.rawData == nil || len(da.rawData) == 0 {
+		// Not yet known
+		return -1
+	}
+
+	var nobs int
+	for _, v := range da.rawData[0] {
+		nobs += ilen(v)
+	}
+	da.nobs = nobs
+
+	return nobs
+}
+
+func (da *dataArrays) init() {
+	da.setNamePos()
+}
+
+func (da *dataArrays) Names() []string {
+	return da.names
+}
+
+func (da *dataArrays) Reset() {
+	da.chunk = 0
+	da.nobs = 0
+	da.done = false
+}
+
+func (da *dataArrays) GetPos(j int) interface{} {
+	if da.done {
+		return nil
+	}
+
+	return da.rawData[j][da.chunk-1]
+}
+
+func (da *dataArrays) Get(na string) interface{} {
+
+	pos, ok := da.namepos[na]
+	if !ok {
+		msg := fmt.Sprintf("Variable '%s' not found", na)
+		panic(msg)
+	}
+
+	return da.GetPos(pos)
+}
+
+func (da *dataArrays) NumVar() int {
+	return len(da.rawData)
+}
+
+// NewFromArrays creates a Dstream from raw data stored as slices;
+// data[i][j] is the data for the i^th variable in the j^th chunk.
+func NewFromArrays(data [][]interface{}, names []string) Dstream {
+	da := &dataArrays{
+		rawData: data,
+		xform: xform{
+			names: names,
+		},
+	}
+
+	da.init()
+
+	return da
+}
+
+//go:generate go run gen.go memcopy.template

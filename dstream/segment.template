@@ -1,0 +1,157 @@
+package dstream
+
+import (
+        "fmt"
+)
+
+func (sd *segmentedData) GetPos(j int) interface{} {
+    var x interface{}
+    var stash bool
+    if ilen(sd.stash[j]) > 0 {
+        x = sd.stash[j]
+        stash = true
+    } else {
+        x = sd.bdata[j]
+    }
+    switch x := x.(type) {
+        {{- range . }}
+        case []{{ .Type }}:
+	    pos := sd.pos
+            if stash {
+                pos = len(x)
+            }
+            return x[0:pos]
+	{{- end }}
+	default:
+	    panic("unknown type")
+    }
+}
+
+
+// fixstash appends the matching initial segment of bdata to the
+// end of the stash
+func (sd *segmentedData) fixstash() bool {
+    pos, fd := sd.findSegmentStash()
+    if pos == 0 {
+        return true
+    }
+    for j := 0; j<sd.source.NumVar(); j++ {
+        x := sd.bdata[j]
+        switch x := x.(type) {
+            {{- range . }}
+            case []{{ .Type }}:
+	        z := sd.stash[j].([]{{ .Type }})
+		sd.stash[j] = append(z, x[0:pos]...)
+		sd.bdata[j] = x[pos:len(x)]
+  	    {{- end }}
+  	    default:
+  	        panic("unknown type")
+        }
+    }
+    return fd
+}
+
+
+// setstash copies bdata into stash, replacing whatever was there.
+func (sd *segmentedData) setstash() {
+    sd.stash = make([]interface{}, sd.source.NumVar())
+    for j := 0; j<sd.source.NumVar(); j++ {
+        x := sd.bdata[j]
+        switch x := x.(type) {
+            {{- range . }}
+            case []{{ .Type }}:
+	        var z []{{ .Type }}
+		if sd.stash[j] != nil {
+                    z = sd.stash[j].([]{{ .Type }})
+                }
+	        z = resize{{ .Type }}(z, len(x))
+		copy(z, x)
+		sd.stash[j] = z
+  	    {{- end }}
+  	    default:
+  	        panic("unknown type")
+        }
+    }
+}
+
+// leftsliceb reslices every element of bdata from position
+// pos to the end of the slice.
+func (sd *segmentedData) leftsliceb(pos int) {
+    for j := 0; j < sd.source.NumVar(); j++ {
+        x := sd.bdata[j]
+        switch x := x.(type) {
+	{{- range . }}
+            case []{{ .Type }}:
+                sd.bdata[j] = x[pos:len(x)]
+	{{- end }}
+	default:
+	    panic("unknown type")
+       }
+    }
+}
+
+
+// findSegment finds the next segment boundary after start in the
+// current backing slice.  If there is no boundary, returns -1.
+func (sd *segmentedData) findSegment(start int) int {
+	pos := -1
+	for _, j := range sd.vpos {
+		x := sd.bdata[j]
+		switch x := x.(type) {
+		{{- range . }}
+		case []{{ .Type }}:
+			for i := start+1; i < len(x); i++ {
+			        if pos != -1 && i >= pos {
+                                        break
+                                }
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
+                {{- end }}
+                case nil:
+		        return -1
+                default:
+			panic(fmt.Sprintf("unknown data type %T", x))
+		}
+        }
+
+	return pos
+}
+
+
+// findSegmentStash finds the first segment boundary in bdata, viewing bstash
+// as a continuation of stash.
+func (sd *segmentedData) findSegmentStash() (int, bool) {
+	pos := -1
+	var m int
+	for _, j := range sd.vpos {
+		x := sd.bdata[j]
+		switch x := x.(type) {
+		{{- range . }}
+		case []{{ .Type }}:
+         		m = len(x)
+		        y := sd.stash[j].([]{{ .Type }})
+			v := y[len(y) - 1]
+			for i := 0; i < len(x); i++ {
+			        if pos != -1 && i >= pos {
+                                        break
+                                }
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
+                {{- end }}
+                default:
+			panic(fmt.Sprintf("unknown data type %T", x))
+		}
+        }
+
+        if pos != -1  {
+	    return pos, true
+	} else {
+            return m, false
+        }
+}
