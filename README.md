@@ -20,7 +20,8 @@ possible to load all data for all variables into memory at once.  To
 achieve this, Dstream utilizes a _chunked_, _columnar_ storage format.
 A chunk contains the data for all of the Dstream's variables for a
 consecutive subset of rows, stored by variable (column-wise) in typed
-arrays.
+arrays.  A single chunk is brought into memory at once, the Dstream as
+a whole will not generally reside in memory.
 
 During data processing, the chunks are visited in linear order.  When
 possible, the memory backing a chunk is re-used for the next chunk.
@@ -154,6 +155,20 @@ for extracting columns into slices.
 The [Join](https://godoc.org/github.com/kshedden/dstream/dstream#Join)
 framework allows several Dstreams to be joined at the chunk level
 based on a shared index variable.
+
+### Exported types and the reference implementation
+
+The concrete dstream implementations are not exported from the
+package.  Thus, the caller sees a dstream as a Dstream interface type,
+not as its underlying concrete type.  Using interface types allows
+interoperability between different Dstream types when working with
+transformations.  An exception to this rule is any Dstream that has
+additional methods that are not part of the Dstream interface (such as
+the CSV reader).
+
+The dataArrays type serves as a reference implementation for a
+Dstream.  This implementation uses in-memory sharded arrays to store
+the values for each variable.
 
 ### Data sources
 
