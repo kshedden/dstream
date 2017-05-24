@@ -16,8 +16,7 @@ type filterCol struct {
 }
 
 // FilterCol applies filtering functions to one or more data columns,
-// and retains only the records where all filtering functions are
-// true.
+// and retains only the rows where all filtering functions are true.
 func FilterCol(data Dstream, funcs map[string]FilterColFunc) Dstream {
 	fc := &filterCol{
 		xform: xform{

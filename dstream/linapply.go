@@ -22,8 +22,8 @@ func (a *linapply) init() {
 	a.bdata = make([]interface{}, len(a.names))
 }
 
-// Linapply adds new variables to Dstream computed by applying taking
-// linear combinations of the other variables.
+// Linapply adds new variables to Dstream by taking linear
+// combinations of the other variables in the Dstream.
 func Linapply(data Dstream, coeffs [][]float64, basename string) Dstream {
 
 	a := &linapply{

@@ -2,21 +2,26 @@ package dstream
 
 import "fmt"
 
-type mfunc func(interface{})
+type MutateFunc func(interface{})
 
 type mutated struct {
 	xform
 
+	// The name of the variable to be mutated
 	vname string
-	vpos  int
 
-	f mfunc
+	// The position of the variable to be mutated
+	vpos int
+
+	// The function that performs the mutation
+	f MutateFunc
 }
 
 // Mutate returns a Dstream in which the variable with the given name
 // is transformed using the given function.
-func Mutate(ds Dstream, name string, f mfunc) Dstream {
+func Mutate(ds Dstream, name string, f MutateFunc) Dstream {
 
+	// Find the variable's position
 	vpos := -1
 	for j, n := range ds.Names() {
 		if n == name {
