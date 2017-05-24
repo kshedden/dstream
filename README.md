@@ -1,3 +1,12 @@
+[Godoc documentation](https://godoc.org/github.com/kshedden/dstream/dstream)
+
+To install:
+
+```
+go get github.com/kshedden/dstream/dstream
+go get github.com/kshedden/dstream/formula
+```
+
 __Dstream__ is a package for manipulating streams of multivariate data
 in [Go](http://golang.org).  A Dstream is a
 [dataframe](http://pandas.pydata.org)-like container that
@@ -55,12 +64,16 @@ ds = Muate(ds, "x1", f) // apply f in-place the variable named "x1"
 The most common transformations can be divided into the following types:
 
 * _Extension_: add new variables to the dstream, usually defined in
-  terms of the existing variables.  Examples include __Diffchunk__,
-  __Lagchunk__, __Apply__, and __LinApply__.
+  terms of the existing variables.  Examples include
+  [DiffChunk](https://godoc.org/github.com/kshedden/dstream/dstream#DiffChunk),
+  [LagChunk](https://godoc.org/github.com/kshedden/dstream/dstream#LagChunk),
+  [Apply](https://godoc.org/github.com/kshedden/dstream/dstream#DropNA),
+  and
+  [LinApply](https://godoc.org/github.com/kshedden/dstream/dstream#LinApply).
 
 * _Re-chunking_: modify the chunk boundaries.  Examples include
   [Segment](https://godoc.org/github.com/kshedden/dstream/dstream#Segment)
-  and __SizeChunk__.
+  and [SizeChunk](https://godoc.org/github.com/kshedden/dstream/dstream#SizeChunk).
 
 * _Mutation_: in-place modifications of the data, examples include
   [Mutate](https://godoc.org/github.com/kshedden/dstream/dstream#Mutate).
@@ -70,13 +83,20 @@ The most common transformations can be divided into the following types:
   [Drop](https://godoc.org/github.com/kshedden/dstream/dstream#Drop),
   [FilterCol](https://godoc.org/github.com/kshedden/dstream/dstream#FilterCol).
 
+* _Copying_:
+  [MemCopy](https://godoc.org/github.com/kshedden/dstream/dstream#DropNA)
+  returns an in-memory Dstream tht is a copy of a given Dstream.
+
 ### Type support
 
 Each column in a Dstream has a fixed type.  When accessing a
-variable's values using `Get` or `GetPos`, the data for one variable,
-in one chunk, is provided as a slice of values.  To support multiple
-data types, this slice is returned as an empty interface{} which can
-be type-asserted to a concrete type, like this:
+variable's values using
+[Get](https://godoc.org/github.com/kshedden/dstream/dstream#Get) or
+[GetPos](https://godoc.org/github.com/kshedden/dstream/dstream#GetPos),
+the data for one variable, in one chunk, is provided as a slice of
+values.  To support multiple data types, this slice is returned as an
+empty interface{} which can be type-asserted to a concrete type, like
+this:
 
 ```
 x := da.Get("x").([]uint8)
@@ -86,12 +106,27 @@ Currently, many of the Dstream transformations are only implemented
 for a limited range of types, `[]float64` is the most
 widely-supported.
 
+### Utility functions
+
+Dstream provides several utility functions for working with Dstreams,
+including
+[Equal](https://godoc.org/github.com/kshedden/dstream/dstream#Equal)
+and
+[EqualReport](https://godoc.org/github.com/kshedden/dstream/dstream#EqualReport)
+for comparison,
+[GetCol](https://godoc.org/github.com/kshedden/dstream/dstream#GetCol)
+and
+[GetColPos](https://godoc.org/github.com/kshedden/dstream/dstream#GetColPos)
+for extracting columns into slices.
+
 ### Data sources
 
 A Dstream is created from a data source.  We provide two procedures
-__StreamCSV__ and __Bcols__ for constructing dstreams from certain
-types of text (csv) and binary data.  A dstream is based on a minimal
-Go
+[StreamCSV](https://godoc.org/github.com/kshedden/dstream/dstream#StreamCSV)
+and
+[Bcols](https://godoc.org/github.com/kshedden/dstream/dstream#DropNAhttps://godoc.org/github.com/kshedden/dstream/dstream#Bcols)
+for constructing dstreams from certain types of text (csv) and binary
+data.  A dstream is based on a minimal Go
 [interface](https://golang.org/doc/effective_go.html#interfaces_and_types),
 so Dstreams can be obtained from other data sources by implementing a
 reader that implements the Dstream interface.

@@ -2,6 +2,8 @@ package dstream
 
 import "math"
 
+// DropDA returns a Dstream in which all rows containing any missing
+// values are dropped.
 func DropNA(data Dstream) Dstream {
 	dna := &dropNA{
 		xform: xform{

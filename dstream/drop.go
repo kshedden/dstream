@@ -34,12 +34,12 @@ func (d *drop) init() {
 }
 
 // Drop removes the given variables from a Dstream.
-func Drop(data Dstream, vars []string) Dstream {
+func Drop(data Dstream, dropvars []string) Dstream {
 	d := &drop{
 		xform: xform{
 			source: data,
 		},
-		dropVars: vars,
+		dropVars: dropvars,
 	}
 	d.init()
 	return d
