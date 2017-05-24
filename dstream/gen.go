@@ -62,7 +62,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	out.WriteString("// GENERATED CODE, DO NOT EDIT\n")
+	out.WriteString("// GENERATED CODE, DO NOT EDIT\n\n")
 	_, err = out.Write(p)
 	if err != nil {
 		panic(err)

@@ -1,4 +1,4 @@
-[Godoc documentation](https://godoc.org/github.com/kshedden/dstream/dstream)
+Link to Godoc [documentation](https://godoc.org/github.com/kshedden/dstream/dstream)
 
 To install:
 
@@ -7,8 +7,8 @@ go get github.com/kshedden/dstream/dstream
 go get github.com/kshedden/dstream/formula
 ```
 
-__Dstream__ is a package for manipulating streams of multivariate data
-in [Go](http://golang.org).  A Dstream is a
+__Dstream__ is a package for manipulating streams of typed,
+multivariate data in [Go](http://golang.org).  A Dstream is a
 [dataframe](http://pandas.pydata.org)-like container that
 (conceptually) holds a rectangular array of data in which the columns
 are variables and the rows are cases or observations.  The Dstream
@@ -26,9 +26,9 @@ arrays.
 The chunks are visited in linear order.  When possible, the memory
 backing a chunk is re-used for the next chunk.  Therefore, a chunk
 must be either completely processed, or copied to independent memory
-before the next chunk is read.  Random chunk access and sorting across
-chunks is not permitted.  A Dstream can be Reset and read multiple
-times, but this requires all the overhead of the initial read
+before subsequent chunks are read.  Random chunk access and sorting
+across chunks is not permitted.  Most Dstreams can be Reset and read
+multiple times, but this requires all the overhead of the initial read
 (e.g. the data will be re-processed from its source).
 
 The typical pattern for working with a Dstream is to visit the chunks
@@ -58,10 +58,10 @@ like this:
 
 ```
 ds = DropNA(ds)         // drop all rows with any missing values
-ds = Muate(ds, "x1", f) // apply f in-place the variable named "x1"
+ds = Muate(ds, "x1", f) // apply the function f in-place to the variable named "x1"
 ```
 
-The most common transformations can be divided into the following types:
+The most common transformations can be grouped as follows:
 
 * _Extension_: add new variables to the dstream, usually defined in
   terms of the existing variables.  Examples include
@@ -85,7 +85,7 @@ The most common transformations can be divided into the following types:
 
 * _Copying_:
   [MemCopy](https://godoc.org/github.com/kshedden/dstream/dstream#DropNA)
-  returns an in-memory Dstream tht is a copy of a given Dstream.
+  returns an in-memory Dstream that is a copy of a given Dstream.
 
 ### Type support
 

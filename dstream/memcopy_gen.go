@@ -1,4 +1,5 @@
 // GENERATED CODE, DO NOT EDIT
+
 package dstream
 
 // MemCopy returns a Dstream that copies the provided Dstream into
