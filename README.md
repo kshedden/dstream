@@ -20,17 +20,18 @@ possible to load all data for all variables into memory at once.  To
 achieve this, Dstream utilizes a _chunked_, _columnar_ storage format.
 A chunk contains the data for all of the Dstream's variables for a
 consecutive subset of rows, stored by variable (column-wise) in typed
-arrays.  A single chunk is brought into memory at once, the Dstream as
-a whole will not generally reside in memory.
+arrays.  A single chunk is brought into memory at once.  The Dstream as
+a whole will generally not reside in memory.
 
 During data processing, the chunks are visited in linear order.  When
 possible, the memory backing a chunk is re-used for the next chunk.
 Therefore, a chunk must either be completely processed, or copied to
 independent memory before subsequent chunks are read.  Random chunk
-access and sorting across chunks is not permitted.  Most Dstreams can
-be Reset and read multiple times, but this requires all the overhead
-of the initial read (the data will be fully re-processed from its
-source following a Reset).
+access and sorting across chunks is not permitted (if processing of
+this type is needed, it should be done with other tools before forming
+the Dstream).  Most Dstreams can be Reset and read multiple times, but
+this requires all the overhead of the initial read (the data will be
+fully re-processed from its source following a call to Reset).
 
 The typical pattern for working with a Dstream is to visit the chunks
 in sequence, extract variables as needed, and perform the desired
@@ -44,8 +45,8 @@ for da.Next() {
 }
 ```
 
-The Next method of a dstream attempts to advance to the next chunk,
-returning true if successful and false if not.
+Note that the Next method of a dstream attempts to advance to the next
+chunk, returning true if successful and false if not.
 
 ### Transformations
 
@@ -63,8 +64,12 @@ like this:
 
 ```
 ds = DropNA(ds)         // drop all rows with any missing values
-ds = Muate(ds, "x1", f) // apply the function f in-place to the variable named "x1"
+ds = Mutate(ds, "x1", f) // apply the function f in-place to the variable named "x1"
 ```
+
+If references to the input and output of a transformation are both
+retained, e.g. `d2 = transform(d1)`, it is extremely important to
+never mix calls on d1 and d2.
 
 The most common transformations can be grouped as follows:
 
@@ -94,30 +99,30 @@ The most common transformations can be grouped as follows:
 
 ### Chunks
 
-The chunks have two distinct roles.  First, they serve to break the
-data into subsets of manageable size.  Second, for some analytic
-procedures, the chunks define meaningful data subsets (e.g. a chunk
-may contain all records for a single value of an index variable).
-Here is a pipeline that illustrates both of these roles:
+A Dstream's chunks have two distinct roles.  First, they serve to
+break the data into subsets of manageable size.  Second, for some
+analytic procedures, the chunks define meaningful data subsets (e.g. a
+chunk may contain all records for a single value of an index
+variable).  Here is a pipeline that illustrates both of these roles:
 
 ```
 da := dstream.FromCSV(r)
-// setup the CSV reader
+// ... more steps to setup the CSV reader
 da.SetChunkSize(1000000) // read chunks of 1 million rows at a time
 dx = da.Segment(da, []string{"Index"})
 dx = dx.DiffChunk(dx, map[string][int]{"Speed", 2})
 ```
 
-In the above example, we first set up a dstream to read form the
-io.Reader, defining a chunk size of 1 million to limit the number of
-distinct raw reads.  We then use Segment to redefine the chunk
-boundaries, so that each chunk contains the values for one level of
-the Index variable (note that the data must be pre-sorted by Index for
-this to work).  We then difference the Speed variable within each
+In the above example, we first set up a Dstream to read CSV-formatted
+data from an io.Reader, using a chunk size of 1 million to limit the
+number of distinct raw reads.  We then use Segment to redefine the
+chunk boundaries, so that each chunk contains the values for one level
+of the Index variable (note that the data must be pre-sorted by Index
+for this to work).  We then difference the Speed variable within each
 level of Index (i.e. within each chunk).  Since DiffChunk does not
 difference across chunk boundaries, the chunk boundaries are not
 merely a computational consideration in this example, they impact the
-result of applying the pipeline.
+output of the pipeline.
 
 ### Type support
 
@@ -162,7 +167,8 @@ based on a shared index variable.
 
 A Dstream is any Go struct that implements the Dstream interface,
 which has seven methods: Next, Names, Get, GetPos, NumVar, NumObs, and
-Reset.  Most concrete Dstream types are not exported from the package.
+Reset.  Most concrete Dstream types are returned by exported
+functions, but the types themselves are not exported from the package.
 Thus, the caller sees a Dstream value as a Dstream interface type, not
 as its underlying concrete type.  Using interface types allows
 interoperability between different concrete Dstream types when working
@@ -176,9 +182,7 @@ To simplify implementation of Dstreams and transformations, a
 prototypical transformation called `xform` is provided.  The `xform`
 type fully implements the Dstream interface in a trivial way.  Most of
 the transforms embed an xform, and re-implement some but not all of
-its methods as needed.  By embedding xform, most transformations do
-not need to immplement all the Dstream methods, which reduces the
-amount of code that needs to be written and maintained.
+its methods as needed.
 
 ### The memory-backed reference implementation
 
@@ -191,12 +195,12 @@ large disk-backed Dstream may be converted to a dataArrays type using
 
 ### Data sources
 
-A Dstream is created from a data source.  We provide two procedures
+A Dstream is created from a data source.  We provide two functions
 [StreamCSV](https://godoc.org/github.com/kshedden/dstream/dstream#StreamCSV)
 and
 [Bcols](https://godoc.org/github.com/kshedden/dstream/dstream#DropNAhttps://godoc.org/github.com/kshedden/dstream/dstream#Bcols)
-for constructing dstreams from certain types of text (csv) and binary
-data.  A dstream is based on a minimal Go
+for constructing Dstreams from certain types of text (csv) and binary
+data.  A Dstream is based on a minimal Go
 [interface](https://golang.org/doc/effective_go.html#interfaces_and_types),
 so Dstreams can be obtained from other data sources by implementing a
 reader that implements the Dstream interface.
