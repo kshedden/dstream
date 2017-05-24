@@ -17,7 +17,7 @@ regression analysis.
 
 Dstream is designed to work with large datasets where it is not
 possible to load all data for all variables into memory at once.  To
-achieve this, Dstream utilizes a _chunked_, _columnar_ representation.
+achieve this, Dstream utilizes a _chunked_, _columnar_ storage format
 A chunk contains the data for all of the Dstream's variables for a
 consecutive subset of rows, stored by variable (column-wise) in typed
 arrays.
@@ -85,6 +85,33 @@ The most common transformations can be grouped as follows:
 * _Copying_:
   [MemCopy](https://godoc.org/github.com/kshedden/dstream/dstream#DropNA)
   returns an in-memory Dstream that is a copy of a given Dstream.
+
+### Chunks
+
+The chunks provide two overlapping roles.  First, the chunks serve to
+break the data into subsets of manageable size.  Second, for some
+analytic procedures, the chunks define meaningful data subsets
+(e.g. all records for a single index value).  Here is a typical
+pipeline that reflects these differing roles of the chunk definitions:
+
+```
+da := dstream.FromCSV(r)
+// setup the CSV reader
+da.SetChunkSize(1000000) // read chunks of 1 million rows at a time
+dx = da.Segment(da, []string{"Index"})
+dx = dx.DiffChunk(dx, map[string][int]{"Speed", 2})
+```
+
+In the above example, we first set up a dstream to read form the
+io.Reader, defining a chunk size of 1 million to limit the number of
+distinct raw reads.  We then use Segment to redefine the chunk
+boundaries so that each chunk contains the values for one level of the
+Index variable (note that the data must have been pre-sorted by Index
+for this to work).  We then difference the Speed variable within each
+level of Index (i.e. within each chunk).  Since DiffChunk does not
+difference across chunk boundaries, the chunk boundaries are not
+merely a computational consideration in this example, they impact the
+result of applying the pipeline.
 
 ### Type support
 
