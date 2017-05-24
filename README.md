@@ -119,6 +119,10 @@ and
 [GetColPos](https://godoc.org/github.com/kshedden/dstream/dstream#GetColPos)
 for extracting columns into slices.
 
+The [Join](https://godoc.org/github.com/kshedden/dstream/dstream#Join)
+framework allows several Dstreams to be joined at the chunk level
+based on a shared index variable.
+
 ### Data sources
 
 A Dstream is created from a data source.  We provide two procedures

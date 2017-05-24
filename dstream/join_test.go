@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestWalk1(t *testing.T) {
+func TestJoin1(t *testing.T) {
 
 	ar := make([][]uint64, 3)
 	for j := 0; j < 3; j++ {
@@ -40,13 +40,13 @@ func TestWalk1(t *testing.T) {
 
 	}
 
-	walk := NewWalk(da, []string{"id", "id", "id"})
+	join := NewJoin(da, []string{"id", "id", "id"})
 
 	jj := 0
-	for walk.Next() {
-		n0 := len(walk.Data[0].GetPos(0).([]uint64))
-		n1 := len(walk.Data[1].GetPos(0).([]uint64))
-		n2 := len(walk.Data[2].GetPos(0).([]uint64))
+	for join.Next() {
+		n0 := len(join.Data[0].GetPos(0).([]uint64))
+		n1 := len(join.Data[1].GetPos(0).([]uint64))
+		n2 := len(join.Data[2].GetPos(0).([]uint64))
 		s := sizes[jj]
 		if n0 != s[0] || n1 != s[1] || n2 != s[2] {
 			t.Fail()
@@ -55,7 +55,7 @@ func TestWalk1(t *testing.T) {
 	}
 
 	for k := 0; k < 3; k++ {
-		f, msg := checkPosName(walk.Data[k])
+		f, msg := checkPosName(join.Data[k])
 		if !f {
 			os.Stderr.WriteString(msg)
 		}

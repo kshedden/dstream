@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Walk combines several Data sets that have been segmented by id
+// Join combines several Data sets that have been segmented by id
 // variables.  Calls to Next always advance Data[0] by one chunk.  The
 // other elements of Data are advanced until their id variable is
 // equal to (if possible) or greater than the id variable of Data[0].
@@ -15,7 +15,7 @@ import (
 // The Data values have are assumed to be segmented so that the id
 // variable is constant within chunks, and increases with subsequent
 // calls to Next.
-type Walk struct {
+type Join struct {
 
 	// A sequence of segmented data sets to advance in unison.
 	Data []Dstream
@@ -32,8 +32,8 @@ type Walk struct {
 	id [][]uint64
 }
 
-func NewWalk(data []Dstream, inames []string) *Walk {
-	w := &Walk{
+func NewJoin(data []Dstream, inames []string) *Join {
+	w := &Join{
 		Data:   data,
 		inames: inames,
 	}
@@ -65,7 +65,7 @@ func NewWalk(data []Dstream, inames []string) *Walk {
 	return w
 }
 
-func (w *Walk) needsadvance(j int) bool {
+func (w *Join) needsadvance(j int) bool {
 	if w.id[j] == nil || len(w.id[j]) == 0 {
 		return true
 	}
@@ -77,13 +77,13 @@ func (w *Walk) needsadvance(j int) bool {
 	return false
 }
 
-func (w *Walk) clearstatus() {
+func (w *Join) clearstatus() {
 	for j, _ := range w.Status {
 		w.Status[j] = false
 	}
 }
 
-func (w *Walk) Next() bool {
+func (w *Join) Next() bool {
 
 	f := w.Data[0].Next()
 	if !f {
