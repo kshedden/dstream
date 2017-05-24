@@ -192,6 +192,11 @@ reader that implements the Dstream interface.
 Dstream is under active development.  Changes that break compatability
 are likely.
 
+### Tests
+
+There are many unit tests, but it is likely that at present some core
+functionality, and many corner-cases are not well covered by tests.
+
 ### Statistical analysis
 
 Dstreams can be fed into statistical modeling tools, including
