@@ -137,7 +137,9 @@ x := da.Get("x").([]uint8)
 Currently, many of the Dstream transformations are only implemented
 for a limited range of types, `[]float64` is the most widely-supported
 type.  We plan to support for all types in all transformations in the
-near future.
+near future.  We are using
+[templates](https://golang.org/pkg/text/template) and code generation
+to do this without too much source bloat.
 
 ### Utility functions
 
@@ -171,7 +173,7 @@ Dstream.  This implementation uses in-memory sharded arrays to store
 the values for each variable.  The dataArrays type is useful for
 smaller datasets.  After substantial reduction (e.g. filtering), a
 large disk-backed Dstream may be converted to a dataArrays type using
-`MemCopy` much like use of `collect` in Spark).
+`MemCopy` (much like use of `collect` in Spark).
 
 ### Data sources
 
