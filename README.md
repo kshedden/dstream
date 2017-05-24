@@ -4,7 +4,6 @@ To install:
 
 ```
 go get github.com/kshedden/dstream/dstream
-go get github.com/kshedden/dstream/formula
 ```
 
 __Dstream__ is a package for manipulating streams of typed,
@@ -134,3 +133,13 @@ data.  A dstream is based on a minimal Go
 [interface](https://golang.org/doc/effective_go.html#interfaces_and_types),
 so Dstreams can be obtained from other data sources by implementing a
 reader that implements the Dstream interface.
+
+### Status
+
+Dstream is under active development.  Compatability-breaking changes are likely.
+
+### Statistical analysis
+
+Dstreams can be fed into statistical modeling tools, including
+[goglm](https://github.com/kshedden/goglm),
+[dimred](https://github.com/kshedden/dimred) and duration.
