@@ -15,31 +15,36 @@ framework facilitates processing data of this type, with a special
 focus on feeding the data into statistical modeling tools such as
 regression analysis.
 
-Dstream is designed to work with large datasets where it is not
+Dstream is designed to work with large datasets, where it is not
 possible to load all data for all variables into memory at once.  To
-achieve this, Dstream utilizes a _chunked_, _columnar_ storage format
+achieve this, Dstream utilizes a _chunked_, _columnar_ storage format.
 A chunk contains the data for all of the Dstream's variables for a
 consecutive subset of rows, stored by variable (column-wise) in typed
 arrays.
 
-The chunks are visited in linear order.  When possible, the memory
-backing a chunk is re-used for the next chunk.  Therefore, a chunk
-must be either completely processed, or copied to independent memory
-before subsequent chunks are read.  Random chunk access and sorting
-across chunks is not permitted.  Most Dstreams can be Reset and read
-multiple times, but this requires all the overhead of the initial read
-(e.g. the data will be re-processed from its source).
+During data processing, the chunks are visited in linear order.  When
+possible, the memory backing a chunk is re-used for the next chunk.
+Therefore, a chunk must be either completely processed, or copied to
+independent memory before subsequent chunks are read.  Random chunk
+access and sorting across chunks is not permitted.  Most Dstreams can
+be Reset and read multiple times, but this requires all the overhead
+of the initial read (the data will be fully re-processed from its
+source).
 
 The typical pattern for working with a Dstream is to visit the chunks
 in sequence, extract variables as needed, and perform the desired
-processing.  A template for this using a Dstream named _da_ is:
+processing.  A template for this operation using a Dstream named _da_
+is:
 
 ```
 for da.Next() {
-    x := da.Get("x3").([]float64)
+    x := da.Get("x3").([]float64) // extract the variable named "x3"
     // do something with x
 }
 ```
+
+The Next method of a dstream attempts to advance to the next chunk,
+returning true if successful and false if not.
 
 ### Transformations
 
@@ -62,8 +67,8 @@ ds = Muate(ds, "x1", f) // apply the function f in-place to the variable named "
 
 The most common transformations can be grouped as follows:
 
-* _Extension_: add new variables to the dstream, usually defined in
-  terms of the existing variables.  Examples include
+* _Extension_: add new variables to the dstream, usually derived from
+  the existing variables.  Examples include
   [DiffChunk](https://godoc.org/github.com/kshedden/dstream/dstream#DiffChunk),
   [LagChunk](https://godoc.org/github.com/kshedden/dstream/dstream#LagChunk),
   [Apply](https://godoc.org/github.com/kshedden/dstream/dstream#DropNA),
@@ -88,11 +93,11 @@ The most common transformations can be grouped as follows:
 
 ### Chunks
 
-The chunks provide two overlapping roles.  First, the chunks serve to
-break the data into subsets of manageable size.  Second, for some
-analytic procedures, the chunks define meaningful data subsets
-(e.g. all records for a single index value).  Here is a typical
-pipeline that reflects these differing roles of the chunk definitions:
+The chunks have two distinct roles.  First, they serve to break the
+data into subsets of manageable size.  Second, for some analytic
+procedures, the chunks define meaningful data subsets (e.g. a chunk
+may contain all records for a single value of an index variable).
+Here is a pipeline that illustrates both of these roles:
 
 ```
 da := dstream.FromCSV(r)
@@ -105,9 +110,9 @@ dx = dx.DiffChunk(dx, map[string][int]{"Speed", 2})
 In the above example, we first set up a dstream to read form the
 io.Reader, defining a chunk size of 1 million to limit the number of
 distinct raw reads.  We then use Segment to redefine the chunk
-boundaries so that each chunk contains the values for one level of the
-Index variable (note that the data must have been pre-sorted by Index
-for this to work).  We then difference the Speed variable within each
+boundaries, so that each chunk contains the values for one level of
+the Index variable (note that the data must be pre-sorted by Index for
+this to work).  We then difference the Speed variable within each
 level of Index (i.e. within each chunk).  Since DiffChunk does not
 difference across chunk boundaries, the chunk boundaries are not
 merely a computational consideration in this example, they impact the
@@ -129,8 +134,9 @@ x := da.Get("x").([]uint8)
 ```
 
 Currently, many of the Dstream transformations are only implemented
-for a limited range of types, `[]float64` is the most
-widely-supported.
+for a limited range of types, `[]float64` is the most widely-supported
+type.  We plan to support for all types in all transformations in the
+near future.
 
 ### Utility functions
 
@@ -139,7 +145,7 @@ including
 [Equal](https://godoc.org/github.com/kshedden/dstream/dstream#Equal)
 and
 [EqualReport](https://godoc.org/github.com/kshedden/dstream/dstream#EqualReport)
-for comparison,
+for making comparisons,
 [GetCol](https://godoc.org/github.com/kshedden/dstream/dstream#GetCol)
 and
 [GetColPos](https://godoc.org/github.com/kshedden/dstream/dstream#GetColPos)
@@ -163,7 +169,8 @@ reader that implements the Dstream interface.
 
 ### Status
 
-Dstream is under active development.  Compatability-breaking changes are likely.
+Dstream is under active development.  Changes that break compatability
+are likely.
 
 ### Statistical analysis
 
