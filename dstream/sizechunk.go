@@ -32,6 +32,7 @@ func (sc *sizechunk) setFromStash() {
 	nvar := sc.NumVar()
 	n := sc.size
 	for j := 0; j < nvar; j++ {
+		// TODO generic types
 		switch x := sc.stash[j].(type) {
 		case []float64:
 			sc.bdata[j] = x[0:n]
@@ -66,6 +67,7 @@ func (sc *sizechunk) Next() bool {
 
 		for j := 0; j < sc.NumVar(); j++ {
 			x := sc.source.GetPos(j)
+			// TODO generic types
 			switch x := x.(type) {
 			case []float64:
 				var y []float64
