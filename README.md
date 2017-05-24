@@ -11,7 +11,7 @@ multivariate data in [Go](http://golang.org).  A Dstream is a
 [dataframe](http://pandas.pydata.org)-like container that
 (conceptually) holds a rectangular array of data in which the columns
 are variables and the rows are cases or observations.  The Dstream
-framework facilitates processing data of this type, with a special
+framework facilitates processing data of this type, with a primary
 focus on feeding the data into statistical modeling tools such as
 regression analysis.
 
@@ -25,12 +25,12 @@ a whole will not generally reside in memory.
 
 During data processing, the chunks are visited in linear order.  When
 possible, the memory backing a chunk is re-used for the next chunk.
-Therefore, a chunk must be either completely processed, or copied to
+Therefore, a chunk must either be completely processed, or copied to
 independent memory before subsequent chunks are read.  Random chunk
 access and sorting across chunks is not permitted.  Most Dstreams can
 be Reset and read multiple times, but this requires all the overhead
 of the initial read (the data will be fully re-processed from its
-source).
+source following a Reset).
 
 The typical pattern for working with a Dstream is to visit the chunks
 in sequence, extract variables as needed, and perform the desired
@@ -158,15 +158,29 @@ The [Join](https://godoc.org/github.com/kshedden/dstream/dstream#Join)
 framework allows several Dstreams to be joined at the chunk level
 based on a shared index variable.
 
-### Exported types and the reference implementation
+### Exported types and the xform implementation
 
-The concrete dstream implementations are not exported from the
-package.  Thus, the caller sees a dstream as a Dstream interface type,
-not as its underlying concrete type.  Using interface types allows
-interoperability between different Dstream types when working with
-transformations.  An exception to this rule is any Dstream that has
-additional methods that are not part of the Dstream interface (such as
-the CSV reader).
+A Dstream is any Go struct that implements the Dstream interface,
+which has seven methods: Next, Names, Get, GetPos, NumVar, NumObs, and
+Reset.  Most concrete Dstream types are not exported from the package.
+Thus, the caller sees a Dstream value as a Dstream interface type, not
+as its underlying concrete type.  Using interface types allows
+interoperability between different concrete Dstream types when working
+with transformations.  An exception to this rule is that a few Dstream
+types have additional methods that are not part of the Dstream
+interface (such as the CSV reader).  To access these methods, the
+value must be stored in a variable having the appropriate concrete
+type.
+
+To simplify implementation of Dstreams and transformations, a
+prototypical transformation called `xform` is provided.  The `xform`
+type fully implements the Dstream interface in a trivial way.  Most of
+the transforms embed an xform, and re-implement some but not all of
+its methods as needed.  By embedding xform, most transformations do
+not need to immplement all the Dstream methods, which reduces the
+amount of code that needs to be written and maintained.
+
+### The memory-backed reference implementation
 
 The dataArrays type serves as a reference implementation for a
 Dstream.  This implementation uses in-memory sharded arrays to store
