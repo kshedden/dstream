@@ -168,7 +168,10 @@ the CSV reader).
 
 The dataArrays type serves as a reference implementation for a
 Dstream.  This implementation uses in-memory sharded arrays to store
-the values for each variable.
+the values for each variable.  The dataArrays type is useful for
+smaller datasets.  After substantial reduction (e.g. filtering), a
+large disk-backed Dstream may be converted to a dataArrays type using
+`MemCopy` much like use of `collect` in Spark).
 
 ### Data sources
 
