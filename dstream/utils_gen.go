@@ -48,6 +48,41 @@ func resizeuint8(x []uint8, n int) []uint8 {
 	return x[0:n]
 }
 
+func resizeint64(x []int64, n int) []int64 {
+	if cap(x) < n {
+		x = make([]int64, n)
+	}
+	return x[0:n]
+}
+
+func resizeint32(x []int32, n int) []int32 {
+	if cap(x) < n {
+		x = make([]int32, n)
+	}
+	return x[0:n]
+}
+
+func resizeint16(x []int16, n int) []int16 {
+	if cap(x) < n {
+		x = make([]int16, n)
+	}
+	return x[0:n]
+}
+
+func resizeint8(x []int8, n int) []int8 {
+	if cap(x) < n {
+		x = make([]int8, n)
+	}
+	return x[0:n]
+}
+
+func resizeint(x []int, n int) []int {
+	if cap(x) < n {
+		x = make([]int, n)
+	}
+	return x[0:n]
+}
+
 func resizestring(x []string, n int) []string {
 	if cap(x) < n {
 		x = make([]string, n)
@@ -68,6 +103,16 @@ func ilen(x interface{}) int {
 	case []uint16:
 		return len(x)
 	case []uint8:
+		return len(x)
+	case []int64:
+		return len(x)
+	case []int32:
+		return len(x)
+	case []int16:
+		return len(x)
+	case []int8:
+		return len(x)
+	case []int:
 		return len(x)
 	case []string:
 		return len(x)
@@ -100,6 +145,21 @@ func truncate(z []interface{}) {
 				z[j] = x[0:0]
 
 			case []uint8:
+				z[j] = x[0:0]
+
+			case []int64:
+				z[j] = x[0:0]
+
+			case []int32:
+				z[j] = x[0:0]
+
+			case []int16:
+				z[j] = x[0:0]
+
+			case []int8:
+				z[j] = x[0:0]
+
+			case []int:
 				z[j] = x[0:0]
 
 			case []string:
@@ -181,6 +241,46 @@ func GetColPos(da Dstream, j int) interface{} {
 		x = append(x, v...)
 		for da.Next() {
 			y := da.GetPos(j).([]uint8)
+			x = append(x, y...)
+		}
+		return x
+	case []int64:
+		var x []int64
+		x = append(x, v...)
+		for da.Next() {
+			y := da.GetPos(j).([]int64)
+			x = append(x, y...)
+		}
+		return x
+	case []int32:
+		var x []int32
+		x = append(x, v...)
+		for da.Next() {
+			y := da.GetPos(j).([]int32)
+			x = append(x, y...)
+		}
+		return x
+	case []int16:
+		var x []int16
+		x = append(x, v...)
+		for da.Next() {
+			y := da.GetPos(j).([]int16)
+			x = append(x, y...)
+		}
+		return x
+	case []int8:
+		var x []int8
+		x = append(x, v...)
+		for da.Next() {
+			y := da.GetPos(j).([]int8)
+			x = append(x, y...)
+		}
+		return x
+	case []int:
+		var x []int
+		x = append(x, v...)
+		for da.Next() {
+			y := da.GetPos(j).([]int)
 			x = append(x, y...)
 		}
 		return x

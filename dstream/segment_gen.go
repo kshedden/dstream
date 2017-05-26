@@ -52,6 +52,36 @@ func (sd *segmentedData) GetPos(j int) interface{} {
 			pos = len(x)
 		}
 		return x[0:pos]
+	case []int64:
+		pos := sd.pos
+		if stash {
+			pos = len(x)
+		}
+		return x[0:pos]
+	case []int32:
+		pos := sd.pos
+		if stash {
+			pos = len(x)
+		}
+		return x[0:pos]
+	case []int16:
+		pos := sd.pos
+		if stash {
+			pos = len(x)
+		}
+		return x[0:pos]
+	case []int8:
+		pos := sd.pos
+		if stash {
+			pos = len(x)
+		}
+		return x[0:pos]
+	case []int:
+		pos := sd.pos
+		if stash {
+			pos = len(x)
+		}
+		return x[0:pos]
 	case []string:
 		pos := sd.pos
 		if stash {
@@ -95,6 +125,26 @@ func (sd *segmentedData) fixstash() bool {
 			sd.bdata[j] = x[pos:len(x)]
 		case []uint8:
 			z := sd.stash[j].([]uint8)
+			sd.stash[j] = append(z, x[0:pos]...)
+			sd.bdata[j] = x[pos:len(x)]
+		case []int64:
+			z := sd.stash[j].([]int64)
+			sd.stash[j] = append(z, x[0:pos]...)
+			sd.bdata[j] = x[pos:len(x)]
+		case []int32:
+			z := sd.stash[j].([]int32)
+			sd.stash[j] = append(z, x[0:pos]...)
+			sd.bdata[j] = x[pos:len(x)]
+		case []int16:
+			z := sd.stash[j].([]int16)
+			sd.stash[j] = append(z, x[0:pos]...)
+			sd.bdata[j] = x[pos:len(x)]
+		case []int8:
+			z := sd.stash[j].([]int8)
+			sd.stash[j] = append(z, x[0:pos]...)
+			sd.bdata[j] = x[pos:len(x)]
+		case []int:
+			z := sd.stash[j].([]int)
 			sd.stash[j] = append(z, x[0:pos]...)
 			sd.bdata[j] = x[pos:len(x)]
 		case []string:
@@ -162,6 +212,46 @@ func (sd *segmentedData) setstash() {
 			z = resizeuint8(z, len(x))
 			copy(z, x)
 			sd.stash[j] = z
+		case []int64:
+			var z []int64
+			if sd.stash[j] != nil {
+				z = sd.stash[j].([]int64)
+			}
+			z = resizeint64(z, len(x))
+			copy(z, x)
+			sd.stash[j] = z
+		case []int32:
+			var z []int32
+			if sd.stash[j] != nil {
+				z = sd.stash[j].([]int32)
+			}
+			z = resizeint32(z, len(x))
+			copy(z, x)
+			sd.stash[j] = z
+		case []int16:
+			var z []int16
+			if sd.stash[j] != nil {
+				z = sd.stash[j].([]int16)
+			}
+			z = resizeint16(z, len(x))
+			copy(z, x)
+			sd.stash[j] = z
+		case []int8:
+			var z []int8
+			if sd.stash[j] != nil {
+				z = sd.stash[j].([]int8)
+			}
+			z = resizeint8(z, len(x))
+			copy(z, x)
+			sd.stash[j] = z
+		case []int:
+			var z []int
+			if sd.stash[j] != nil {
+				z = sd.stash[j].([]int)
+			}
+			z = resizeint(z, len(x))
+			copy(z, x)
+			sd.stash[j] = z
 		case []string:
 			var z []string
 			if sd.stash[j] != nil {
@@ -193,6 +283,16 @@ func (sd *segmentedData) leftsliceb(pos int) {
 		case []uint16:
 			sd.bdata[j] = x[pos:len(x)]
 		case []uint8:
+			sd.bdata[j] = x[pos:len(x)]
+		case []int64:
+			sd.bdata[j] = x[pos:len(x)]
+		case []int32:
+			sd.bdata[j] = x[pos:len(x)]
+		case []int16:
+			sd.bdata[j] = x[pos:len(x)]
+		case []int8:
+			sd.bdata[j] = x[pos:len(x)]
+		case []int:
 			sd.bdata[j] = x[pos:len(x)]
 		case []string:
 			sd.bdata[j] = x[pos:len(x)]
@@ -260,6 +360,56 @@ func (sd *segmentedData) findSegment(start int) int {
 				}
 			}
 		case []uint8:
+			for i := start + 1; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
+		case []int64:
+			for i := start + 1; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
+		case []int32:
+			for i := start + 1; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
+		case []int16:
+			for i := start + 1; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
+		case []int8:
+			for i := start + 1; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
+		case []int:
 			for i := start + 1; i < len(x); i++ {
 				if pos != -1 && i >= pos {
 					break
@@ -365,6 +515,71 @@ func (sd *segmentedData) findSegmentStash() (int, bool) {
 		case []uint8:
 			m = len(x)
 			y := sd.stash[j].([]uint8)
+			v := y[len(y)-1]
+			for i := 0; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
+		case []int64:
+			m = len(x)
+			y := sd.stash[j].([]int64)
+			v := y[len(y)-1]
+			for i := 0; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
+		case []int32:
+			m = len(x)
+			y := sd.stash[j].([]int32)
+			v := y[len(y)-1]
+			for i := 0; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
+		case []int16:
+			m = len(x)
+			y := sd.stash[j].([]int16)
+			v := y[len(y)-1]
+			for i := 0; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
+		case []int8:
+			m = len(x)
+			y := sd.stash[j].([]int8)
+			v := y[len(y)-1]
+			for i := 0; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
+		case []int:
+			m = len(x)
+			y := sd.stash[j].([]int)
 			v := y[len(y)-1]
 			for i := 0; i < len(x); i++ {
 				if pos != -1 && i >= pos {

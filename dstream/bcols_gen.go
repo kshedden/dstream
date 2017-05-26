@@ -73,6 +73,21 @@ func (b *bcols) init() {
 		case "uint8":
 			var x []uint8
 			b.bdata = append(b.bdata, x)
+		case "int64":
+			var x []int64
+			b.bdata = append(b.bdata, x)
+		case "int32":
+			var x []int32
+			b.bdata = append(b.bdata, x)
+		case "int16":
+			var x []int16
+			b.bdata = append(b.bdata, x)
+		case "int8":
+			var x []int8
+			b.bdata = append(b.bdata, x)
+		case "int":
+			var x []int
+			b.bdata = append(b.bdata, x)
 		case "string":
 			var x []string
 			b.bdata = append(b.bdata, x)
@@ -275,6 +290,96 @@ func (b *bcols) Next() bool {
 		case []uint8:
 			for k := 0; k < b.chunksize; k++ {
 				var x uint8
+				err := binary.Read(rdr, binary.LittleEndian, &x)
+				if err == io.EOF {
+					b.done = true
+					break
+				} else if err != nil {
+					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
+					print(msg)
+					panic(err)
+				}
+				v = append(v, x)
+				if j == 0 {
+					b.nobs++
+				}
+			}
+			b.bdata[j] = v
+		case []int64:
+			for k := 0; k < b.chunksize; k++ {
+				var x int64
+				err := binary.Read(rdr, binary.LittleEndian, &x)
+				if err == io.EOF {
+					b.done = true
+					break
+				} else if err != nil {
+					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
+					print(msg)
+					panic(err)
+				}
+				v = append(v, x)
+				if j == 0 {
+					b.nobs++
+				}
+			}
+			b.bdata[j] = v
+		case []int32:
+			for k := 0; k < b.chunksize; k++ {
+				var x int32
+				err := binary.Read(rdr, binary.LittleEndian, &x)
+				if err == io.EOF {
+					b.done = true
+					break
+				} else if err != nil {
+					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
+					print(msg)
+					panic(err)
+				}
+				v = append(v, x)
+				if j == 0 {
+					b.nobs++
+				}
+			}
+			b.bdata[j] = v
+		case []int16:
+			for k := 0; k < b.chunksize; k++ {
+				var x int16
+				err := binary.Read(rdr, binary.LittleEndian, &x)
+				if err == io.EOF {
+					b.done = true
+					break
+				} else if err != nil {
+					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
+					print(msg)
+					panic(err)
+				}
+				v = append(v, x)
+				if j == 0 {
+					b.nobs++
+				}
+			}
+			b.bdata[j] = v
+		case []int8:
+			for k := 0; k < b.chunksize; k++ {
+				var x int8
+				err := binary.Read(rdr, binary.LittleEndian, &x)
+				if err == io.EOF {
+					b.done = true
+					break
+				} else if err != nil {
+					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
+					print(msg)
+					panic(err)
+				}
+				v = append(v, x)
+				if j == 0 {
+					b.nobs++
+				}
+			}
+			b.bdata[j] = v
+		case []int:
+			for k := 0; k < b.chunksize; k++ {
+				var x int
 				err := binary.Read(rdr, binary.LittleEndian, &x)
 				if err == io.EOF {
 					b.done = true

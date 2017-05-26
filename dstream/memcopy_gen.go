@@ -40,6 +40,26 @@ func MemCopy(data Dstream) Dstream {
 				z := make([]uint8, len(v))
 				copy(z, v)
 				y = z
+			case []int64:
+				z := make([]int64, len(v))
+				copy(z, v)
+				y = z
+			case []int32:
+				z := make([]int32, len(v))
+				copy(z, v)
+				y = z
+			case []int16:
+				z := make([]int16, len(v))
+				copy(z, v)
+				y = z
+			case []int8:
+				z := make([]int8, len(v))
+				copy(z, v)
+				y = z
+			case []int:
+				z := make([]int, len(v))
+				copy(z, v)
+				y = z
 			case []string:
 				z := make([]string, len(v))
 				copy(z, v)

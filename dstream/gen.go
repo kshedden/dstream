@@ -26,6 +26,11 @@ var (
 		Dtype{Type: "uint32"},
 		Dtype{Type: "uint16"},
 		Dtype{Type: "uint8"},
+		Dtype{Type: "int64"},
+		Dtype{Type: "int32"},
+		Dtype{Type: "int16"},
+		Dtype{Type: "int8"},
+		Dtype{Type: "int"},
 		Dtype{Type: "string"},
 	}
 )

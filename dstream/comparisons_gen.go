@@ -103,6 +103,56 @@ func EqualReport(x, y Dstream, report bool) bool {
 					return false
 				}
 
+			case []int64:
+				u, ok := y.GetPos(j).([]int64)
+				if !ok || !aequalint64(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+
+			case []int32:
+				u, ok := y.GetPos(j).([]int32)
+				if !ok || !aequalint32(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+
+			case []int16:
+				u, ok := y.GetPos(j).([]int16)
+				if !ok || !aequalint16(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+
+			case []int8:
+				u, ok := y.GetPos(j).([]int8)
+				if !ok || !aequalint8(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+
+			case []int:
+				u, ok := y.GetPos(j).([]int)
+				if !ok || !aequalint(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+
 			case []string:
 				u, ok := y.GetPos(j).([]string)
 				if !ok || !aequalstring(v, u) {
@@ -186,6 +236,66 @@ func aequaluint16(x, y []uint16) bool {
 }
 
 func aequaluint8(x, y []uint8) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	for i, v := range x {
+		if v != y[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func aequalint64(x, y []int64) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	for i, v := range x {
+		if v != y[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func aequalint32(x, y []int32) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	for i, v := range x {
+		if v != y[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func aequalint16(x, y []int16) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	for i, v := range x {
+		if v != y[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func aequalint8(x, y []int8) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	for i, v := range x {
+		if v != y[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func aequalint(x, y []int) bool {
 	if len(x) != len(y) {
 		return false
 	}
