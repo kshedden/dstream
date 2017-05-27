@@ -36,9 +36,9 @@ type Dstream interface {
 type dataArrays struct {
 	xform
 
-	// rawData is the underlying data to be passed to the
+	// arrays is the underlying data to be passed to the
 	// consumer.
-	rawData [][]interface{}
+	arrays [][]interface{}
 
 	chunk int // 1-based
 	done  bool
@@ -48,7 +48,7 @@ type dataArrays struct {
 func (da *dataArrays) Next() bool {
 
 	da.chunk++
-	if da.chunk <= len(da.rawData[0]) {
+	if da.chunk <= len(da.arrays[0]) {
 		return true
 	}
 	da.done = true
@@ -61,13 +61,13 @@ func (da *dataArrays) NumObs() int {
 		return da.nobs
 	}
 
-	if da.rawData == nil || len(da.rawData) == 0 {
+	if da.arrays == nil || len(da.arrays) == 0 {
 		// Not yet known
 		return -1
 	}
 
 	var nobs int
-	for _, v := range da.rawData[0] {
+	for _, v := range da.arrays[0] {
 		nobs += ilen(v)
 	}
 	da.nobs = nobs
@@ -94,7 +94,7 @@ func (da *dataArrays) GetPos(j int) interface{} {
 		return nil
 	}
 
-	return da.rawData[j][da.chunk-1]
+	return da.arrays[j][da.chunk-1]
 }
 
 func (da *dataArrays) Get(na string) interface{} {
@@ -109,14 +109,14 @@ func (da *dataArrays) Get(na string) interface{} {
 }
 
 func (da *dataArrays) NumVar() int {
-	return len(da.rawData)
+	return len(da.arrays)
 }
 
 // NewFromArrays creates a Dstream from raw data stored as slices;
 // data[i][j] is the data for the i^th variable in the j^th chunk.
 func NewFromArrays(data [][]interface{}, names []string) Dstream {
 	da := &dataArrays{
-		rawData: data,
+		arrays: data,
 		xform: xform{
 			names: names,
 		},
