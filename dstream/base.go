@@ -30,6 +30,8 @@ type Dstream interface {
 	// Reset sets the provider so that the data are read from the
 	// beginning of the dataset.
 	Reset()
+
+	Close()
 }
 
 // dataArrays is an implementation of Dstream based on sharded arrays.
@@ -115,6 +117,13 @@ func (da *dataArrays) NumVar() int {
 // NewFromArrays creates a Dstream from raw data stored as slices;
 // data[i][j] is the data for the i^th variable in the j^th chunk.
 func NewFromArrays(data [][]interface{}, names []string) Dstream {
+
+	if len(data) != len(names) {
+		msg := fmt.Sprintf("NewFromArrays: len(data) = %d != len(names) = %d",
+			len(data), len(names))
+		panic(msg)
+	}
+
 	da := &dataArrays{
 		arrays: data,
 		xform: xform{

@@ -162,3 +162,7 @@ func (lc *lagChunk) Next() bool {
 
 	return true
 }
+
+// TODO: remove when lagchunk uses xform
+func (lc *lagChunk) Close() {
+}

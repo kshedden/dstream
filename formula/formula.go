@@ -701,7 +701,12 @@ func (fp *FormulaParser) ParseAll(others []string) dstream.Dstream {
 	var ox []int
 	rnames := fp.RawData.Names()
 	for _, s := range others {
-		ox = append(ox, find(rnames, s))
+		i := find(rnames, s)
+		if i == -1 {
+			msg := fmt.Sprintf("Variable '%s' not found", s)
+			panic(msg)
+		}
+		ox = append(ox, i)
 	}
 
 	for fp.Next() {

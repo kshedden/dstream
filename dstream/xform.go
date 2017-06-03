@@ -23,6 +23,9 @@ type xform struct {
 	namepos map[string]int
 }
 
+func (x *xform) Close() {
+}
+
 // setNamePos constructs a map from variable names to their column
 // positions.
 func (x *xform) setNamePos() {

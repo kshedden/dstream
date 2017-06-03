@@ -23,6 +23,7 @@ func (b *bcols) init() {
 	if err != nil {
 		panic(err)
 	}
+	defer fid.Close()
 	dec := json.NewDecoder(fid)
 	dtypes := make(map[string]string)
 	err = dec.Decode(&dtypes)

@@ -54,6 +54,9 @@ func FromCSV(r io.Reader) *CSVStreamer {
 	return da
 }
 
+func (cs *CSVStreamer) Close() {
+}
+
 // Init must be called before using a Dstream that reads a CSV file.
 // If hasheader is true, the first row is assumed to be a row of
 // variable names.  Otherwise the data starts in the first row, and

@@ -63,4 +63,6 @@ func TestBcols1(t *testing.T) {
 		}
 		da.Reset()
 	}
+
+	da.Close()
 }
