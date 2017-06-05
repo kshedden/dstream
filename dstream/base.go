@@ -31,6 +31,7 @@ type Dstream interface {
 	// beginning of the dataset.
 	Reset()
 
+	// Close frees any resources suh as file handles used by the dstream.
 	Close()
 }
 

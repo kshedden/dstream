@@ -58,10 +58,10 @@ func (cs *CSVStreamer) Close() {
 }
 
 // Init must be called before using a Dstream that reads a CSV file.
-// If hasheader is true, the first row is assumed to be a row of
-// variable names.  Otherwise the data starts in the first row, and
-// the variables are named V1, V2, ....
-func (cs *CSVStreamer) Init(hasheader bool) {
+// If hasheader is true, the first row is taken to contain variable
+// names.  Otherwise the data starts in the first row, and the
+// variables are named V1, V2, ....
+func (cs *CSVStreamer) Init(hasheader bool) *CSVStreamer {
 
 	cs.hasheader = hasheader
 	if cs.chunkSize == 0 {
@@ -123,24 +123,29 @@ func (cs *CSVStreamer) Init(hasheader bool) {
 	for k, na := range cs.names {
 		cs.namepos[na] = k
 	}
+
+	return cs
 }
 
-func (cs *CSVStreamer) SetChunkSize(c int) {
+func (cs *CSVStreamer) SetChunkSize(c int) *CSVStreamer {
 	cs.chunkSize = c
+	return cs
 }
 
 // SetFloatVars sets the names of the variables to be converted to
 // float64 type.  Refer to the columns by V1, V2, etc. if there is no
 // header row.
-func (cs *CSVStreamer) SetFloatVars(x []string) {
+func (cs *CSVStreamer) SetFloatVars(x []string) *CSVStreamer {
 	cs.floatVars = x
+	return cs
 }
 
 // SetStringVars sets the names of the variables to be stored as
 // string type values.  Refer to the columns by V1, V2, etc. if there
 // is no header row.
-func (cs *CSVStreamer) SetStringVars(x []string) {
+func (cs *CSVStreamer) SetStringVars(x []string) *CSVStreamer {
 	cs.stringVars = x
+	return cs
 }
 
 func (cs *CSVStreamer) Names() []string {
