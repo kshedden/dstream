@@ -1,7 +1,5 @@
 package dstream
 
-import "fmt"
-
 //go:generate go run gen.go utils.template
 
 func VarPos(d Dstream) map[string]int {
@@ -13,22 +11,6 @@ func VarPos(d Dstream) map[string]int {
 	}
 
 	return mp
-}
-
-func VarTypes(d Dstream) {
-	for k, na := range d.Names() {
-		v := d.GetPos(k)
-		switch v.(type) {
-		case []float64:
-			fmt.Printf("%s float64\n", na)
-		case []string:
-			fmt.Printf("%s string\n", na)
-		case nil:
-			fmt.Printf("%s nil\n", na)
-		default:
-			fmt.Printf("%s other\n", na)
-		}
-	}
 }
 
 func wherefalse(ma []bool, pos []int) []int {

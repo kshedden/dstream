@@ -13,6 +13,24 @@ func resize{{ .Type }}(x []{{ .Type }}, n int) []{{ .Type }} {
 }
 {{ end }}
 
+// VarTypes returns a map relating each variable by name to its corresponding
+// data type.
+func VarTypes(d Dstream) map[string]string {
+	types := make(map[string]string)
+	for k, na := range d.Names() {
+		v := d.GetPos(k)
+                switch v.(type) {
+		{{- range . }}
+		case []{{ .Type }}:
+			types[na] = "{{ .Type }}"
+		{{ end }}
+		default:
+			types[na] = "unknown type"
+		}
+	}
+        return types
+}
+
 func ilen(x interface{}) int {
 	switch x := x.(type) {
         {{- range . }}

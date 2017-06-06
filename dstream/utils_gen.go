@@ -90,6 +90,56 @@ func resizestring(x []string, n int) []string {
 	return x[0:n]
 }
 
+// VarTypes returns a map relating each variable by name to its corresponding
+// data type.
+func VarTypes(d Dstream) map[string]string {
+	types := make(map[string]string)
+	for k, na := range d.Names() {
+		v := d.GetPos(k)
+		switch v.(type) {
+		case []float64:
+			types[na] = "float64"
+
+		case []float32:
+			types[na] = "float32"
+
+		case []uint64:
+			types[na] = "uint64"
+
+		case []uint32:
+			types[na] = "uint32"
+
+		case []uint16:
+			types[na] = "uint16"
+
+		case []uint8:
+			types[na] = "uint8"
+
+		case []int64:
+			types[na] = "int64"
+
+		case []int32:
+			types[na] = "int32"
+
+		case []int16:
+			types[na] = "int16"
+
+		case []int8:
+			types[na] = "int8"
+
+		case []int:
+			types[na] = "int"
+
+		case []string:
+			types[na] = "string"
+
+		default:
+			types[na] = "unknown type"
+		}
+	}
+	return types
+}
+
 func ilen(x interface{}) int {
 	switch x := x.(type) {
 	case []float64:
