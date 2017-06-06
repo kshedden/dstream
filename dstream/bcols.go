@@ -8,7 +8,7 @@ import (
 	"sort"
 )
 
-type ByteReaderReader interface {
+type byteReaderReader interface {
 	io.Reader
 	io.ByteReader
 }
@@ -22,7 +22,7 @@ type bcols struct {
 
 	bdata []interface{}
 
-	rdrs []ByteReaderReader
+	rdrs []byteReaderReader
 
 	toclose []io.Closer
 

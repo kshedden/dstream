@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-// EqualReport compares two Dstream values.  If they are not equal
+// EqualReport compares two Dstream values.  If they are not equal,
 // further information is written to the standard error stream.
 func EqualReport(x, y Dstream, report bool) bool {
 
