@@ -14,5 +14,4 @@
 // easy to add new transformations.  Examples of transformations are
 // Mutate (modify a column in-place) and Drop (drop a set of columns
 // from the dstream).
-
 package dstream
