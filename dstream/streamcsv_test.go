@@ -33,11 +33,7 @@ func TestStreamCSV1(t *testing.T) {
 
 	rdr := bytes.NewReader(bbuf.Bytes())
 
-	da := FromCSV(rdr)
-	da.SetStringVars([]string{"Country"})
-	da.SetFloatVars([]string{"Id", "Age"})
-	da.SetChunkSize(3)
-	da.Init(true)
+	da := FromCSV(rdr).SetStringVars([]string{"Country"}).SetFloatVars([]string{"Id", "Age"}).SetChunkSize(3).HasHeader()
 
 	// Check first read
 	if !EqualReport(ex, da, true) {
@@ -47,6 +43,13 @@ func TestStreamCSV1(t *testing.T) {
 	// Make sure reset/reread works
 	da.Reset()
 	if !EqualReport(ex, da, true) {
+		t.Fail()
+	}
+
+	if da.NumObs() != 5 {
+		t.Fail()
+	}
+	if da.NumVar() != 3 {
 		t.Fail()
 	}
 

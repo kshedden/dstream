@@ -106,9 +106,7 @@ chunk may contain all records for a single value of an index
 variable).  Here is a pipeline that illustrates both of these roles:
 
 ```
-da := dstream.FromCSV(r)
-// ... more steps to setup the CSV reader
-da.SetChunkSize(1000000) // read chunks of 1 million rows at a time
+da := dstream.FromCSV(r).SetChunkSize(1000).SetFloatVars([]string{"Index", "Speed"})
 dx = da.Segment(da, []string{"Index"})
 dx = dx.DiffChunk(dx, map[string][int]{"Speed", 2})
 ```
