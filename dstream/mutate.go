@@ -50,6 +50,10 @@ func (m *mutated) Next() bool {
 	if !m.source.Next() {
 		return false
 	}
+
+	// Call the mutating function on the variable to be
+	// transformed.
 	m.f(m.GetPos(m.vpos))
+
 	return true
 }

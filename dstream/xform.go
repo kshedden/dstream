@@ -86,5 +86,5 @@ func (x *xform) Get(na string) interface{} {
 		msg := fmt.Sprintf("Variable '%s' not found", na)
 		panic(msg)
 	}
-	return x.bdata[pos]
+	return x.GetPos(pos)
 }
