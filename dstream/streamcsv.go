@@ -8,6 +8,7 @@ import (
 	"strconv"
 )
 
+// CSVStreamer is a DStream implementation that reads data from a CSV file.
 type CSVStreamer struct {
 	rdr io.Reader
 	cvr *csv.Reader
@@ -42,8 +43,9 @@ type CSVStreamer struct {
 }
 
 // FromCSV returns a Dstream that reads from a CSV data file.  Call at
-// least one SetXX method to define variables to be retrieved, then
-// call Init before using.
+// least one SetXX method to define variables to be retrieved.  To
+// specify options, chain calls to SetStringVars, SetFloatVars,
+// HasHeader, and SetChunkSize.
 func FromCSV(r io.Reader) *CSVStreamer {
 
 	da := &CSVStreamer{
@@ -53,6 +55,8 @@ func FromCSV(r io.Reader) *CSVStreamer {
 	return da
 }
 
+// Close does nothing, the caller should explicitly close the
+// io.Reader passed to FromCSV if needed.
 func (cs *CSVStreamer) Close() {
 }
 
@@ -132,6 +136,8 @@ func (cs *CSVStreamer) init() {
 	cs.doneinit = true
 }
 
+// SetChunkSize sets the size of chunks for this Dstream, it can only
+// be called before reading begins.
 func (cs *CSVStreamer) SetChunkSize(c int) *CSVStreamer {
 	if cs.doneinit {
 		msg := "CSVStreamer: can't call SetChunkSize after beginning data read"
@@ -228,6 +234,7 @@ func (cs *CSVStreamer) Reset() {
 	cs.nobs = 0
 }
 
+// Next advances the CSVStreamer to the next chunk.
 func (cs *CSVStreamer) Next() bool {
 
 	if !cs.doneinit {
