@@ -1,5 +1,3 @@
-package dstream
-
 // dstream is a package for manipulating streams of typed,
 // multivariate data.  A Dstream is a data container that
 // (conceptually) holds a rectangular array of data in which the
@@ -16,3 +14,5 @@ package dstream
 // easy to add new transformations.  Examples of transformations are
 // Mutate (modify a column in-place) and Drop (drop a set of columns
 // from the dstream).
+
+package dstream
