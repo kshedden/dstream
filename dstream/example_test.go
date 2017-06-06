@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func ExampleDStream_FromCSV() {
+func ExampleFromCSV() {
 
 	data := `Food,Type,Weight,Price
 Banana,Fruit,13,9
@@ -31,7 +31,7 @@ Lamb,Meat,40,76
 	// [13 15 12 40]
 }
 
-func ExampleDStream_Mutate() {
+func ExampleMutate() {
 
 	data := `1,2,3,4
 2,3,4,5
