@@ -16,8 +16,7 @@ Lamb,Meat,40,76
 
 	b := bytes.NewBuffer([]byte(data))
 
-	da := FromCSV(b).SetStringVars([]string{"Food", "Type"}).SetFloatVars([]string{"Weight"}).HasHeader()
-
+	da := FromCSV(b).SetStringVars([]string{"Food", "Type"}).SetFloatVars([]string{"Weight"}).HasHeader().Done()
 	da.Next() // Always call Next before first call to Get or GetPos
 
 	y := da.Get("Type").([]string)
@@ -48,13 +47,12 @@ func ExampleMutate() {
 	}
 
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"})
+	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).Done()
+	da = Mutate(da, "V2", timesTwo)
 
-	dx := Mutate(da, "V2", timesTwo)
+	da.Next() // Always call Next before first call to Get or GetPos
 
-	dx.Next() // Always call Next before first call to Get or GetPos
-
-	y := dx.Get("V2")
+	y := da.Get("V2")
 	fmt.Printf("%v\n", y)
 
 	// Output:
@@ -82,13 +80,12 @@ func ExampleFilter() {
 	}
 
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader()
+	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader().Done()
+	da = Filter(da, map[string]FilterFunc{"V2": f})
 
-	dx := Filter(da, map[string]FilterFunc{"V2": f})
+	da.Next() // Always call Next before first call to Get or GetPos
 
-	dx.Next() // Always call Next before first call to Get or GetPos
-
-	y := dx.Get("V1")
+	y := da.Get("V1")
 	fmt.Printf("%v\n", y)
 
 	// Output:
@@ -105,12 +102,11 @@ func ExampleSegment() {
 `
 
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader()
+	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader().Done()
+	da = Segment(da, []string{"V1"})
 
-	dx := Segment(da, []string{"V1"})
-
-	for dx.Next() {
-		y := dx.Get("V2")
+	for da.Next() {
+		y := da.Get("V2")
 		fmt.Printf("%v\n", y)
 	}
 

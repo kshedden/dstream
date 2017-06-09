@@ -55,6 +55,12 @@ func FromCSV(r io.Reader) *CSVStreamer {
 	return da
 }
 
+// Done can be called when all configuration is complete.  It is a
+// convenience method that returns the CSVStreamer as a Dstream.
+func (cs *CSVStreamer) Done() Dstream {
+	return cs
+}
+
 // Close does nothing, the caller should explicitly close the
 // io.Reader passed to FromCSV if needed.
 func (cs *CSVStreamer) Close() {
