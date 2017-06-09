@@ -2,6 +2,8 @@ package dstream
 
 //go:generate go run gen.go utils.template
 
+// VarPos returns a map from variable names to their corresponding
+// column positions.
 func VarPos(d Dstream) map[string]int {
 
 	mp := make(map[string]int)

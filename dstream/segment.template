@@ -23,7 +23,8 @@ func (sd *segmentedData) GetPos(j int) interface{} {
             return x[0:pos]
 	{{- end }}
 	default:
-	    panic("unknown type")
+	    msg := fmt.Sprintf("Segment: unknown type %T\n", x)
+	    panic(msg)
     }
 }
 
@@ -45,7 +46,8 @@ func (sd *segmentedData) fixstash() bool {
 		sd.bdata[j] = x[pos:len(x)]
   	    {{- end }}
   	    default:
-  	        panic("unknown type")
+                msg := fmt.Sprintf("Segment: unknown type %T\n", x)
+  	        panic(msg)
         }
     }
     return fd
@@ -69,7 +71,8 @@ func (sd *segmentedData) setstash() {
 		sd.stash[j] = z
   	    {{- end }}
   	    default:
-  	        panic("unknown type")
+                msg := fmt.Sprintf("Segment: unknown type %T\n", x)
+  	        panic(msg)
         }
     }
 }
@@ -85,7 +88,8 @@ func (sd *segmentedData) leftsliceb(pos int) {
                 sd.bdata[j] = x[pos:len(x)]
 	{{- end }}
 	default:
-	    panic("unknown type")
+	    msg := fmt.Sprintf("Segment: unknown type %T\n", x)
+	    panic(msg)
        }
     }
 }
@@ -113,7 +117,8 @@ func (sd *segmentedData) findSegment(start int) int {
                 case nil:
 		        return -1
                 default:
-			panic(fmt.Sprintf("unknown data type %T", x))
+			msg := fmt.Sprintf("Segment: unknown type %T\n", x)
+			panic(msg)
 		}
         }
 
@@ -145,7 +150,8 @@ func (sd *segmentedData) findSegmentStash() (int, bool) {
 			}
                 {{- end }}
                 default:
-			panic(fmt.Sprintf("unknown data type %T", x))
+		        msg := fmt.Sprintf("Segment: unknown type %T", x)
+			panic(msg)
 		}
         }
 

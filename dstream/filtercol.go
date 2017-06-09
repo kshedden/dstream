@@ -2,22 +2,27 @@ package dstream
 
 import "fmt"
 
-// A filtering function for use with FilterCol.
-type FilterColFunc func(interface{}, []bool) bool
+// A filtering function for use with Filter. The empty interface holds
+// a slice of values, the boolean array should be sized to match this
+// slice.  Rows of data are retained where the boolean array is true,
+// and excluded otherwise.  The returned boolean indicates whether any
+// rows are dropped (true if any rows are dropped).  It is also
+// acceptable to always return true.
+type FilterFunc func(interface{}, []bool) bool
 
 type filterCol struct {
 	xform
 
-	filters   map[string]FilterColFunc
+	filters   map[string]FilterFunc
 	keep      []bool
 	keeppos   []int
 	nobs      int
 	nobsKnown bool
 }
 
-// FilterCol applies filtering functions to one or more data columns,
+// Filter applies filtering functions to one or more data columns,
 // and retains only the rows where all filtering functions are true.
-func FilterCol(data Dstream, funcs map[string]FilterColFunc) Dstream {
+func Filter(data Dstream, funcs map[string]FilterFunc) Dstream {
 	fc := &filterCol{
 		xform: xform{
 			source: data,
@@ -100,6 +105,7 @@ func (fc *filterCol) Next() bool {
 	for j := 0; j < nvar; j++ {
 		v := fc.source.GetPos(j)
 
+		//TODO needs all types
 		switch v := v.(type) {
 		case []float64:
 			if anydrop {

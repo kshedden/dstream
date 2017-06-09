@@ -5,15 +5,15 @@
 // dstream framework facilitates processing data of this type, with a
 // focus on feeding the data into statistical modeling tools.
 //
-// The data held by a dstream is stored column-wise, and each column
-// is partitioned into chunks.  A dstream visits its chunks in order,
+// The data held by a Dstream is stored column-wise, and each column
+// is partitioned into chunks.  A Dstream visits its chunks in order,
 // and in general, a single chunk resides in memory at one point in
-// time.  When processing a dstream, call Next to advance to the next
+// time.  When processing a Dstream, call Next to advance to the next
 // chunk, then call Get to retrieve the data for one column.
 //
-// Most operations on dstreams take the form of a transformation d =
-// f(d).  Many transformations are defined in the package, and it is
-// easy to add new transformations.  Examples of transformations are
-// Mutate (modify a column in-place) and Drop (drop a set of columns
-// from the dstream).
+// Most operations on Dstreams take the form of a transformation d =
+// f(d), where d is a Dstream.  Many transformations are defined in
+// the package, and it is easy to add new transformations.  Examples
+// of transformations are Mutate (modify a column in-place) and
+// DropCols (drop a set of columns from the Dstream).
 package dstream

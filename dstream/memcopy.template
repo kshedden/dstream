@@ -1,8 +1,8 @@
 package dstream
 
 // MemCopy returns a Dstream that copies the provided Dstream into
-// in-memory storage.  The Dstream is copied from the current position,
-// call Reset on the source Dstream to copy the whole stream.
+// in-memory storage.  The Dstream is copied from its current position.
+// To copy a Dstream the beginning, call Reset before calling MemCopy.
 func MemCopy(data Dstream) Dstream {
 
 	nvar := data.NumVar()

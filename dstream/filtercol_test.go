@@ -57,7 +57,7 @@ func dataf1() (Dstream, Dstream) {
 	return da, db
 }
 
-func TestFilterCol1(t *testing.T) {
+func TestFilter1(t *testing.T) {
 
 	da, db := dataf1()
 
@@ -75,7 +75,7 @@ func TestFilterCol1(t *testing.T) {
 		return any
 	}
 
-	dx := FilterCol(da, map[string]FilterColFunc{"x1": f1})
+	dx := Filter(da, map[string]FilterFunc{"x1": f1})
 
 	for k := 0; k < 2; k++ {
 		if !EqualReport(dx, db, true) {
@@ -89,7 +89,7 @@ func TestFilterCol1(t *testing.T) {
 	}
 }
 
-func TestFilterCol2(t *testing.T) {
+func TestFilter2(t *testing.T) {
 
 	da, _ := dataf1()
 
@@ -105,7 +105,7 @@ func TestFilterCol2(t *testing.T) {
 		return any
 	}
 
-	dx := FilterCol(da, map[string]FilterColFunc{"x1": f1})
+	dx := Filter(da, map[string]FilterFunc{"x1": f1})
 
 	if !EqualReport(dx, MemCopy(da), true) {
 		t.Fail()

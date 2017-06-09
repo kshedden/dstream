@@ -60,3 +60,62 @@ func ExampleMutate() {
 	// Output:
 	// [4 6 8 10]
 }
+
+func ExampleFilter() {
+
+	data := `V1,V2,V3,V4
+1,2,3,4
+2,0,4,5
+3,4,5,6
+4,0,6,7
+`
+
+	// A mutating function, selects if not equal to 0.
+	f := func(x interface{}, b []bool) bool {
+		v := x.([]float64)
+		var any bool
+		for i := range v {
+			b[i] = v[i] != 0
+			any = any || !b[i]
+		}
+		return any
+	}
+
+	b := bytes.NewBuffer([]byte(data))
+	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader()
+
+	dx := Filter(da, map[string]FilterFunc{"V2": f})
+
+	dx.Next() // Always call Next before first call to Get or GetPos
+
+	y := dx.Get("V1")
+	fmt.Printf("%v\n", y)
+
+	// Output:
+	// [1 3]
+}
+
+func ExampleSegment() {
+
+	data := `V1,V2,V3,V4
+1,2,3,4
+1,0,4,5
+2,4,5,6
+3,0,6,7
+`
+
+	b := bytes.NewBuffer([]byte(data))
+	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader()
+
+	dx := Segment(da, []string{"V1"})
+
+	for dx.Next() {
+		y := dx.Get("V2")
+		fmt.Printf("%v\n", y)
+	}
+
+	// Output:
+	// [2 0]
+	// [4]
+	// [0]
+}

@@ -1,5 +1,7 @@
 package dstream
 
+import "fmt"
+
 //go:generate go run gen.go segment.template
 
 type segmentedData struct {
@@ -24,9 +26,7 @@ type segmentedData struct {
 
 // Segment restructures the chunks of a Dstream so that chunk
 // boundaries are determined by any change in the consecutive values
-// of a specified set of variables.  Note that for this to behave like
-// a "groupby" the variables defining the group boundaries should be
-// sorted.
+// of a specified set of variables.
 func Segment(data Dstream, vars []string) Dstream {
 	s := &segmentedData{
 		xform: xform{
@@ -41,15 +41,13 @@ func Segment(data Dstream, vars []string) Dstream {
 
 func (sd *segmentedData) init() {
 
+	// Get the positions of the variables that define the
+	// segments.
 	sd.names = sd.source.Names()
-
 	mp := make(map[string]int)
 	for k, v := range sd.names {
 		mp[v] = k
 	}
-
-	// Get the positions of the variables that define the
-	// segments.
 	var vpos []int
 	for _, v := range sd.vars {
 		vpos = append(vpos, mp[v])
@@ -60,7 +58,6 @@ func (sd *segmentedData) init() {
 	sd.bdata = make([]interface{}, nvar)
 	sd.stash = make([]interface{}, nvar)
 
-	sd.source.Reset()
 	sd.source.Next()
 	sd.setb()
 }
@@ -71,6 +68,20 @@ func (sd *segmentedData) setb() {
 	for j := 0; j < nvar; j++ {
 		sd.bdata[j] = sd.source.GetPos(j)
 	}
+}
+
+func (sd *segmentedData) Get(na string) interface{} {
+
+	if sd.namepos == nil {
+		sd.setNamePos()
+	}
+
+	pos, ok := sd.namepos[na]
+	if !ok {
+		msg := fmt.Sprintf("Variable '%s' not found", na)
+		panic(msg)
+	}
+	return sd.GetPos(pos)
 }
 
 func (sd *segmentedData) Reset() {
