@@ -1,0 +1,67 @@
+package dstream
+
+import (
+    "fmt"
+)
+
+const (
+  bc = 100
+)
+
+func addchunk(da Dstream, rslt *dataArrays) {
+        for j := 0; j < da.NumVar(); j++ {
+                v := da.GetPos(j)
+                switch v := v.(type) {
+                {{ range . }}
+                case []{{ .Type }}:
+                         rslt.arrays[j] = append(rslt.arrays[j], make([]{{ .Type }}, 0, bc))
+                {{ end }}
+                default:
+		        msg := fmt.Sprintf("Regroup: unknown type %T\n", v)
+			panic(msg)
+		}
+        }
+}
+
+func doRegroup(da Dstream, varpos int) *dataArrays {
+
+        bucket := make(map[uint64]int)
+
+        rslt := &dataArrays{
+	        xform: xform{
+                        names: da.Names(),
+                },
+                arrays: make([][]interface{}, da.NumVar()),
+        }
+
+        for da.Next() {
+
+                idv := da.GetPos(varpos).([]uint64)
+
+                for i, id := range idv {
+
+                        b, ok := bucket[id]
+			if !ok {
+                                b = len(bucket)
+				bucket[id] = b
+				addchunk(da, rslt)
+                        }
+
+                        for k := 0; k<da.NumVar(); k++ {
+                                switch v := rslt.arrays[k][b].(type) {
+				        {{- range . }}
+                                        case []{{ .Type }}:
+					    u := da.GetPos(k).([]{{ .Type }})
+                                            v = append(v, u[i])
+					    rslt.arrays[k][b] = v
+					{{- end }}
+                                        default:
+					    msg := fmt.Sprintf("Regroup: unkown type %T\n", v)
+					    panic(msg)
+                                 }
+                        }
+                }
+        }
+
+        return rslt
+}
