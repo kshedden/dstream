@@ -4,14 +4,11 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"go/format"
+	"html/template"
 	"os"
 	"strings"
-	"text/template"
-)
-
-const (
-	doformat = true
 )
 
 type Dtype struct {
@@ -19,7 +16,7 @@ type Dtype struct {
 }
 
 var (
-	Dtypes = []Dtype{
+	NumTypes = []Dtype{
 		Dtype{Type: "float64"},
 		Dtype{Type: "float32"},
 		Dtype{Type: "uint64"},
@@ -31,29 +28,39 @@ var (
 		Dtype{Type: "int16"},
 		Dtype{Type: "int8"},
 		Dtype{Type: "int"},
+	}
+
+	AllTypes = []Dtype{
 		Dtype{Type: "string"},
 	}
 )
 
 func main() {
 
-	if len(os.Args) != 2 {
-		panic("wrong number of arguments")
-	}
+	noformat := flag.Bool("noformat", false, "format code")
+	numeric := flag.Bool("numeric", false, "only use numeric types")
+	templatefile := flag.String("template", "", "template file")
+	flag.Parse()
 
-	tmpl, err := template.ParseFiles(os.Args[1])
+	AllTypes = append(AllTypes, NumTypes...)
+
+	tmpl, err := template.ParseFiles(*templatefile)
 	if err != nil {
 		panic(err)
 	}
 
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, Dtypes)
+	if *numeric {
+		err = tmpl.Execute(&buf, NumTypes)
+	} else {
+		err = tmpl.Execute(&buf, AllTypes)
+	}
 	if err != nil {
 		panic(err)
 	}
 
 	var p []byte
-	if doformat {
+	if !*noformat {
 		p, err = format.Source(buf.Bytes())
 		if err != nil {
 			panic(err)
@@ -62,7 +69,7 @@ func main() {
 		p = buf.Bytes()
 	}
 
-	outname := strings.Replace(os.Args[1], ".template", "_gen.go", 1)
+	outname := strings.Replace(*templatefile, ".template", "_gen.go", 1)
 	out, err := os.Create(outname)
 	if err != nil {
 		panic(err)

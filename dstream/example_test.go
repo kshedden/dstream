@@ -115,3 +115,137 @@ func ExampleSegment() {
 	// [4]
 	// [0]
 }
+
+func ExampleApply() {
+
+	data := `V1,V2,V3,V4
+1,2,3,4
+1,0,4,5
+2,4,5,6
+3,0,6,7
+`
+
+	f := func(v map[string]interface{}, x interface{}) {
+		v1 := v["V1"].([]float64)
+		v2 := v["V2"].([]float64)
+		y := x.([]float64)
+		for i := range v1 {
+			y[i] = v1[i] + v2[i]
+		}
+	}
+
+	b := bytes.NewBuffer([]byte(data))
+	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader().Done()
+	da = Apply(da, "V1p2", f, "float64")
+
+	for da.Next() {
+		y := da.Get("V1p2")
+		fmt.Printf("%v\n", y)
+	}
+
+	// Output:
+	// [3 1 6 3]
+}
+
+func ExampleDiffChunk() {
+
+	data := `V1,V2,V3,V4
+1,2,3,4
+1,0,4,5
+2,4,5,6
+3,0,6,8
+3,1,5,9
+`
+
+	b := bytes.NewBuffer([]byte(data))
+	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader().Done()
+	da = DiffChunk(da, map[string]int{"V2": 1, "V4": 2})
+
+	for da.Next() {
+		y := da.Get("V2$d1")
+		fmt.Printf("%v\n", y)
+		y = da.Get("V4$d2")
+		fmt.Printf("%v\n", y)
+	}
+
+	// Output:
+	// [4 -4 1]
+	// [0 1 -1]
+}
+
+func ExampleLagChunk() {
+
+	data := `1,2,3,4
+2,3,4,5
+3,4,5,6
+4,5,6,7
+`
+
+	b := bytes.NewBuffer([]byte(data))
+	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).Done()
+	da = LagChunk(da, map[string]int{"V2": 2})
+
+	da.Next() // Always call Next before first call to Get or GetPos
+
+	y := da.Get("V2[0]")
+	fmt.Printf("%v\n", y)
+	y = da.Get("V2[-1]")
+	fmt.Printf("%v\n", y)
+
+	// Output:
+	// [4 5]
+	// [3 4]
+}
+
+func ExampleJoin() {
+
+	data1 := `1,2,3,4
+1,3,4,5
+3,4,5,6
+3,5,6,7
+`
+
+	data2 := `1,2,3
+1,3,4
+1,4,5
+3,5,6
+`
+
+	data3 := `2,2,3,5,6
+2,3,4,7,5
+3,4,5,3,4
+4,5,6,2,3
+`
+
+	names := [][]string{{"V1", "V2", "V3", "V4"},
+		{"V1", "V2", "V3"},
+		{"V1", "V2", "V3", "V4", "V5"}}
+	var da []Dstream
+
+	for j, data := range []string{data1, data2, data3} {
+		b := bytes.NewBuffer([]byte(data))
+		d := FromCSV(b).SetFloatVars(names[j]).Done()
+		d = Convert(d, "V1", "uint64")
+		d = Segment(d, []string{"V1"})
+		da = append(da, d)
+	}
+
+	join := NewJoin(da, []string{"V1", "V1", "V1"})
+
+	for join.Next() {
+		fmt.Printf("%v\n", da[0].GetPos(0))
+		if join.Status[1] {
+			fmt.Printf("%v\n", da[1].GetPos(0))
+		}
+		if join.Status[2] {
+			fmt.Printf("%v\n\n", da[2].GetPos(0))
+		}
+	}
+
+	// Output:
+	// [1 1]
+	// [1 1 1]
+	// [3 3]
+	// [3]
+	// [3]
+}

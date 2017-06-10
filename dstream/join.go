@@ -10,9 +10,9 @@ import (
 // other elements of Data are advanced until their id variable is
 // equal to (if possible) or greater than the id variable of Data[0].
 // If equality is achieved, the corresponding element of Status is set
-// to true.
+// to true.  Status[0] is always false and has no meaning.
 //
-// The Data values have are assumed to be segmented so that the id
+// The Data values are assumed to be segmented so that the id
 // variable is constant within chunks, and increases with subsequent
 // calls to Next.
 type Join struct {
@@ -57,10 +57,6 @@ func NewJoin(data []Dstream, inames []string) *Join {
 
 	w.Status = make([]bool, len(data))
 	w.id = make([][]uint64, len(data))
-
-	for _, da := range data {
-		da.Reset()
-	}
 
 	return w
 }
