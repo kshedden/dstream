@@ -6,9 +6,9 @@ import (
 	"bytes"
 	"flag"
 	"go/format"
-	"html/template"
 	"os"
 	"strings"
+	"text/template"
 )
 
 type Dtype struct {

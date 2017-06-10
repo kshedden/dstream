@@ -249,3 +249,49 @@ func ExampleJoin() {
 	// [3]
 	// [3]
 }
+
+func ExampleRegroup() {
+
+	data := `V1,V2,V3
+1,2,3
+3,3,4
+2,4,5
+2,5,6
+5,2,3
+0,3,4
+1,4,5
+5,5,6
+`
+
+	b := bytes.NewBuffer([]byte(data))
+	d := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3"}).HasHeader().Done()
+	d = Convert(d, "V1", "uint64")
+	d = Regroup(d, "V1", true)
+
+	for d.Next() {
+		fmt.Printf("%v\n", d.GetPos(0))
+		fmt.Printf("%v\n", d.GetPos(1))
+		fmt.Printf("%v\n\n", d.GetPos(2))
+	}
+
+	// Output:
+	// [0]
+	// [3]
+	// [4]
+	//
+	// [1 1]
+	// [2 4]
+	// [3 5]
+	//
+	// [2 2]
+	// [4 5]
+	// [5 6]
+	//
+	// [3]
+	// [3]
+	// [4]
+	//
+	// [5 5]
+	// [2 5]
+	// [3 6]
+}

@@ -1,6 +1,6 @@
-all: bcols base comparisons segment utils convert
+all: bcols base comparisons segment utils convert regroup
 
-.PHONY: bcols base comparisons segment utils convert
+.PHONY: bcols base comparisons segment utils convert regroup
 
 bcols:
 	go generate bcols.go
@@ -14,3 +14,5 @@ comparisons:
 	go generate comparisons.go
 convert:
 	go generate convert.go
+regroup:
+	go generate regroup.go

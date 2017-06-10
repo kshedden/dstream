@@ -37,7 +37,7 @@ type Dstream interface {
 
 // dataArrays is an implementation of Dstream based on sharded arrays.
 type dataArrays struct {
-	xform
+	xform // bdata is not used
 
 	// arrays is the underlying data to be passed to the
 	// consumer.
