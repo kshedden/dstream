@@ -1,0 +1,63 @@
+package dstream
+
+import (
+        "fmt"
+)
+
+func (c *convertType) GetPos(j int) interface{} {
+
+        if j != c.vpos {
+		return c.source.GetPos(j)
+        }
+
+        if c.conv[j] {
+	        // The result is already available so just return it.
+		return c.bdata[j]
+        }
+
+        // Initialize the backing array on the first call
+	to := c.bdata[j]
+        if to == nil {
+                switch c.dtype {
+		        {{- range . }}
+		        case "{{ .Type }}":
+			        to = make([]{{ .Type }}, 0, 100)
+			{{- end }}
+			default:
+			        msg := fmt.Sprintf("Convert: unknown type %s\n", c.dtype)
+				panic(msg)
+	        }
+	}
+
+        // Need this to do nested switches.
+        {{ $types := . }}
+
+        from := c.source.GetPos(j)
+        switch to := to.(type) {
+                {{- range $Type1 := $types }}
+                case []{{ $Type1.Type }}:
+		        switch from := from.(type) {
+		            {{- range $Type2 := $types }}
+	                    case []{{ $Type2.Type }}:
+			            {{- if eq $Type1.Type $Type2.Type }}
+				    c.bdata[j] = from
+			            {{- else }}
+			            for _, x := range from {
+                                            to = append(to, {{ $Type1.Type }}(x))
+			            }
+				    c.bdata[j] = to
+				    {{- end }}
+	                    {{- end }}
+		            default:
+			            msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
+				    panic(msg)
+                       }
+		{{- end }}
+		default:
+	                msg := fmt.Sprintf("Convert: unkown destination type %T\n", to)
+		        panic(msg)
+	}
+
+        c.conv[j] = true
+        return c.bdata[j]
+}
