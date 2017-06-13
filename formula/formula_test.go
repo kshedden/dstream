@@ -366,7 +366,7 @@ func TestSingle(t *testing.T) {
 		},
 	} {
 		dp := dstream.NewFromArrays(rawData, rawNames)
-		fp := New(pr.formula, dp, pr.reflevels, nil, funcs)
+		fp := New(pr.formula, dp).RefLevels(pr.reflevels).Funcs(funcs).Done()
 
 		chunk := 0
 		for fp.Next() {
@@ -467,7 +467,7 @@ func TestMulti(t *testing.T) {
 		},
 	} {
 		dp := dstream.NewFromArrays(rawData, rawNames)
-		fp := NewMulti(pr.formulas, dp, pr.reflevels, nil, funcs)
+		fp := NewMulti(pr.formulas, dp).RefLevels(pr.reflevels).Funcs(funcs).Done()
 
 		chunk := 0
 		for fp.Next() {
@@ -502,6 +502,6 @@ func TestReg(t *testing.T) {
 	}
 
 	dp := dstream.NewFromArrays(rawData, rawNames)
-	fdp := New("x1 + x2", dp, nil, nil, nil)
+	fdp := New("x1 + x2", dp).Done()
 	_ = dstream.NewReg(fdp, "y", []string{"x1", "x2", "", ""}, "", "")
 }
