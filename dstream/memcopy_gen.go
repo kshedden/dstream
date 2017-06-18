@@ -15,6 +15,10 @@ func MemCopy(data Dstream) Dstream {
 			var y interface{}
 			v := data.GetPos(j)
 			switch v := v.(type) {
+			case []string:
+				z := make([]string, len(v))
+				copy(z, v)
+				y = z
 			case []float64:
 				z := make([]float64, len(v))
 				copy(z, v)
@@ -57,10 +61,6 @@ func MemCopy(data Dstream) Dstream {
 				y = z
 			case []int:
 				z := make([]int, len(v))
-				copy(z, v)
-				y = z
-			case []string:
-				z := make([]string, len(v))
 				copy(z, v)
 				y = z
 			}

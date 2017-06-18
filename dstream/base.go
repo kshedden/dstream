@@ -79,7 +79,7 @@ func (da *dataArrays) NumObs() int {
 }
 
 func (da *dataArrays) init() {
-	da.setNamePos()
+	da.setNamePos() // TODO should get rid of this
 }
 
 func (da *dataArrays) Names() []string {
@@ -102,9 +102,16 @@ func (da *dataArrays) GetPos(j int) interface{} {
 
 func (da *dataArrays) Get(na string) interface{} {
 
-	pos, ok := da.namepos[na]
-	if !ok {
-		msg := fmt.Sprintf("Variable '%s' not found", na)
+	pos := -1
+	for j, nm := range da.Names() {
+		if nm == na {
+			pos = j
+			break
+		}
+	}
+
+	if pos == -1 {
+		msg := fmt.Sprintf("Get: variable '%s' not found", na)
 		panic(msg)
 	}
 
@@ -137,4 +144,4 @@ func NewFromArrays(data [][]interface{}, names []string) Dstream {
 	return da
 }
 
-//go:generate go run gen.go memcopy.template
+//go:generate go run gen.go -template=memcopy.template

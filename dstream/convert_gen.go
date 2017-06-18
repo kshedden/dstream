@@ -6,20 +6,21 @@ import (
 	"fmt"
 )
 
-func (c *convertType) GetPos(j int) interface{} {
+func (c *convert) Next() bool {
 
-	if j != c.vpos {
-		return c.source.GetPos(j)
+	if !c.source.Next() {
+		return false
 	}
 
-	if c.conv[j] {
-		// The result is already available so just return it.
-		//print("HI\n")
-		return c.bdata[j]
+	// The non-converted variables are just pointer assignments.
+	for j := 0; j < c.source.NumVar(); j++ {
+		if j != c.vpos {
+			c.bdata[j] = c.source.GetPos(j)
+		}
 	}
 
-	// Initialize the backing array on the first call
-	to := c.bdata[j]
+	// Initialize the backing array if needed
+	to := c.bdata[c.vpos]
 	if to == nil {
 		switch c.dtype {
 		case "float64":
@@ -52,62 +53,75 @@ func (c *convertType) GetPos(j int) interface{} {
 
 	// Need this to do nested switches.
 
-	from := c.source.GetPos(j)
+	// Unconverted data
+	from := c.source.GetPos(c.vpos)
+
 	switch to := to.(type) {
 	case []float64:
 		switch from := from.(type) {
 		case []float64:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		case []float32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -115,57 +129,68 @@ func (c *convertType) GetPos(j int) interface{} {
 	case []float32:
 		switch from := from.(type) {
 		case []float64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []float32:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		case []uint64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, float32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -173,57 +198,68 @@ func (c *convertType) GetPos(j int) interface{} {
 	case []uint64:
 		switch from := from.(type) {
 		case []float64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []float32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint64:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		case []uint32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -231,57 +267,68 @@ func (c *convertType) GetPos(j int) interface{} {
 	case []uint32:
 		switch from := from.(type) {
 		case []float64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []float32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint32:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		case []uint16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -289,57 +336,68 @@ func (c *convertType) GetPos(j int) interface{} {
 	case []uint16:
 		switch from := from.(type) {
 		case []float64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []float32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint16:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		case []uint8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -347,57 +405,68 @@ func (c *convertType) GetPos(j int) interface{} {
 	case []uint8:
 		switch from := from.(type) {
 		case []float64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []float32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint8:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		case []int64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, uint8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -405,57 +474,68 @@ func (c *convertType) GetPos(j int) interface{} {
 	case []int64:
 		switch from := from.(type) {
 		case []float64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []float32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int64:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		case []int32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int64(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -463,57 +543,68 @@ func (c *convertType) GetPos(j int) interface{} {
 	case []int32:
 		switch from := from.(type) {
 		case []float64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []float32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int32:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		case []int16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int32(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -521,57 +612,68 @@ func (c *convertType) GetPos(j int) interface{} {
 	case []int16:
 		switch from := from.(type) {
 		case []float64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []float32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int16:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		case []int8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int16(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -579,57 +681,68 @@ func (c *convertType) GetPos(j int) interface{} {
 	case []int8:
 		switch from := from.(type) {
 		case []float64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []float32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int8:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		case []int:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int8(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -637,57 +750,68 @@ func (c *convertType) GetPos(j int) interface{} {
 	case []int:
 		switch from := from.(type) {
 		case []float64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []float32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []uint8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int64:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int32:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int16:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int8:
+			to = to[0:0]
 			for _, x := range from {
 				to = append(to, int(x))
 			}
-			c.bdata[j] = to
+			c.bdata[c.vpos] = to
 		case []int:
-			c.bdata[j] = from
+			// Same types, nothing to do
+			c.bdata[c.vpos] = from
 		default:
 			msg := fmt.Sprintf("Convert: unknown origin type %T\n", from)
 			panic(msg)
@@ -697,6 +821,5 @@ func (c *convertType) GetPos(j int) interface{} {
 		panic(msg)
 	}
 
-	c.conv[j] = true
-	return c.bdata[j]
+	return true
 }

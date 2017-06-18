@@ -1,6 +1,6 @@
 package dstream
 
-//go:generate go run gen.go utils.template
+//go:generate go run gen.go -template=utils.template
 
 // VarPos returns a map from variable names to their corresponding
 // column positions.

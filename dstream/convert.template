@@ -4,19 +4,21 @@ import (
         "fmt"
 )
 
-func (c *convertType) GetPos(j int) interface{} {
+func (c *convert) Next() bool {
 
-        if j != c.vpos {
-		return c.source.GetPos(j)
-        }
+	if !c.source.Next() {
+		return false
+	}
 
-        if c.conv[j] {
-	        // The result is already available so just return it.
-		return c.bdata[j]
-        }
+        // The non-converted variables are just pointer assignments.
+        for j := 0; j < c.source.NumVar(); j++ {
+	        if j != c.vpos {
+                        c.bdata[j] = c.source.GetPos(j)
+	        }
+	}
 
-        // Initialize the backing array on the first call
-	to := c.bdata[j]
+        // Initialize the backing array if needed
+	to := c.bdata[c.vpos]
         if to == nil {
                 switch c.dtype {
 		        {{- range . }}
@@ -32,7 +34,9 @@ func (c *convertType) GetPos(j int) interface{} {
         // Need this to do nested switches.
         {{ $types := . }}
 
-        from := c.source.GetPos(j)
+        // Unconverted data
+        from := c.source.GetPos(c.vpos)
+
         switch to := to.(type) {
                 {{- range $Type1 := $types }}
                 case []{{ $Type1.Type }}:
@@ -40,12 +44,14 @@ func (c *convertType) GetPos(j int) interface{} {
 		            {{- range $Type2 := $types }}
 	                    case []{{ $Type2.Type }}:
 			            {{- if eq $Type1.Type $Type2.Type }}
-				    c.bdata[j] = from
+				    // Same types, nothing to do
+				    c.bdata[c.vpos] = from
 			            {{- else }}
+				    to = to[0:0]
 			            for _, x := range from {
                                             to = append(to, {{ $Type1.Type }}(x))
 			            }
-				    c.bdata[j] = to
+				    c.bdata[c.vpos] = to
 				    {{- end }}
 	                    {{- end }}
 		            default:
@@ -58,6 +64,5 @@ func (c *convertType) GetPos(j int) interface{} {
 		        panic(msg)
 	}
 
-        c.conv[j] = true
-        return c.bdata[j]
+	return true
 }

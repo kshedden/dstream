@@ -16,6 +16,12 @@ func (sd *segmentedData) GetPos(j int) interface{} {
 		x = sd.bdata[j]
 	}
 	switch x := x.(type) {
+	case []string:
+		pos := sd.pos
+		if stash {
+			pos = len(x)
+		}
+		return x[0:pos]
 	case []float64:
 		pos := sd.pos
 		if stash {
@@ -82,12 +88,6 @@ func (sd *segmentedData) GetPos(j int) interface{} {
 			pos = len(x)
 		}
 		return x[0:pos]
-	case []string:
-		pos := sd.pos
-		if stash {
-			pos = len(x)
-		}
-		return x[0:pos]
 	default:
 		msg := fmt.Sprintf("Segment: unknown type %T\n", x)
 		panic(msg)
@@ -104,6 +104,10 @@ func (sd *segmentedData) fixstash() bool {
 	for j := 0; j < sd.source.NumVar(); j++ {
 		x := sd.bdata[j]
 		switch x := x.(type) {
+		case []string:
+			z := sd.stash[j].([]string)
+			sd.stash[j] = append(z, x[0:pos]...)
+			sd.bdata[j] = x[pos:len(x)]
 		case []float64:
 			z := sd.stash[j].([]float64)
 			sd.stash[j] = append(z, x[0:pos]...)
@@ -148,10 +152,6 @@ func (sd *segmentedData) fixstash() bool {
 			z := sd.stash[j].([]int)
 			sd.stash[j] = append(z, x[0:pos]...)
 			sd.bdata[j] = x[pos:len(x)]
-		case []string:
-			z := sd.stash[j].([]string)
-			sd.stash[j] = append(z, x[0:pos]...)
-			sd.bdata[j] = x[pos:len(x)]
 		default:
 			msg := fmt.Sprintf("Segment: unknown type %T\n", x)
 			panic(msg)
@@ -166,6 +166,14 @@ func (sd *segmentedData) setstash() {
 	for j := 0; j < sd.source.NumVar(); j++ {
 		x := sd.bdata[j]
 		switch x := x.(type) {
+		case []string:
+			var z []string
+			if sd.stash[j] != nil {
+				z = sd.stash[j].([]string)
+			}
+			z = resizestring(z, len(x))
+			copy(z, x)
+			sd.stash[j] = z
 		case []float64:
 			var z []float64
 			if sd.stash[j] != nil {
@@ -254,14 +262,6 @@ func (sd *segmentedData) setstash() {
 			z = resizeint(z, len(x))
 			copy(z, x)
 			sd.stash[j] = z
-		case []string:
-			var z []string
-			if sd.stash[j] != nil {
-				z = sd.stash[j].([]string)
-			}
-			z = resizestring(z, len(x))
-			copy(z, x)
-			sd.stash[j] = z
 		default:
 			msg := fmt.Sprintf("Segment: unknown type %T\n", x)
 			panic(msg)
@@ -275,6 +275,8 @@ func (sd *segmentedData) leftsliceb(pos int) {
 	for j := 0; j < sd.source.NumVar(); j++ {
 		x := sd.bdata[j]
 		switch x := x.(type) {
+		case []string:
+			sd.bdata[j] = x[pos:len(x)]
 		case []float64:
 			sd.bdata[j] = x[pos:len(x)]
 		case []float32:
@@ -296,8 +298,6 @@ func (sd *segmentedData) leftsliceb(pos int) {
 		case []int8:
 			sd.bdata[j] = x[pos:len(x)]
 		case []int:
-			sd.bdata[j] = x[pos:len(x)]
-		case []string:
 			sd.bdata[j] = x[pos:len(x)]
 		default:
 			msg := fmt.Sprintf("Segment: unknown type %T\n", x)
@@ -313,6 +313,16 @@ func (sd *segmentedData) findSegment(start int) int {
 	for _, j := range sd.vpos {
 		x := sd.bdata[j]
 		switch x := x.(type) {
+		case []string:
+			for i := start + 1; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
 		case []float64:
 			for i := start + 1; i < len(x); i++ {
 				if pos != -1 && i >= pos {
@@ -414,16 +424,6 @@ func (sd *segmentedData) findSegment(start int) int {
 				}
 			}
 		case []int:
-			for i := start + 1; i < len(x); i++ {
-				if pos != -1 && i >= pos {
-					break
-				}
-				if x[i] != x[i-1] {
-					pos = i
-					break
-				}
-			}
-		case []string:
 			for i := start + 1; i < len(x); i++ {
 				if pos != -1 && i >= pos {
 					break
@@ -452,6 +452,19 @@ func (sd *segmentedData) findSegmentStash() (int, bool) {
 	for _, j := range sd.vpos {
 		x := sd.bdata[j]
 		switch x := x.(type) {
+		case []string:
+			m = len(x)
+			y := sd.stash[j].([]string)
+			v := y[len(y)-1]
+			for i := 0; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
 		case []float64:
 			m = len(x)
 			y := sd.stash[j].([]float64)
@@ -585,19 +598,6 @@ func (sd *segmentedData) findSegmentStash() (int, bool) {
 		case []int:
 			m = len(x)
 			y := sd.stash[j].([]int)
-			v := y[len(y)-1]
-			for i := 0; i < len(x); i++ {
-				if pos != -1 && i >= pos {
-					break
-				}
-				if x[i] != v {
-					pos = i
-					break
-				}
-			}
-		case []string:
-			m = len(x)
-			y := sd.stash[j].([]string)
 			v := y[len(y)-1]
 			for i := 0; i < len(x); i++ {
 				if pos != -1 && i >= pos {

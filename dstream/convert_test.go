@@ -47,5 +47,4 @@ func TestConvert(t *testing.T) {
 	if !EqualReport(dx, db, true) {
 		t.Fail()
 	}
-
 }

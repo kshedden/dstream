@@ -25,6 +25,8 @@ func (a *apply) init() {
 	switch a.dtype {
 	case "float64":
 		a.bdata[len(a.bdata)-1] = make([]float64, 0)
+	case "uint64":
+		a.bdata[len(a.bdata)-1] = make([]float64, 0)
 	case "string":
 		a.bdata[len(a.bdata)-1] = make([]string, 0)
 	default:
@@ -67,6 +69,8 @@ func (a *apply) Next() bool {
 	switch x := a.bdata[q].(type) {
 	case []float64:
 		a.bdata[q] = resizefloat64(x, n)
+	case []uint64:
+		a.bdata[q] = resizeuint64(x, n)
 	case []string:
 		a.bdata[q] = resizestring(x, n)
 	default:

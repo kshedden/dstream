@@ -56,6 +56,9 @@ func (b *bcols) init() {
 
 		// Create concrete types to hold the data
 		switch b.dtypes[na] {
+		case "string":
+			var x []string
+			b.bdata = append(b.bdata, x)
 		case "float64":
 			var x []float64
 			b.bdata = append(b.bdata, x)
@@ -88,9 +91,6 @@ func (b *bcols) init() {
 			b.bdata = append(b.bdata, x)
 		case "int":
 			var x []int
-			b.bdata = append(b.bdata, x)
-		case "string":
-			var x []string
 			b.bdata = append(b.bdata, x)
 		case "uvarint":
 			var x []uint64
@@ -198,6 +198,24 @@ func (b *bcols) Next() bool {
 
 		// Handle fixed width data
 		switch v := b.bdata[j].(type) {
+		case []string:
+			for k := 0; k < b.chunksize; k++ {
+				var x string
+				err := binary.Read(rdr, binary.LittleEndian, &x)
+				if err == io.EOF {
+					b.done = true
+					break
+				} else if err != nil {
+					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
+					print(msg)
+					panic(err)
+				}
+				v = append(v, x)
+				if j == 0 {
+					b.nobs++
+				}
+			}
+			b.bdata[j] = v
 		case []float64:
 			for k := 0; k < b.chunksize; k++ {
 				var x float64
@@ -381,24 +399,6 @@ func (b *bcols) Next() bool {
 		case []int:
 			for k := 0; k < b.chunksize; k++ {
 				var x int
-				err := binary.Read(rdr, binary.LittleEndian, &x)
-				if err == io.EOF {
-					b.done = true
-					break
-				} else if err != nil {
-					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
-					print(msg)
-					panic(err)
-				}
-				v = append(v, x)
-				if j == 0 {
-					b.nobs++
-				}
-			}
-			b.bdata[j] = v
-		case []string:
-			for k := 0; k < b.chunksize; k++ {
-				var x string
 				err := binary.Read(rdr, binary.LittleEndian, &x)
 				if err == io.EOF {
 					b.done = true

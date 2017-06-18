@@ -1,6 +1,6 @@
 package dstream
 
-//go:generate go run gen.go bcols.template
+//go:generate go run gen.go -template=bcols.template
 
 import (
 	"fmt"

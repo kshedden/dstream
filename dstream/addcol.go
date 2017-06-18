@@ -1,5 +1,7 @@
 package dstream
 
+import "fmt"
+
 type addcol struct {
 	xform
 	newname string
@@ -19,6 +21,13 @@ func Addcol(da Dstream, newdat []float64, newname string) Dstream {
 		},
 		newname: newname,
 		newdat:  newdat,
+	}
+
+	for _, na := range r.source.Names() {
+		if newname == na {
+			msg := fmt.Sprintf("Addcol: a variable named '%s' already exists.", na)
+			panic(msg)
+		}
 	}
 
 	r.names = append(r.names, r.source.Names()...)

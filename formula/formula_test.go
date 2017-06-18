@@ -37,7 +37,7 @@ func colSetEq(a, b *ColSet) bool {
 	}
 	eq := func(x, y float64) bool { return math.Abs(x-y) < 1e-5 }
 	for i, x := range a.Data {
-		if !floats.EqualFunc(x, b.Data[i], eq) {
+		if !floats.EqualFunc(x.([]float64), b.Data[i].([]float64), eq) {
 			return false
 		}
 	}
@@ -87,7 +87,7 @@ func makeFuncs() map[string]Func {
 		for i, v := range x {
 			y[i] = v * v
 		}
-		return &ColSet{Names: []string{na}, Data: [][]float64{y}}
+		return &ColSet{Names: []string{na}, Data: []interface{}{y}}
 	}
 	funcs["pbase"] = func(na string, x []float64) *ColSet {
 		y := make([]float64, len(x))
@@ -96,7 +96,7 @@ func makeFuncs() map[string]Func {
 			y[i] = v * v
 			z[i] = v * v * v
 		}
-		return &ColSet{Names: []string{na + "^2", na + "^3"}, Data: [][]float64{y, z}}
+		return &ColSet{Names: []string{na + "^2", na + "^3"}, Data: []interface{}{y, z}}
 	}
 	return funcs
 }
@@ -148,7 +148,7 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"x1", "x2[1]", "x1:x2[1]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, 1, 2},
 						[]float64{0, 0, 0},
 						[]float64{0, 0, 0},
@@ -156,7 +156,7 @@ func TestSingle(t *testing.T) {
 				},
 				&ColSet{
 					Names: []string{"x1", "x2[1]", "x1:x2[1]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{3, 4},
 						[]float64{1, 1},
 						[]float64{3, 4},
@@ -170,7 +170,7 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"x1", "x2[0]", "x1:x2[0]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, 1, 2},
 						[]float64{1, 1, 1},
 						[]float64{0, 1, 2},
@@ -178,7 +178,7 @@ func TestSingle(t *testing.T) {
 				},
 				&ColSet{
 					Names: []string{"x1", "x2[0]", "x1:x2[0]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{3, 4},
 						[]float64{0, 0},
 						[]float64{0, 0},
@@ -191,13 +191,13 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"x1"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, 1, 2},
 					},
 				},
 				&ColSet{
 					Names: []string{"x1"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{3, 4},
 					},
 				},
@@ -209,13 +209,13 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"x2[1]:x3[b]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, 0, 0},
 					},
 				},
 				&ColSet{
 					Names: []string{"x2[1]:x3[b]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{1, 0},
 					},
 				},
@@ -227,7 +227,7 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"x1:x3[b]", "x1:x4", "x2[1]:x3[b]", "x2[1]:x4"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, 1, 0},
 						[]float64{0, 0, 2},
 						[]float64{0, 0, 0},
@@ -236,7 +236,7 @@ func TestSingle(t *testing.T) {
 				},
 				&ColSet{
 					Names: []string{"x1:x3[b]", "x1:x4", "x2[1]:x3[b]", "x2[1]:x4"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{3, 0},
 						[]float64{0, -4},
 						[]float64{1, 0},
@@ -251,7 +251,7 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"x4", "x1:x3[b]", "x2[0]:x3[b]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{-1, 0, 1},
 						[]float64{0, 1, 0},
 						[]float64{0, 1, 0},
@@ -259,7 +259,7 @@ func TestSingle(t *testing.T) {
 				},
 				&ColSet{
 					Names: []string{"x4", "x1:x3[b]", "x2[0]:x3[b]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, -1},
 						[]float64{3, 0},
 						[]float64{0, 0},
@@ -272,14 +272,14 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"icept", "x1"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{1, 1, 1},
 						[]float64{0, 1, 2},
 					},
 				},
 				&ColSet{
 					Names: []string{"icept", "x1"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{1, 1},
 						[]float64{3, 4},
 					},
@@ -291,14 +291,14 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"x1", "icept"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, 1, 2},
 						[]float64{1, 1, 1},
 					},
 				},
 				&ColSet{
 					Names: []string{"x1", "icept"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{3, 4},
 						[]float64{1, 1},
 					},
@@ -310,14 +310,14 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"square(x1)", "icept"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, 1, 4},
 						[]float64{1, 1, 1},
 					},
 				},
 				&ColSet{
 					Names: []string{"square(x1)", "icept"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{9, 16},
 						[]float64{1, 1},
 					},
@@ -329,7 +329,7 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"icept", "pbase(x1)^2", "pbase(x1)^3"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{1, 1, 1},
 						[]float64{0, 1, 4},
 						[]float64{0, 1, 8},
@@ -337,7 +337,7 @@ func TestSingle(t *testing.T) {
 				},
 				&ColSet{
 					Names: []string{"icept", "pbase(x1)^2", "pbase(x1)^3"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{1, 1},
 						[]float64{9, 16},
 						[]float64{27, 64},
@@ -350,14 +350,14 @@ func TestSingle(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"icept", "square(x1)"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{1, 1, 1},
 						[]float64{0, 1, 4},
 					},
 				},
 				&ColSet{
 					Names: []string{"icept", "square(x1)"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{1, 1},
 						[]float64{9, 16},
 					},
@@ -367,21 +367,22 @@ func TestSingle(t *testing.T) {
 	} {
 		dp := dstream.NewFromArrays(rawData, rawNames)
 		fp := New(pr.formula, dp).RefLevels(pr.reflevels).Funcs(funcs).Done()
+		fr := fp.(*FormulaParser)
 
 		chunk := 0
 		for fp.Next() {
-			if !colSetEq(pr.expected[chunk], fp.Data) {
+			if !colSetEq(pr.expected[chunk], fr.Data) {
 				fmt.Printf("Mismatch:\nip=%d\n", ip)
 				fmt.Printf("chunk=%d\n", chunk)
 				fmt.Printf("Expected: %v\n", pr.expected[chunk])
-				fmt.Printf("Observed: %v\n", fp.Data)
+				fmt.Printf("Observed: %v\n", fr.Data)
 				t.Fail()
 			}
 			chunk++
 		}
 
-		if fp.ErrorState != nil {
-			fmt.Printf("ip=%d %v\n", ip, fp.ErrorState)
+		if fr.ErrorState != nil {
+			fmt.Printf("ip=%d %v\n", ip, fr.ErrorState)
 			t.Fail()
 		}
 
@@ -411,32 +412,32 @@ func TestMulti(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"x1"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, 1, 2},
 					},
 				},
 				&ColSet{
 					Names: []string{"x1"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{3, 4},
 					},
 				},
 			},
 		},
 		{
-			formulas:  []string{"x1", "x2"},
+			formulas:  []string{"x1", "x1+x2"},
 			reflevels: map[string]string{"x2": "1"},
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"x1", "x2[0]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, 1, 2},
 						[]float64{1, 1, 1},
 					},
 				},
 				&ColSet{
 					Names: []string{"x1", "x2[0]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{3, 4},
 						[]float64{0, 0},
 					},
@@ -449,7 +450,7 @@ func TestMulti(t *testing.T) {
 			expected: []*ColSet{
 				&ColSet{
 					Names: []string{"x1", "square(x1)", "x2[0]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{0, 1, 2},
 						[]float64{0, 1, 4},
 						[]float64{1, 1, 1},
@@ -457,7 +458,7 @@ func TestMulti(t *testing.T) {
 				},
 				&ColSet{
 					Names: []string{"x1", "square(x1)", "x2[0]"},
-					Data: [][]float64{
+					Data: []interface{}{
 						[]float64{3, 4},
 						[]float64{9, 16},
 						[]float64{0, 0},
@@ -468,17 +469,16 @@ func TestMulti(t *testing.T) {
 	} {
 		dp := dstream.NewFromArrays(rawData, rawNames)
 		fp := NewMulti(pr.formulas, dp).RefLevels(pr.reflevels).Funcs(funcs).Done()
+		fr := fp.(*FormulaParser)
 
-		chunk := 0
-		for fp.Next() {
-			if !colSetEq(pr.expected[chunk], fp.Data) {
+		for chunk := 0; fp.Next(); chunk++ {
+			if !colSetEq(pr.expected[chunk], fr.Data) {
 				fmt.Printf("Mismatch:\nip=%d\n", ip)
 				fmt.Printf("chunk=%d\n", chunk)
 				fmt.Printf("Expected: %v\n", pr.expected[chunk])
-				fmt.Printf("Observed: %v\n", fp.Data)
+				fmt.Printf("Observed: %v\n", fr.Data)
 				t.Fail()
 			}
-			chunk++
 		}
 	}
 }

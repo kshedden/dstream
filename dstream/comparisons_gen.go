@@ -43,6 +43,16 @@ func EqualReport(x, y Dstream, report bool) bool {
 		for j := 0; j < x.NumVar(); j++ {
 			switch v := x.GetPos(j).(type) {
 
+			case []string:
+				u, ok := y.GetPos(j).([]string)
+				if !ok || !aequalstring(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+
 			case []float64:
 				u, ok := y.GetPos(j).([]float64)
 				if !ok || !aequalfloat64(v, u) {
@@ -153,16 +163,6 @@ func EqualReport(x, y Dstream, report bool) bool {
 					return false
 				}
 
-			case []string:
-				u, ok := y.GetPos(j).([]string)
-				if !ok || !aequalstring(v, u) {
-					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
-						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
-					}
-					return false
-				}
-
 			default:
 				if report {
 					print("mismatched types")
@@ -172,6 +172,18 @@ func EqualReport(x, y Dstream, report bool) bool {
 		}
 	}
 
+	return true
+}
+
+func aequalstring(x, y []string) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	for i, v := range x {
+		if v != y[i] {
+			return false
+		}
+	}
 	return true
 }
 
@@ -296,18 +308,6 @@ func aequalint8(x, y []int8) bool {
 }
 
 func aequalint(x, y []int) bool {
-	if len(x) != len(y) {
-		return false
-	}
-	for i, v := range x {
-		if v != y[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func aequalstring(x, y []string) bool {
 	if len(x) != len(y) {
 		return false
 	}

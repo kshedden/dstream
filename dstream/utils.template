@@ -23,7 +23,7 @@ func VarTypes(d Dstream) map[string]string {
 		{{- range . }}
 		case []{{ .Type }}:
 			types[na] = "{{ .Type }}"
-		{{ end }}
+		{{- end }}
 		default:
 			types[na] = "unknown type"
 		}
@@ -49,10 +49,10 @@ func truncate(z []interface{}) {
 	for j, x := range z {
 		if x != nil {
 			switch x := x.(type) {
-			{{ range . }}
+			{{- range . }}
 			case []{{ .Type }}:
 				z[j] = x[0:0]
-                        {{ end }}
+                        {{- end }}
                         default:
 				msg := fmt.Sprintf("unknown type %T", x)
 				panic(msg)
@@ -62,7 +62,9 @@ func truncate(z []interface{}) {
 }
 
 // GetCol returns a copy of the data for one variable.  The data
-// are returned as a slice.
+// are returned as a slice.  The column is returned starting with the
+// current chunk, call Reset to ensure that the column is extracted
+// form the first chunk.
 func GetCol(da Dstream, na string) interface{} {
 
         vn := da.Names()
@@ -76,10 +78,10 @@ func GetCol(da Dstream, na string) interface{} {
 }
 
 // GetColPos returns a copy of the data for one variable.
-// The data are returned as a slice.
+// The data are returned as a slice, starting from the current
+// position.  Call Reset to get the entire column.
 func GetColPos(da Dstream, j int) interface{} {
 
-        da.Reset()
         da.Next()
         v := da.GetPos(j)
 
@@ -96,6 +98,7 @@ func GetColPos(da Dstream, j int) interface{} {
             {{- end }}
 	}
 
-        panic("GetColPos: unknown type")
+        msg := fmt.Sprintf("GetColPos: unkown type %T.\n", v)
+        panic(msg)
         return nil
 }

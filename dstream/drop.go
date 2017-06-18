@@ -19,7 +19,7 @@ func (d *drop) init() {
 	dmp := make(map[string]bool)
 	for _, na := range d.dropVars {
 		if !hna[na] {
-			msg := fmt.Sprintf("cannot drop '%s', no such column", na)
+			msg := fmt.Sprintf("Drop: variable '%s' not found.\n", na)
 			panic(msg)
 		}
 		dmp[na] = true

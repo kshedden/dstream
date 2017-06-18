@@ -6,6 +6,13 @@ import (
 	"fmt"
 )
 
+func resizestring(x []string, n int) []string {
+	if cap(x) < n {
+		x = make([]string, n)
+	}
+	return x[0:n]
+}
+
 func resizefloat64(x []float64, n int) []float64 {
 	if cap(x) < n {
 		x = make([]float64, n)
@@ -83,13 +90,6 @@ func resizeint(x []int, n int) []int {
 	return x[0:n]
 }
 
-func resizestring(x []string, n int) []string {
-	if cap(x) < n {
-		x = make([]string, n)
-	}
-	return x[0:n]
-}
-
 // VarTypes returns a map relating each variable by name to its corresponding
 // data type.
 func VarTypes(d Dstream) map[string]string {
@@ -97,42 +97,30 @@ func VarTypes(d Dstream) map[string]string {
 	for k, na := range d.Names() {
 		v := d.GetPos(k)
 		switch v.(type) {
-		case []float64:
-			types[na] = "float64"
-
-		case []float32:
-			types[na] = "float32"
-
-		case []uint64:
-			types[na] = "uint64"
-
-		case []uint32:
-			types[na] = "uint32"
-
-		case []uint16:
-			types[na] = "uint16"
-
-		case []uint8:
-			types[na] = "uint8"
-
-		case []int64:
-			types[na] = "int64"
-
-		case []int32:
-			types[na] = "int32"
-
-		case []int16:
-			types[na] = "int16"
-
-		case []int8:
-			types[na] = "int8"
-
-		case []int:
-			types[na] = "int"
-
 		case []string:
 			types[na] = "string"
-
+		case []float64:
+			types[na] = "float64"
+		case []float32:
+			types[na] = "float32"
+		case []uint64:
+			types[na] = "uint64"
+		case []uint32:
+			types[na] = "uint32"
+		case []uint16:
+			types[na] = "uint16"
+		case []uint8:
+			types[na] = "uint8"
+		case []int64:
+			types[na] = "int64"
+		case []int32:
+			types[na] = "int32"
+		case []int16:
+			types[na] = "int16"
+		case []int8:
+			types[na] = "int8"
+		case []int:
+			types[na] = "int"
 		default:
 			types[na] = "unknown type"
 		}
@@ -142,6 +130,8 @@ func VarTypes(d Dstream) map[string]string {
 
 func ilen(x interface{}) int {
 	switch x := x.(type) {
+	case []string:
+		return len(x)
 	case []float64:
 		return len(x)
 	case []float32:
@@ -164,8 +154,6 @@ func ilen(x interface{}) int {
 		return len(x)
 	case []int:
 		return len(x)
-	case []string:
-		return len(x)
 	case nil:
 		return 0
 	default:
@@ -178,43 +166,30 @@ func truncate(z []interface{}) {
 	for j, x := range z {
 		if x != nil {
 			switch x := x.(type) {
-
-			case []float64:
-				z[j] = x[0:0]
-
-			case []float32:
-				z[j] = x[0:0]
-
-			case []uint64:
-				z[j] = x[0:0]
-
-			case []uint32:
-				z[j] = x[0:0]
-
-			case []uint16:
-				z[j] = x[0:0]
-
-			case []uint8:
-				z[j] = x[0:0]
-
-			case []int64:
-				z[j] = x[0:0]
-
-			case []int32:
-				z[j] = x[0:0]
-
-			case []int16:
-				z[j] = x[0:0]
-
-			case []int8:
-				z[j] = x[0:0]
-
-			case []int:
-				z[j] = x[0:0]
-
 			case []string:
 				z[j] = x[0:0]
-
+			case []float64:
+				z[j] = x[0:0]
+			case []float32:
+				z[j] = x[0:0]
+			case []uint64:
+				z[j] = x[0:0]
+			case []uint32:
+				z[j] = x[0:0]
+			case []uint16:
+				z[j] = x[0:0]
+			case []uint8:
+				z[j] = x[0:0]
+			case []int64:
+				z[j] = x[0:0]
+			case []int32:
+				z[j] = x[0:0]
+			case []int16:
+				z[j] = x[0:0]
+			case []int8:
+				z[j] = x[0:0]
+			case []int:
+				z[j] = x[0:0]
 			default:
 				msg := fmt.Sprintf("unknown type %T", x)
 				panic(msg)
@@ -224,7 +199,9 @@ func truncate(z []interface{}) {
 }
 
 // GetCol returns a copy of the data for one variable.  The data
-// are returned as a slice.
+// are returned as a slice.  The column is returned starting with the
+// current chunk, call Reset to ensure that the column is extracted
+// form the first chunk.
 func GetCol(da Dstream, na string) interface{} {
 
 	vn := da.Names()
@@ -238,14 +215,22 @@ func GetCol(da Dstream, na string) interface{} {
 }
 
 // GetColPos returns a copy of the data for one variable.
-// The data are returned as a slice.
+// The data are returned as a slice, starting from the current
+// position.  Call Reset to get the entire column.
 func GetColPos(da Dstream, j int) interface{} {
 
-	da.Reset()
 	da.Next()
 	v := da.GetPos(j)
 
 	switch v := v.(type) {
+	case []string:
+		var x []string
+		x = append(x, v...)
+		for da.Next() {
+			y := da.GetPos(j).([]string)
+			x = append(x, y...)
+		}
+		return x
 	case []float64:
 		var x []float64
 		x = append(x, v...)
@@ -334,16 +319,9 @@ func GetColPos(da Dstream, j int) interface{} {
 			x = append(x, y...)
 		}
 		return x
-	case []string:
-		var x []string
-		x = append(x, v...)
-		for da.Next() {
-			y := da.GetPos(j).([]string)
-			x = append(x, y...)
-		}
-		return x
 	}
 
-	panic("GetColPos: unknown type")
+	msg := fmt.Sprintf("GetColPos: unkown type %T.\n", v)
+	panic(msg)
 	return nil
 }

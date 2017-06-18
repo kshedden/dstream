@@ -2,7 +2,7 @@ package dstream
 
 import "fmt"
 
-//go:generate go run gen.go segment.template
+//go:generate go run gen.go -template=segment.template
 
 type segmentedData struct {
 	xform
