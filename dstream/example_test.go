@@ -68,7 +68,7 @@ func ExampleFilter() {
 4,0,6,7
 `
 
-	// A mutating function, selects if not equal to 0.
+	// A filtering function, selects if not equal to 0.
 	f := func(x interface{}, b []bool) bool {
 		v := x.([]float64)
 		var any bool
