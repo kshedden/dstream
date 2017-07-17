@@ -2,12 +2,14 @@ package dstream
 
 import "fmt"
 
-// A filtering function for use with Filter. The empty interface holds
-// a slice of values, the boolean array should be sized to match this
-// slice.  Rows of data are retained where the boolean array is true,
-// and excluded otherwise.  The returned boolean indicates whether any
-// rows are dropped (true if any rows are dropped).  It is also
-// acceptable to always return true.
+// FilterFunc is a filtering function for use with Filter. The empty
+// interface holds a slice of values of length n, the boolean array,
+// denoted "Keep" below, also has length n.  The FilterFunc should set
+// elements of Keep to false wherever the corresponding Dstream record
+// is to be excluded.  Never set any element of Keep to true, as this
+// may interfere with other FilterFuncs acting jointly with this
+// one. The returned boolean indicates whether the FilterFunc entered
+// any new false values into Keep.
 type FilterFunc func(interface{}, []bool) bool
 
 type filterCol struct {
