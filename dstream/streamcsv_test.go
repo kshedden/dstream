@@ -2,6 +2,7 @@ package dstream
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -57,6 +58,42 @@ func TestStreamCSV1(t *testing.T) {
 	f, msg := checkPosName(da)
 	if !f {
 		print(msg)
+		t.Fail()
+	}
+}
+
+func TestCSVWriter1(t *testing.T) {
+	data1 := `id,v1,v2,v3
+1,2,3,4
+1,3,4,5
+2,4,5,6
+3,5,6,7
+3,99,99,99
+3,100,101,102
+4,200,201,202
+`
+
+	r := strings.NewReader(data1)
+	ds := FromCSV(r).SetFloatVars([]string{"id", "v1", "v2", "v3"}).SetChunkSize(2).HasHeader().Done()
+
+	var buf bytes.Buffer
+	fm := map[string]string{"v1": "%.1f"}
+	err := ToCSV(ds).SetWriter(&buf).FloatFmt("%.0f").Formats(fm).Done()
+	if err != nil {
+		panic(err)
+	}
+
+	es := `id,v1,v2,v3
+1,2.0,3,4
+1,3.0,4,5
+2,4.0,5,6
+3,5.0,6,7
+3,99.0,99,99
+3,100.0,101,102
+4,200.0,201,202
+`
+
+	if es != string(buf.Bytes()) {
 		t.Fail()
 	}
 }

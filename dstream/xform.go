@@ -2,9 +2,23 @@ package dstream
 
 import "fmt"
 
-// xform is embedded into any transformer object that converts a
-// Dstream into another Dstream.  It implements the basic
-// functionality that is common to most such transformers.
+// xform can be embedded into any transformer object that converts a
+// Dstream into another Dstream.  It implements the basic behavior
+// that is common to all transformers.  While xform implements the
+// Dstream interface in a trivial way, Types that embed xform can
+// provide their own implementation of any of these methods.
+//
+// In most cases, it will be sufficient to (i) set names properly, and
+// (ii) implement Next to set bdata correctly (bdata holds the data
+// slices by column).  In some cases it may be desirable to implement
+// other Dstream methods.  Note that due to the way that Go embedding
+// works, if a type implements its own, say, Names function, all the
+// code below will continue to call the xform Names implementation,
+// not the customized Names implementation.  For this reason, it is
+// usually better to modify the bdata and names members rather than to
+// provide new implementations of Get, etc.  If Get and other Dstream
+// methods need to be implemented by a type, it may be necessary to
+// implement all Dstream interface components.
 type xform struct {
 
 	// The data to be transformed.
