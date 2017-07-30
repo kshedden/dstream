@@ -11,11 +11,11 @@ type drop struct {
 
 func (d *drop) init() {
 
+	// Check that all variables to drop exist.
 	hna := make(map[string]bool)
 	for _, v := range d.source.Names() {
 		hna[v] = true
 	}
-
 	dmp := make(map[string]bool)
 	for _, na := range d.dropVars {
 		if !hna[na] {
@@ -31,6 +31,8 @@ func (d *drop) init() {
 			d.names = append(d.names, na)
 		}
 	}
+
+	d.bdata = make([]interface{}, len(d.keepPos))
 }
 
 // DropCols removes the given variables from a Dstream.
@@ -45,6 +47,15 @@ func DropCols(data Dstream, dropvars []string) Dstream {
 	return d
 }
 
-func (d *drop) GetPos(j int) interface{} {
-	return d.source.GetPos(d.keepPos[j])
+func (d *drop) Next() bool {
+
+	if !d.source.Next() {
+		return false
+	}
+
+	for j, k := range d.keepPos {
+		d.bdata[j] = d.source.GetPos(k)
+	}
+
+	return true
 }

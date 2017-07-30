@@ -1,6 +1,9 @@
 package dstream
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 func TestConvert(t *testing.T) {
 
@@ -46,5 +49,43 @@ func TestConvert(t *testing.T) {
 
 	if !EqualReport(dx, db, true) {
 		t.Fail()
+	}
+}
+
+func TestConvert2(t *testing.T) {
+
+	data1 := `id,v1,v2,v3
+1,2,3,4
+1,3,4,5
+2,4,5,6
+3,5,6,7
+3,99,99,99
+3,100,101,102
+4,200,201,202
+`
+	times100 := func(v map[string]interface{}, z interface{}) {
+		id := v["id"].([]float64)
+		y := z.([]float64)
+		for i := range id {
+			y[i] = id[i] * 100
+		}
+	}
+	_ = times100
+
+	b1 := bytes.NewReader([]byte(data1))
+	d1 := FromCSV(b1).SetFloatVars([]string{"id", "v1", "v2", "v3"}).HasHeader().Done()
+	d1 = Apply(d1, "id100", times100, "float64")
+	d1 = Convert(d1, "id100", "uint64")
+	d1 = DropCols(d1, []string{"id"})
+
+	if !d1.Next() {
+		t.Fail()
+	}
+	z := d1.Get("id100").([]uint64)
+	y := []uint64{100, 100, 200, 300, 300, 300, 400}
+	for i, u := range z {
+		if u != y[i] {
+			t.Fail()
+		}
 	}
 }
