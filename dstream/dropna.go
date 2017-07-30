@@ -2,6 +2,9 @@ package dstream
 
 import "math"
 
+// TODO: change this to DropNaN, then add a separate dropna that uses
+// a function to define what is missing.
+
 // DropDA returns a Dstream in which all rows containing any missing
 // values are dropped.
 func DropNA(data Dstream) Dstream {
@@ -21,18 +24,6 @@ type dropNA struct {
 	pos       []int
 	nobs      int
 	nobsKnown bool
-}
-
-func (dna *dropNA) GetPos(j int) interface{} {
-	return dna.bdata[j]
-}
-
-func (dna *dropNA) Names() []string {
-	return dna.source.Names()
-}
-
-func (dna *dropNA) NumVar() int {
-	return dna.source.NumVar()
 }
 
 func (dna *dropNA) NumObs() int {

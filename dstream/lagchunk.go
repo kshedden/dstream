@@ -1,23 +1,20 @@
 package dstream
 
+// TODO make type generic
+
 import (
 	"fmt"
 )
 
-// TODO lagChunk should use xform
 type lagChunk struct {
+	xform
+
 	SourceData Dstream
 
 	// Lags maps variable names to the number of lags to include
 	// for the variable.  Variables not included in the map are
 	// retained with no lags.
 	Lags map[string]int
-
-	// Backing data for slices returned by Get()
-	ldata []interface{}
-
-	// Names of the variables
-	names []string
 
 	namespos map[string]int
 
@@ -32,17 +29,12 @@ type lagChunk struct {
 // within a chunk, not across chunk boundaries, and the first m values
 // of each chunk are omitted, where m is the maximum lag value.
 func LagChunk(data Dstream, lags map[string]int) Dstream {
-	return &lagChunk{
+	lc := &lagChunk{
 		SourceData: data,
 		Lags:       lags,
 	}
-}
-
-func (lc *lagChunk) Names() []string {
-	if !lc.doneInit {
-		lc.init()
-	}
-	return lc.names
+	lc.init()
+	return lc
 }
 
 func (lc *lagChunk) init() {
@@ -77,34 +69,12 @@ func (lc *lagChunk) init() {
 	lc.doneInit = true
 }
 
-func (lc *lagChunk) GetPos(j int) interface{} {
-	return lc.ldata[j]
-}
-
-func (lc *lagChunk) Get(na string) interface{} {
-
-	pos, ok := lc.namespos[na]
-	if !ok {
-		msg := fmt.Sprintf("Variable '%s' not found", na)
-		panic(msg)
-	}
-
-	return lc.ldata[pos]
-}
-
 func (lc *lagChunk) NumObs() int {
 	if lc.nobsKnown {
 		return lc.nobs
 	} else {
 		return -1
 	}
-}
-
-func (lc *lagChunk) NumVar() int {
-	if !lc.doneInit {
-		lc.init()
-	}
-	return len(lc.names)
 }
 
 func (lc *lagChunk) Reset() {
@@ -123,8 +93,8 @@ func (lc *lagChunk) Next() bool {
 		return false
 	}
 
-	if lc.ldata == nil {
-		lc.ldata = make([]interface{}, len(lc.names))
+	if lc.bdata == nil {
+		lc.bdata = make([]interface{}, len(lc.names))
 	}
 
 	// Loop over the original data columns
@@ -144,14 +114,14 @@ func (lc *lagChunk) Next() bool {
 			n := len(v)
 			lc.nobs += n - maxlag
 			for k := 0; k <= q; k++ {
-				lc.ldata[jj] = v[(maxlag - k):(n - k)]
+				lc.bdata[jj] = v[(maxlag - k):(n - k)]
 				jj++
 			}
 		case []string:
 			n := len(v)
 			lc.nobs += n - maxlag
 			for k := 0; k <= q; k++ {
-				lc.ldata[jj] = v[(maxlag - k):(n - k)]
+				lc.bdata[jj] = v[(maxlag - k):(n - k)]
 				jj++
 			}
 		default:
@@ -161,8 +131,4 @@ func (lc *lagChunk) Next() bool {
 	}
 
 	return true
-}
-
-// TODO: remove when lagchunk uses xform
-func (lc *lagChunk) Close() {
 }
