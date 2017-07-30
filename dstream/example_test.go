@@ -5,6 +5,31 @@ import (
 	"fmt"
 )
 
+func ExampleToCSV() {
+
+	data := `Food,Type,Weight,Price
+Banana,Fruit,13,9
+Cucumber,Vegetable,15,5
+Cheese,Dairy,12,35
+Lamb,Meat,40,76
+`
+
+	b := bytes.NewBuffer([]byte(data))
+	da := FromCSV(b).SetStringVars([]string{"Food", "Type"}).SetFloatVars([]string{"Weight"}).HasHeader().Done()
+
+	var buf bytes.Buffer
+	ToCSV(da).SetWriter(&buf).FloatFmt("%.0f").Done()
+
+	fmt.Printf("%s\n", string(buf.Bytes()))
+
+	// Output:
+	//Weight,Food,Type
+	//13,Banana,Fruit
+	//15,Cucumber,Vegetable
+	//12,Cheese,Dairy
+	//40,Lamb,Meat
+}
+
 func ExampleFromCSV() {
 
 	data := `Food,Type,Weight,Price
