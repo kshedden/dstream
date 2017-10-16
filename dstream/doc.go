@@ -6,8 +6,8 @@
 // streaming manner, with a focus on feeding the data into statistical
 // modeling tools.
 //
-// The data held by a Dstream is stored as chunks of contiguous rows,
-// and within each chunk the data are stored column-wise.  A Dstream
+// The data held by a Dstream is stored as chunks of contiguous rows.
+// Within each chunk, the data are stored column-wise.  A Dstream
 // visits its chunks in order.  When processing a Dstream, call Next
 // to advance to the next chunk, then call Get to retrieve the data
 // for one column.

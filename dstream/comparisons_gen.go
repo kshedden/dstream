@@ -35,7 +35,7 @@ func EqualReport(x, y Dstream, report bool) bool {
 	for chunk := 0; x.Next(); chunk++ {
 		if !y.Next() {
 			if report {
-				msg := fmt.Sprintf("uneqal numbers of chunks\n")
+				msg := fmt.Sprintf("unequal numbers of chunks (y has fewer chunks than x)\n")
 				print(msg)
 			}
 			return false
@@ -170,6 +170,14 @@ func EqualReport(x, y Dstream, report bool) bool {
 				return false
 			}
 		}
+	}
+
+	if y.Next() {
+		if report {
+			msg := fmt.Sprintf("unequal numbers of chunks (x has fewer chunks than y)\n")
+			print(msg)
+		}
+		return false
 	}
 
 	return true

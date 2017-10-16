@@ -12,8 +12,8 @@ import (
 
 // csvReader supports reading a Dstream from an io.Reader.
 type csvReader struct {
-	rdr io.Reader
-	cvr *csv.Reader
+	rdr    io.Reader
+	csvrdr *csv.Reader
 
 	bdata []interface{}
 
@@ -30,6 +30,9 @@ type csvReader struct {
 
 	namepos map[string]int
 	names   []string
+
+	// If true, all variables are included and converted to float.
+	allFloat bool
 
 	// Names of variables to be converted to floats
 	floatVars []string
@@ -59,6 +62,7 @@ func FromCSV(r io.Reader) *csvReader {
 
 // Done is called when all configuration is complete to obtain a Dstream.
 func (cs *csvReader) Done() Dstream {
+	cs.init()
 	return cs
 }
 
@@ -84,27 +88,43 @@ func (cs *csvReader) init() {
 		cs.chunkSize = 10000
 	}
 
-	cs.cvr = csv.NewReader(cs.rdr)
+	cs.csvrdr = csv.NewReader(cs.rdr)
 
+	// Read the first row (may or may not be column header)
 	var row1 []string
 	var err error
-	row1, err = cs.cvr.Read()
+	row1, err = cs.csvrdr.Read()
 	if err != nil {
 		panic(err)
 	}
 
+	// Create a variable name to column index map
 	hdrmap := make(map[string]int)
+	var vlist []string
 	if cs.hasheader {
 		for k, v := range row1 {
 			hdrmap[v] = k
+			vlist = append(vlist, v)
 		}
 	} else {
 		cs.stashrec = row1
 		for k := range row1 {
-			hdrmap[fmt.Sprintf("V%d", k+1)] = k
+			v := fmt.Sprintf("V%d", k+1)
+			hdrmap[v] = k
+			vlist = append(vlist, v)
 		}
 	}
 
+	// All variables are selected and have float type
+	if cs.allFloat && len(cs.floatVars) > 0 {
+		fmt.Printf("%v\n", cs.floatVars)
+		msg := "Cannot specify AllFloat and FloatVars simultaneously"
+		panic(msg)
+	} else if cs.allFloat {
+		cs.floatVars = vlist
+	}
+
+	// Specify certain variables as having float type
 	cs.floatVarsPos = cs.floatVarsPos[0:0]
 	for _, v := range cs.floatVars {
 		pos, ok := hdrmap[v]
@@ -143,6 +163,13 @@ func (cs *csvReader) init() {
 	cs.doneinit = true
 }
 
+// AllFloat results in all variables being selected and converted to
+// float64 type.
+func (cs *csvReader) AllFloat() *csvReader {
+	cs.allFloat = true
+	return cs
+}
+
 // SetChunkSize sets the size of chunks for this Dstream, it can only
 // be called before reading begins.
 func (cs *csvReader) SetChunkSize(c int) *csvReader {
@@ -168,17 +195,11 @@ func (cs *csvReader) SetStringVars(x []string) *csvReader {
 
 // Names returns the names of the variables in the dstream.
 func (cs *csvReader) Names() []string {
-	if !cs.doneinit {
-		cs.init()
-	}
 	return cs.names
 }
 
 // NumVar returns the number of variables in the dstream.
 func (cs *csvReader) NumVar() int {
-	if !cs.doneinit {
-		cs.init()
-	}
 	return cs.nvar
 }
 
@@ -193,17 +214,11 @@ func (cs *csvReader) NumObs() int {
 
 // GetPos returns a chunk of a data column by column position.
 func (cs *csvReader) GetPos(j int) interface{} {
-	if !cs.doneinit {
-		cs.init()
-	}
 	return cs.bdata[j]
 }
 
 // Get returns a chunk of a data column by name.
 func (cs *csvReader) Get(na string) interface{} {
-	if !cs.doneinit {
-		cs.init()
-	}
 	pos, ok := cs.namepos[na]
 	if !ok {
 		msg := fmt.Sprintf("Variable '%s' not found", na)
@@ -216,6 +231,10 @@ func (cs *csvReader) Get(na string) interface{} {
 // io.Reader.  This is only possible if the underlying reader is
 // seekable, so reset panics if the seek cannot be performed.
 func (cs *csvReader) Reset() {
+	if !cs.doneinit {
+		panic("cannot reset, Dstream has not been fully constructed")
+	}
+
 	r, ok := cs.rdr.(io.ReadSeeker)
 	if !ok {
 		panic("cannot reset")
@@ -224,17 +243,23 @@ func (cs *csvReader) Reset() {
 	if err != nil {
 		panic(err)
 	}
-	cs.done = false
-	cs.doneinit = false
 	cs.nobs = 0
+	cs.done = false
+	cs.rdr = r                   // is this needed?
+	cs.csvrdr = csv.NewReader(r) // is this needed?
+
+	// Skip over the header if needed.
+	if cs.hasheader {
+		_, err := cs.csvrdr.Read()
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 // Next advances to the next chunk.
 func (cs *csvReader) Next() bool {
 
-	if !cs.doneinit {
-		cs.init()
-	}
 	if cs.done {
 		return false
 	}
@@ -249,7 +274,7 @@ func (cs *csvReader) Next() bool {
 			rec = cs.stashrec
 			cs.stashrec = nil
 		} else {
-			rec, err = cs.cvr.Read()
+			rec, err = cs.csvrdr.Read()
 			if err == io.EOF {
 				cs.done = true
 				return ilen(cs.bdata[0]) > 0

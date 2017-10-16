@@ -6,12 +6,15 @@ import (
 )
 
 // EqualReport compares two Dstream values.  If they are not equal,
-// further information is written to the standard error stream.
+// further information is written to the standard error stream.  Equality
+// here implies that the data values, types, order, and chunk
+// boundaries are all identical.
 func EqualReport(x, y Dstream, report bool) bool {
 
 	x.Reset()
 	y.Reset()
 
+        // Check variable names
 	if !aequalstring(x.Names(), y.Names()) {
 		if report {
 			msg := fmt.Sprintf("Names are not equal:\nx: %v\ny: %v\n",
@@ -33,7 +36,7 @@ func EqualReport(x, y Dstream, report bool) bool {
 	for chunk := 0; x.Next(); chunk++ {
 		if !y.Next() {
 			if report {
-				msg := fmt.Sprintf("uneqal numbers of chunks\n")
+				msg := fmt.Sprintf("unequal numbers of chunks (y has fewer chunks than x)\n")
 				print(msg)
 			}
 			return false
@@ -58,6 +61,14 @@ func EqualReport(x, y Dstream, report bool) bool {
 				return false
 			}
 		}
+	}
+
+	if y.Next() {
+		if report {
+			msg := fmt.Sprintf("unequal numbers of chunks (x has fewer chunks than y)\n")
+			print(msg)
+		}
+		return false
 	}
 
 	return true

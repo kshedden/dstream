@@ -2,6 +2,8 @@ package dstream
 
 import (
 	"bytes"
+	"fmt"
+	"os"
 	"strings"
 	"testing"
 )
@@ -34,7 +36,7 @@ func TestStreamCSV1(t *testing.T) {
 
 	rdr := bytes.NewReader(bbuf.Bytes())
 
-	da := FromCSV(rdr).SetStringVars([]string{"Country"}).SetFloatVars([]string{"Id", "Age"}).SetChunkSize(3).HasHeader()
+	da := FromCSV(rdr).SetStringVars([]string{"Country"}).SetFloatVars([]string{"Id", "Age"}).SetChunkSize(3).HasHeader().Done()
 
 	// Check first read
 	if !EqualReport(ex, da, true) {
@@ -51,6 +53,62 @@ func TestStreamCSV1(t *testing.T) {
 		t.Fail()
 	}
 	if da.NumVar() != 3 {
+		t.Fail()
+	}
+
+	// Make sure we can get variables by name and by position.
+	f, msg := checkPosName(da)
+	if !f {
+		print(msg)
+		t.Fail()
+	}
+}
+
+func TestStreamCSV2(t *testing.T) {
+
+	x1 := []interface{}{
+		[]float64{1, 2, 3},
+		[]float64{4, 5},
+	}
+	x2 := []interface{}{
+		[]float64{34, 19, 45},
+		[]float64{46, 44},
+	}
+	dat := [][]interface{}{x1, x2}
+	na := []string{"Id", "Age"}
+	ex := NewFromArrays(dat, na)
+
+	var bbuf bytes.Buffer
+	bbuf.Write([]byte("Id,Age\n"))
+	bbuf.Write([]byte("1,34\n"))
+	bbuf.Write([]byte("2,19\n"))
+	bbuf.Write([]byte("3,45\n"))
+	bbuf.Write([]byte("4,46\n"))
+	bbuf.Write([]byte("5,44\n"))
+
+	rdr := bytes.NewReader(bbuf.Bytes())
+
+	da := FromCSV(rdr).AllFloat().SetChunkSize(3).HasHeader().Done()
+
+	// Check first read
+	if !EqualReport(ex, da, true) {
+		t.Fail()
+	}
+
+	// Make sure reset/reread works
+	da.Reset()
+	if !EqualReport(ex, da, true) {
+		t.Fail()
+	}
+
+	if da.NumObs() != 5 {
+		msg := fmt.Sprintf("Incorrect number of observations (found %d, expected 3)\n", da.NumObs())
+		os.Stderr.WriteString(msg)
+		t.Fail()
+	}
+	if da.NumVar() != 2 {
+		msg := fmt.Sprintf("Incorrect number of variables (found %d, expected 3)\n", da.NumVar())
+		os.Stderr.WriteString(msg)
 		t.Fail()
 	}
 

@@ -1,89 +1,89 @@
 package dstream
 
-type sizechunk struct {
+type maxchunksize struct {
 	xform
 
+	// Maximum chunk size
 	size int
 
-	stash []interface{}
+	// Position in the current chunk
+	pos int
+
+	// If true, need to call source.Next before proceeding
+	first bool
 }
 
-func SizeChunk(data Dstream, size int) Dstream {
+// MaxChunkSize splits the chunks of the input Dstream so that no
+// chunk has more than size rows.
+func MaxChunkSize(data Dstream, size int) Dstream {
 
-	sc := &sizechunk{
+	sc := &maxchunksize{
 		xform: xform{
 			source: data,
 		},
-		size: size,
+		size:  size,
+		first: true,
 	}
 
-	nvar := data.NumVar()
+	// Read the first source chunk.
+	sc.source.Next()
+
+	nvar := sc.source.NumVar()
 	sc.names = sc.source.Names()
 	sc.bdata = make([]interface{}, nvar)
-	sc.stash = make([]interface{}, nvar)
 
 	return sc
 }
 
-// setFromStash sets bdata using the stash.  Only can be called if the
-// stash arrays are big enough to hold a chunk.
-func (sc *sizechunk) setFromStash() {
+func (sc *maxchunksize) Next() bool {
 
-	nvar := sc.NumVar()
-	n := sc.size
-	for j := 0; j < nvar; j++ {
+	if sc.first {
+		if !sc.source.Next() {
+			return false
+		}
+		sc.first = false
+	}
+
+	// Advance or return if there is no current data
+	x := sc.source.GetPos(0)
+	m := ilen(x) - sc.pos
+	if m <= 0 {
+		if !sc.source.Next() {
+			return false
+		}
+		sc.pos = 0
+		x = sc.source.GetPos(0)
+		m = ilen(x) - sc.pos
+		if m <= 0 {
+			return false
+		}
+	}
+	if m > sc.size {
+		m = sc.size
+	}
+
+	for j := 0; j < sc.NumVar(); j++ {
+
+		x := sc.source.GetPos(j)
+
 		// TODO generic types
-		switch x := sc.stash[j].(type) {
+		switch x := x.(type) {
 		case []float64:
-			sc.bdata[j] = x[0:n]
-			sc.stash[j] = x[n:len(x)]
+			sc.bdata[j] = x[sc.pos : sc.pos+m]
 		case []string:
-			sc.bdata[j] = x[0:n]
-			sc.stash[j] = x[n:len(x)]
+			sc.bdata[j] = x[sc.pos : sc.pos+m]
 		default:
 			panic("unkown type")
 		}
 	}
 
+	sc.pos += m
+
+	return true
 }
 
-func (sc *sizechunk) Next() bool {
-
-	for {
-		if ilen(sc.stash[0]) >= sc.size {
-			sc.setFromStash()
-			return true
-		}
-
-		f := sc.source.Next()
-		if !f {
-			// What remains is final chunk
-			copy(sc.bdata, sc.stash)
-			for j, _ := range sc.stash {
-				sc.stash[j] = nil
-			}
-			return false
-		}
-
-		for j := 0; j < sc.NumVar(); j++ {
-			x := sc.source.GetPos(j)
-			// TODO generic types
-			switch x := x.(type) {
-			case []float64:
-				var y []float64
-				if sc.stash[j] != nil {
-					y = sc.stash[j].([]float64)
-				}
-				sc.stash[j] = append(y, x...)
-			case []string:
-				var y []string
-				if sc.stash[j] != nil {
-					y = sc.stash[j].([]string)
-				}
-				sc.stash[j] = append(y, x...)
-			default:
-				panic("unkown type")
-			}
-		}
-	}
+func (sc *maxchunksize) Reset() {
+	sc.source.Reset()
+	sc.first = true
+	sc.pos = 0
 }

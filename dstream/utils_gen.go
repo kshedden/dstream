@@ -201,7 +201,7 @@ func truncate(z []interface{}) {
 // GetCol returns a copy of the data for one variable.  The data
 // are returned as a slice.  The column is returned starting with the
 // current chunk, call Reset to ensure that the column is extracted
-// form the first chunk.
+// from the first chunk.
 func GetCol(da Dstream, na string) interface{} {
 
 	vn := da.Names()
