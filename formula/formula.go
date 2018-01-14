@@ -391,8 +391,8 @@ func (fp *FormulaParser) setCodes() {
 	fp.codes = make(map[string]map[string]int)
 	fp.facNames = make(map[string][]string)
 
-	// Codes requires resettable data, since we pass through
-	// through the data to get the code information.
+	// Codes requires resettable data, since we must read through
+	// all the data to get the code information.
 	fp.RawData.Reset()
 	names := fp.RawData.Names()
 
