@@ -5,17 +5,19 @@ import (
 	"os"
 )
 
-// Join combines several Dstreams that have been segmented by id
-// variables.  Calls to Next always advance the first Dstream (Data[0]
-// )by one chunk.  The other elements of Data are advanced until their
-// id variable is equal to (if possible) or greater than the id
-// variable of Data[0].  If equality is achieved, the corresponding
-// element of Status is set to true.  Status[0] is always false and
-// has no meaning.
+// Join performs a streaming join on several Dstreams that have been
+// segmented by id variables.  Join.Data[i] is the current chunk of
+// the i^th stream.  All streams being joined must have been segmented
+// by an id variable.  A call to the Next method advances the first
+// stream (Data[0]) by one chunk.  The other elements of Data are
+// advanced until their id variable is equal to (if possible) or
+// greater than the id variable of Data[0].  If equality is achieved,
+// the corresponding element of Status is set to true.  Status[0] is
+// always false and has no meaning.
 //
-// The Data values are assumed to be segmented so that the id
-// variable is constant within chunks, and increases with subsequent
-// calls to Next.
+// The Data values are assumed to be segmented so that the id variable
+// is constant within chunks, and increases in numeric value with
+// subsequent calls to Next.
 type Join struct {
 
 	// A sequence of segmented Dstreams to advance in unison.

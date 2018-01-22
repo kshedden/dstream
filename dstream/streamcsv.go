@@ -318,10 +318,10 @@ type csvWriter struct {
 	wtr io.Writer
 }
 
-// ToCSV supports writing a DStream in CSV format.  Call SetWriter
-// or Filename on the returned value to configure the underlying
-// writer, then call additional methods for customization as desired,
-// and finally call Done to complete the writing.
+// ToCSV writes a Dstream in CSV format.  Call SetWriter or Filename
+// to configure the underlying writer, then call additional methods
+// for customization as desired, and finally call Done to complete the
+// writing.
 func ToCSV(d Dstream) *csvWriter {
 	c := &csvWriter{
 		stream: d,

@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// All segments are within the original chunks.
 func datas1() (Dstream, Dstream) {
 	x1 := []interface{}{
 		[]float64{0, 0, 0},
@@ -69,9 +70,76 @@ func datas1() (Dstream, Dstream) {
 	return da, dm
 }
 
+// Segments span the original chunks.
+func datas2() (Dstream, Dstream) {
+	x1 := []interface{}{
+		[]float64{0, 0, 1},
+		[]float64{1, 2, 2},
+		[]float64{2, 3, 3},
+	}
+	x2 := []interface{}{
+		[]float64{1, 1, 2},
+		[]float64{2, 3, 3},
+		[]float64{3, 4, 4},
+	}
+	x3 := []interface{}{
+		[]float64{1, 2, 3},
+		[]float64{4, 5, 6},
+		[]float64{7, 8, 9},
+	}
+	x4 := []interface{}{
+		[]string{"a", "b", "c"},
+		[]string{"d", "e", "f"},
+		[]string{"g", "h", "i"},
+	}
+	dat := [][]interface{}{x1, x2, x3, x4}
+	na := []string{"x1", "x2", "x3", "x4"}
+	da := NewFromArrays(dat, na)
+
+	x1 = []interface{}{
+		[]float64{0, 0},
+		[]float64{1, 1},
+		[]float64{2, 2, 2},
+		[]float64{3, 3},
+	}
+	x2 = []interface{}{
+		[]float64{1, 1},
+		[]float64{2, 2},
+		[]float64{3, 3, 3},
+		[]float64{4, 4},
+	}
+	x3 = []interface{}{
+		[]float64{1, 2},
+		[]float64{3, 4},
+		[]float64{5, 6, 7},
+		[]float64{8, 9},
+	}
+	x4 = []interface{}{
+		[]string{"a", "b"},
+		[]string{"c", "d"},
+		[]string{"e", "f", "g"},
+		[]string{"h", "i"},
+	}
+	dat = [][]interface{}{x1, x2, x3, x4}
+	na = []string{"x1", "x2", "x3", "x4"}
+	dm := NewFromArrays(dat, na)
+
+	return da, dm
+}
+
 func TestSegment1(t *testing.T) {
 
 	da, dm := datas1()
+	dx := Segment(da, []string{"x1", "x2"})
+
+	if !EqualReport(dm, dx, true) {
+		t.Fail()
+	}
+}
+
+func TestSegment2(t *testing.T) {
+
+	da, dm := datas2()
 	dx := Segment(da, []string{"x1", "x2"})
 
 	if !EqualReport(dm, dx, true) {
@@ -98,7 +166,7 @@ func gensegdat(a, b, n int) Dstream {
 	return NewFromArrays([][]interface{}{chunks}, na)
 }
 
-func TestSegment2(t *testing.T) {
+func TestSegment3(t *testing.T) {
 
 	for _, q := range []struct {
 		a int

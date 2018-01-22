@@ -8,12 +8,15 @@ import (
 )
 
 // EqualReport compares two Dstream values.  If they are not equal,
-// further information is written to the standard error stream.
+// further information is written to the standard error stream.  Equality
+// here implies that the data values, types, order, and chunk
+// boundaries are all identical.
 func EqualReport(x, y Dstream, report bool) bool {
 
 	x.Reset()
 	y.Reset()
 
+	// Check variable names
 	if !aequalstring(x.Names(), y.Names()) {
 		if report {
 			msg := fmt.Sprintf("Names are not equal:\nx: %v\ny: %v\n",

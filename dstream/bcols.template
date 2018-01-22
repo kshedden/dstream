@@ -59,6 +59,9 @@ func (b *bcols) init() {
 		        var x []{{ .Type }}
 			b.bdata = append(b.bdata, x)
                     {{- end }}
+		    case "string":
+		        var x []string
+			b.bdata = append(b.bdata, x)
 		    case "uvarint":
 		        var x []uint64
 			b.bdata = append(b.bdata, x)
@@ -107,9 +110,15 @@ func (b *bcols) init() {
 			panic("compression type not recognized")
 		}
 	}
+
+        b.doneInit = true
 }
 
 func (b *bcols) Next() bool {
+
+        if !b.doneInit {
+            panic("Call Done before using stream")
+        }
 
         if b.done {
                 return false
@@ -185,8 +194,85 @@ func (b *bcols) Next() bool {
                                 }
 				b.bdata[j] = v
                 {{- end }}
+		        case []string:
+                        for k := 0; k<b.chunksize; k++ {
+                            x, err := rdr.ReadString('\n')
+			    if err == io.EOF {
+                                    b.done = true
+				    break
+                            } else if err != nil {
+                                msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
+				print(msg)
+				panic(err)
+                            }
+                            x = strings.TrimRight(x, "\n")
+			    v = append(v, x)
+			    if j == 0 {
+                                b.nobs++
+                            }
+                        }
+			b.bdata[j] = v
                 }
         }
 
         return true
+}
+
+
+func (tb *toBCols) writeDtypes() {
+
+    dtypes := make(map[string]string)
+
+    tb.stream.Reset()
+    names := tb.stream.Names()
+    tb.stream.Next()
+    for j, na := range names {
+        u := tb.stream.GetPos(j)
+        switch u.(type) {
+            {{- range . }}
+	         case []{{ .Type }}:
+                     dtypes[na] = "{{ .Type }}"
+            {{ end }}
+	    case []string:
+	        dtypes[na] = "string"
+        }
+    }
+
+    f, err := os.Create(path.Join(tb.path, "dtypes.json"))
+    if err != nil {
+        panic(err)
+    }
+    defer f.Close()
+    enc := json.NewEncoder(f)
+    enc.Encode(dtypes)
+}
+
+func (tb *toBCols) write() {
+
+	tb.stream.Reset()
+	names := tb.stream.Names()
+
+	for tb.stream.Next() {
+	        for j := range names {
+	                u := tb.stream.GetPos(j)
+                        switch u.(type) {
+                                {{- range . }}
+		                    case []{{ .Type }}:
+			                v := u.([]{{ .Type }})
+                                        err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				        if err != nil {
+                                                panic(err)
+                                        }
+                                {{- end }}
+				case []string:
+				        v := u.([]string)
+				        for _, x := range v {
+                                                _, err := tb.wtrs[j].Write([]byte(x + "\n"))
+						if err != nil {
+                                                        panic(err)
+                                                }
+                                        }
+                        }
+	        }
+	}
 }
