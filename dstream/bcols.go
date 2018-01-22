@@ -73,7 +73,7 @@ func (bc *bcols) Exclude(vars []string) *bcols {
 	return bc
 }
 
-func (bc *bcols) Done() *bcols {
+func (bc *bcols) Done() Dstream {
 	bc.init()
 	return bc
 }
