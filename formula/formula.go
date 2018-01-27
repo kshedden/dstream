@@ -114,7 +114,7 @@ func lex(input string) ([]*token, error) {
 			}
 			tokens = append(tokens, &token{symbol: vname, name: string(name)})
 		default:
-			return nil, fmt.Errorf("invalid formula [1]")
+			return nil, fmt.Errorf("Invalid formula, symbol '%s' is not known.", string(r))
 		}
 	}
 
@@ -297,7 +297,10 @@ func (fp *FormulaParser) Keep(vars []string) *FormulaParser {
 }
 
 func (fp *FormulaParser) Done() dstream.Dstream {
-	fp.init()
+	err := fp.init()
+	if err != nil {
+		panic(err)
+	}
 	return fp
 }
 

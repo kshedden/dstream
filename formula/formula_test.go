@@ -483,26 +483,3 @@ func TestMulti(t *testing.T) {
 		}
 	}
 }
-
-func TestReg(t *testing.T) {
-
-	rawData := make([][]interface{}, 3)
-	rawNames := []string{"y", "x1", "x2"}
-
-	rawData[0] = []interface{}{
-		[]float64{1, 2, 3},
-		[]float64{4, 5},
-	}
-	rawData[1] = []interface{}{
-		[]float64{1, 1, 1},
-		[]float64{0, 0},
-	}
-	rawData[2] = []interface{}{
-		[]float64{0, 1, 0},
-		[]float64{1, 0},
-	}
-
-	dp := dstream.NewFromArrays(rawData, rawNames)
-	fdp := New("x1 + x2", dp).Done()
-	_ = dstream.NewReg(fdp, "y", []string{"x1", "x2", "", ""}, "", "")
-}

@@ -20,8 +20,8 @@ possible to load all data for all variables into memory at once.  To
 achieve this, Dstream utilizes a _chunked_, _columnar_ storage format.
 A chunk contains the data for all of the Dstream's variables for a
 consecutive subset of rows, stored by variable (column-wise) in typed
-arrays.  A single chunk is brought into memory at once.  The Dstream as
-a whole will generally not reside in memory.
+arrays.  Only one chunk of the Dstream must be held in memory at one
+time.
 
 During data processing, the chunks are visited in linear order.  When
 possible, the memory backing a chunk is re-used for the next chunk.
