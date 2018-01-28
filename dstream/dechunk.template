@@ -1,0 +1,45 @@
+package dstream
+
+import (
+    "fmt"
+)
+
+// Dechunk combines all chunks into a single chunk.
+func Dechunk(source Dstream) Dstream {
+
+	// Use the first chunk to get started
+	if !source.Next() {
+	        msg := "Can't read from stream"
+                panic(msg)
+        }
+
+	names := source.Names()
+	nvar := source.NumVar()
+	data := make([][]interface{}, nvar)
+	for j := 0; j<nvar; j++ {
+                data[j] = make([]interface{}, 1)
+        }
+
+        for {
+        	for j := 0; j < nvar; j++ {
+                        x := source.GetPos(j)
+                        switch x := x.(type) {
+		            {{- range . }}
+		            case []{{ .Type }}:
+			        var z []{{ .Type }}
+				if data[j][0] != nil {
+                                        z = data[j][0].([]{{ .Type }})
+                                }
+				data[j][0] = append(z, x...)
+                            {{- end }}
+		            default:
+		                panic(fmt.Sprintf("Type %T is not known\n", x))
+		        }
+		}
+		if !source.Next() {
+                        break
+                }
+	}
+
+	return NewFromArrays(data, names)
+}

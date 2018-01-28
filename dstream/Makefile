@@ -16,3 +16,5 @@ convert:
 	go generate convert.go
 regroup:
 	go generate regroup.go
+dechunk:
+	go generate dechunk.go

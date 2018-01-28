@@ -381,7 +381,7 @@ func (fp *FormulaParser) Get(na string) interface{} {
 		}
 	}
 
-	msg := fmt.Sprintf("Formla: variable '%s not found", na)
+	msg := fmt.Sprintf("Formula: variable '%s' not found", na)
 	panic(msg)
 	return nil
 }
@@ -611,7 +611,10 @@ func (fp *FormulaParser) init() error {
 	}
 
 	// Read one chunk to get the number of variables
-	fp.Next()
+	ok := fp.Next()
+	if !ok {
+		return fmt.Errorf("Unable to read data")
+	}
 	if fp.ErrorState != nil {
 		return fp.ErrorState
 	}
