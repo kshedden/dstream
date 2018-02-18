@@ -144,4 +144,20 @@ func NewFromArrays(data [][]interface{}, names []string) Dstream {
 	return da
 }
 
+// Shallow attempts to make a shallow copy of the data stream.
+// Currently, only memory-backed data streams can be shallow copied,
+// otherwise a deep copy is returned.  Shallow copies of the same data
+// can be read in parallel.
+func Shallow(data Dstream) Dstream {
+
+	data.Reset()
+	switch data := data.(type) {
+	case *dataArrays:
+		var dy dataArrays = *data
+		return &dy
+	default:
+		return MemCopy(data)
+	}
+}
+
 //go:generate go run gen.go -template=memcopy.template
