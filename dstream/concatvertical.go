@@ -1,6 +1,6 @@
 package dstream
 
-type concat struct {
+type concatVertical struct {
 
 	// The streams to be concatenated
 	streams []Dstream
@@ -19,12 +19,12 @@ type concat struct {
 	namepos map[string]int
 }
 
-// Concat concatenates a collection of Dstreams observation-wise.  The
-// column names and data types of all the Dstreams being combined must
-// be identical.
-func Concat(streams []Dstream) Dstream {
+// ConcatVertical concatenates a collection of Dstreams vertically
+// (appending additional observations).  The column names and data
+// types of all the Dstreams being combined must be identical.
+func ConcatVertical(streams ...Dstream) Dstream {
 
-	c := &concat{
+	c := &concatVertical{
 		streams: streams,
 	}
 
@@ -37,37 +37,37 @@ func Concat(streams []Dstream) Dstream {
 	return c
 }
 
-func (c *concat) Close() {
+func (c *concatVertical) Close() {
 
 	for _, s := range c.streams {
 		s.Close()
 	}
 }
 
-func (c *concat) GetPos(pos int) interface{} {
+func (c *concatVertical) GetPos(pos int) interface{} {
 	return c.streams[c.pos].GetPos(pos)
 }
 
-func (c *concat) NumObs() int {
+func (c *concatVertical) NumObs() int {
 	if c.nobsKnown {
 		return c.nobs
 	}
 	return -1
 }
 
-func (c *concat) NumVar() int {
+func (c *concatVertical) NumVar() int {
 	return len(c.Names())
 }
 
-func (c *concat) Names() []string {
+func (c *concatVertical) Names() []string {
 	return c.streams[0].Names()
 }
 
-func (c *concat) Get(name string) interface{} {
+func (c *concatVertical) Get(name string) interface{} {
 	return c.GetPos(c.namepos[name])
 }
 
-func (c *concat) Next() bool {
+func (c *concatVertical) Next() bool {
 
 	// Advance within current stream
 	if c.streams[c.pos].Next() {
@@ -102,7 +102,7 @@ func (c *concat) Next() bool {
 	return true
 }
 
-func (c *concat) Reset() {
+func (c *concatVertical) Reset() {
 
 	c.pos = 0
 	c.nobs = 0

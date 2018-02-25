@@ -2,7 +2,7 @@ package dstream
 
 import "testing"
 
-func TestConcat1(t *testing.T) {
+func TestConcatVertical1(t *testing.T) {
 
 	x1 := []interface{}{
 		[]float64{0, 1, 1},
@@ -12,9 +12,7 @@ func TestConcat1(t *testing.T) {
 		[]float64{1, 1, 1},
 		[]float64{1, 1, 1, 1},
 	}
-	dat := [][]interface{}{x1, x2}
-	na := []string{"x1", "x2"}
-	da := NewFromArrays(dat, na)
+	da := NewFromArrays([][]interface{}{x1, x2}, []string{"x1", "x2"})
 
 	x1 = []interface{}{
 		[]float64{0, 1, 1},
@@ -28,13 +26,12 @@ func TestConcat1(t *testing.T) {
 		[]float64{1, 1, 1},
 		[]float64{1, 1, 1, 1},
 	}
-	dat = [][]interface{}{x1, x2}
-	de := NewFromArrays(dat, na)
+	de := NewFromArrays([][]interface{}{x1, x2}, []string{"x1", "x2"})
 
 	db := MemCopy(da)
 	da.Reset()
 
-	dq := Concat([]Dstream{da, db})
+	dq := ConcatVertical(da, db)
 
 	if !EqualReport(dq, de, true) {
 		t.Fail()
