@@ -426,15 +426,15 @@ func (b *bcols) Next() bool {
 	return true
 }
 
-func (tb *toBCols) writeDtypes() {
+func (bw *BColsWriter) writeDtypes() {
 
 	dtypes := make(map[string]string)
 
-	tb.stream.Reset()
-	names := tb.stream.Names()
-	tb.stream.Next()
+	bw.stream.Reset()
+	names := bw.stream.Names()
+	bw.stream.Next()
 	for j, na := range names {
-		u := tb.stream.GetPos(j)
+		u := bw.stream.GetPos(j)
 		switch u.(type) {
 		case []float64:
 			dtypes[na] = "float64"
@@ -474,7 +474,7 @@ func (tb *toBCols) writeDtypes() {
 		}
 	}
 
-	f, err := os.Create(path.Join(tb.path, "dtypes.json"))
+	f, err := os.Create(path.Join(bw.path, "dtypes.json"))
 	if err != nil {
 		panic(err)
 	}
@@ -483,85 +483,85 @@ func (tb *toBCols) writeDtypes() {
 	enc.Encode(dtypes)
 }
 
-func (tb *toBCols) write() {
+func (bw *BColsWriter) write() {
 
-	tb.stream.Reset()
-	names := tb.stream.Names()
+	bw.stream.Reset()
+	names := bw.stream.Names()
 
-	for tb.stream.Next() {
+	for bw.stream.Next() {
 		for j := range names {
-			u := tb.stream.GetPos(j)
+			u := bw.stream.GetPos(j)
 			switch u.(type) {
 			case []float64:
 				v := u.([]float64)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []float32:
 				v := u.([]float32)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []uint64:
 				v := u.([]uint64)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []uint32:
 				v := u.([]uint32)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []uint16:
 				v := u.([]uint16)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []uint8:
 				v := u.([]uint8)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []int64:
 				v := u.([]int64)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []int32:
 				v := u.([]int32)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []int16:
 				v := u.([]int16)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []int8:
 				v := u.([]int8)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []int:
 				v := u.([]int)
-				err := binary.Write(tb.wtrs[j], binary.LittleEndian, &v)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
 			case []string:
 				v := u.([]string)
 				for _, x := range v {
-					_, err := tb.wtrs[j].Write([]byte(x + "\n"))
+					_, err := bw.wtrs[j].Write([]byte(x + "\n"))
 					if err != nil {
 						panic(err)
 					}

@@ -67,7 +67,7 @@ func TestBcols1(t *testing.T) {
 	da.Close()
 }
 
-func TestToBCols(t *testing.T) {
+func TestBColsWriter(t *testing.T) {
 
 	x1 := []interface{}{
 		[]float64{0, 1, 2, 3},
@@ -85,21 +85,21 @@ func TestToBCols(t *testing.T) {
 	na := []string{"x1", "x2", "x3"}
 	da := NewFromArrays(dat, na)
 
-	ToBCols(da).Path("testdata/tobcols").Done()
+	NewBColsWriter(da).Path("testdata/tobcols").Done()
 	db := NewBCols("testdata/tobcols", 4).Done()
 	if !EqualReport(da, db, true) {
 		t.Fail()
 	}
 
 	dax := DropCols(da, []string{"x2"})
-	ToBCols(dax).Path("testdata/tobcols").Done()
+	NewBColsWriter(dax).Path("testdata/tobcols").Done()
 	db = NewBCols("testdata/tobcols", 4).Done()
 	if !EqualReport(dax, db, true) {
 		t.Fail()
 	}
 
 	dax = DropCols(da, []string{"x2"})
-	ToBCols(dax).Path("testdata/tobcols").Done()
+	NewBColsWriter(dax).Path("testdata/tobcols").Done()
 	db = NewBCols("testdata/tobcols", 4).Include([]string{"x1", "x3"}).Done()
 	if !EqualReport(dax, db, true) {
 		t.Fail()

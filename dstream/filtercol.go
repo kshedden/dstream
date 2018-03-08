@@ -82,7 +82,7 @@ func (fc *filterCol) Next() bool {
 	for na, fu := range fc.filters {
 		j, ok := fc.namepos[na]
 		if !ok {
-			msg := fmt.Sprintf("cannot filter on %s, not found", na)
+			msg := fmt.Sprintf("Variable '%s' not found.", na)
 			panic(msg)
 		}
 		x := fc.source.GetPos(j)

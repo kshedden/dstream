@@ -63,11 +63,15 @@ func NewBCols(path string, chunksize int) *bcols {
 	return b
 }
 
+// Include specifies variables that are included when writing the data
+// to disk (if Include is called, all other variables are excluded).
 func (bc *bcols) Include(vars []string) *bcols {
 	bc.include = vars
 	return bc
 }
 
+// Exclude specifies variables that are excluded when writing the data
+// to disk.
 func (bc *bcols) Exclude(vars []string) *bcols {
 	bc.exclude = vars
 	return bc
@@ -161,7 +165,8 @@ func (b *bcols) Get(na string) interface{} {
 	return b.bdata[pos]
 }
 
-type toBCols struct {
+// BColsWriter writes a dstream to disk in bcols format.
+type BColsWriter struct {
 
 	// The source data to be written
 	stream Dstream
@@ -179,86 +184,91 @@ type toBCols struct {
 	needsClosing []io.Closer
 }
 
-func ToBCols(d Dstream) *toBCols {
+// NewBColsWriter creates a new BColsWriter that writes the given
+// dstream.
+func NewBColsWriter(d Dstream) *BColsWriter {
 
-	return &toBCols{
+	return &BColsWriter{
 		stream: d,
 	}
 }
 
-func (tb *toBCols) Path(p string) *toBCols {
+// Path sets the location (a directory path) to which the data are
+// written.
+func (bw *BColsWriter) Path(p string) *BColsWriter {
 
-	tb.path = p
+	bw.path = p
 
 	err := os.MkdirAll(p, 0770)
 	if err != nil {
 		panic(err)
 	}
 
-	return tb
+	return bw
 }
 
-func (tb *toBCols) init() {
+func (bw *BColsWriter) init() {
 
-	if tb.path == "" {
+	if bw.path == "" {
 		msg := "Path value not set"
 		panic(msg)
 	}
 
 	// Default compression type
-	if tb.cmpr == "" {
-		tb.cmpr = "gz"
+	if bw.cmpr == "" {
+		bw.cmpr = "gz"
 	}
 
-	names := tb.stream.Names()
+	names := bw.stream.Names()
 
-	tb.writeDtypes()
+	bw.writeDtypes()
 
 	for _, na := range names {
 
 		na += ".bin"
-		if tb.cmpr == "gz" {
+		if bw.cmpr == "gz" {
 			na += ".gz"
-		} else if tb.cmpr == "sz" {
+		} else if bw.cmpr == "sz" {
 			na += ".sz"
 		} else {
-			msg := fmt.Sprintf("Compression type %s not recognized", tb.cmpr)
+			msg := fmt.Sprintf("Compression type %s not recognized", bw.cmpr)
 			panic(msg)
 		}
 
 		// Create the file
-		fn := path.Join(tb.path, na)
+		fn := path.Join(bw.path, na)
 		f, err := os.Create(fn)
 		if err != nil {
 			panic(err)
 		}
-		tb.needsClosing = append(tb.needsClosing, f)
+		bw.needsClosing = append(bw.needsClosing, f)
 
 		// Wrap it in a compressor if needed
-		switch tb.cmpr {
+		switch bw.cmpr {
 		case "gz":
 			g := gzip.NewWriter(f)
-			tb.needsClosing = append(tb.needsClosing, g)
-			tb.wtrs = append(tb.wtrs, g)
+			bw.needsClosing = append(bw.needsClosing, g)
+			bw.wtrs = append(bw.wtrs, g)
 		case "sz":
 			g := snappy.NewWriter(f)
-			tb.needsClosing = append(tb.needsClosing, g)
-			tb.wtrs = append(tb.wtrs, g)
+			bw.needsClosing = append(bw.needsClosing, g)
+			bw.wtrs = append(bw.wtrs, g)
 		default:
-			tb.wtrs = append(tb.wtrs, f)
+			bw.wtrs = append(bw.wtrs, f)
 		}
 	}
 }
 
-func (tb *toBCols) Done() {
+// Done flushes the data to disk.
+func (bw *BColsWriter) Done() {
 
-	tb.init()
-	tb.write()
+	bw.init()
+	bw.write()
 
 	// Need to process in reverse order so that nested writers are
 	// closed inside-out.
-	for j := len(tb.needsClosing) - 1; j >= 0; j-- {
-		f := tb.needsClosing[j]
+	for j := len(bw.needsClosing) - 1; j >= 0; j-- {
+		f := bw.needsClosing[j]
 		f.Close()
 	}
 }

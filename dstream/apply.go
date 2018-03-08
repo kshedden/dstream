@@ -1,11 +1,14 @@
 package dstream
 
+import "fmt"
+
 // ApplyFunc is a function that can be used to generate a new variable
 // from existing variables.  The first argument, say m, is a map from
 // variable names to data (whose concrete types are slices held as
-// empty interfaces).  The second argument is a pre-allocated array
-// (also a slice held as an empty interface) into which the new
-// variable's values are to be written.
+// empty interfaces).  The second argument is a pre-allocated array (a
+// slice provided as an interface{}) into which the new variable's
+// values are to be written.  The destination array is not set to
+// zeros before passing to the function.
 type ApplyFunc func(map[string]interface{}, interface{})
 
 type apply struct {
@@ -17,6 +20,13 @@ type apply struct {
 }
 
 func (a *apply) init() {
+
+	for _, na := range a.source.Names() {
+		if a.newvarname == na {
+			msg := fmt.Sprintf("Apply: variable '%s' already exists.\n", a.newvarname)
+			panic(msg)
+		}
+	}
 
 	a.names = append(a.source.Names(), a.newvarname)
 	a.bdata = make([]interface{}, len(a.names))
@@ -36,6 +46,7 @@ func (a *apply) init() {
 
 // Apply appends a new variable to a Dstream, obtaining its values by
 // applying the given function to the other variables in the Dstream.
+// The new variable must not already exist in the Dstream.
 func Apply(data Dstream, name string, fnc ApplyFunc, dtype string) Dstream {
 
 	a := &apply{

@@ -215,11 +215,17 @@ func GetCol(da Dstream, na string) interface{} {
 }
 
 // GetColPos returns a copy of the data for one variable.
-// The data are returned as a slice, starting from the current
-// position.  Call Reset to get the entire column.
+// The data are returned as a slice, which is a coy of the
+// underlying data.
 func GetColPos(da Dstream, j int) interface{} {
 
-	da.Next()
+	da.Reset()
+
+	if !da.Next() {
+		return false
+	}
+
+	// Get the first chunk so that we have the data type.
 	v := da.GetPos(j)
 
 	switch v := v.(type) {
@@ -319,9 +325,10 @@ func GetColPos(da Dstream, j int) interface{} {
 			x = append(x, y...)
 		}
 		return x
+	case nil:
+		return nil
+	default:
+		msg := fmt.Sprintf("GetCol: unknown data type %T.\n", v)
+		panic(msg)
 	}
-
-	msg := fmt.Sprintf("GetColPos: unkown type %T.\n", v)
-	panic(msg)
-	return nil
 }
