@@ -3,13 +3,13 @@
 package dstream
 
 // MemCopy returns a Dstream that copies the provided Dstream into
-// in-memory storage.  The Dstream is copied from its current position.
-// To copy a Dstream the beginning, call Reset before calling MemCopy.
+// in-memory storage.
 func MemCopy(data Dstream) Dstream {
 
 	nvar := data.NumVar()
 	bdata := make([][]interface{}, nvar)
 
+	data.Reset()
 	for data.Next() {
 		for j := 0; j < nvar; j++ {
 			var y interface{}

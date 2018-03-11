@@ -10,8 +10,8 @@ import (
 	"strconv"
 )
 
-// csvReader supports reading a Dstream from an io.Reader.
-type csvReader struct {
+// CSVReader supports reading a Dstream from an io.Reader.
+type CSVReader struct {
 	rdr    io.Reader
 	csvrdr *csv.Reader
 
@@ -51,9 +51,9 @@ type csvReader struct {
 // least one SetXX method to define variables to be retrieved.  For
 // further configuration, chain calls to other SetXXX methods, and
 // finally call Done to produce the Dstream.
-func FromCSV(r io.Reader) *csvReader {
+func FromCSV(r io.Reader) *CSVReader {
 
-	dr := &csvReader{
+	dr := &CSVReader{
 		rdr: r,
 	}
 
@@ -61,19 +61,19 @@ func FromCSV(r io.Reader) *csvReader {
 }
 
 // Done is called when all configuration is complete to obtain a Dstream.
-func (cs *csvReader) Done() Dstream {
+func (cs *CSVReader) Done() Dstream {
 	cs.init()
 	return cs
 }
 
 // Close does nothing, the caller should explicitly close the
 // io.Reader passed to FromCSV if needed.
-func (cs *csvReader) Close() {
+func (cs *CSVReader) Close() {
 }
 
 // HasHeader indicates that the first row of the data file contains
 // column names.  The default behavior is that there is no header.
-func (cs *csvReader) HasHeader() *csvReader {
+func (cs *CSVReader) HasHeader() *CSVReader {
 	if cs.doneinit {
 		msg := "FromCSV: can't call HasHeader after beginning data read"
 		panic(msg)
@@ -82,7 +82,7 @@ func (cs *csvReader) HasHeader() *csvReader {
 	return cs
 }
 
-func (cs *csvReader) init() {
+func (cs *CSVReader) init() {
 
 	if cs.chunkSize == 0 {
 		cs.chunkSize = 10000
@@ -165,14 +165,14 @@ func (cs *csvReader) init() {
 
 // AllFloat results in all variables being selected and converted to
 // float64 type.
-func (cs *csvReader) AllFloat() *csvReader {
+func (cs *CSVReader) AllFloat() *CSVReader {
 	cs.allFloat = true
 	return cs
 }
 
 // SetChunkSize sets the size of chunks for this Dstream, it can only
 // be called before reading begins.
-func (cs *csvReader) SetChunkSize(c int) *csvReader {
+func (cs *CSVReader) SetChunkSize(c int) *CSVReader {
 	cs.chunkSize = c
 	return cs
 }
@@ -180,7 +180,7 @@ func (cs *csvReader) SetChunkSize(c int) *csvReader {
 // SetFloatVars sets the names of the variables to be converted to
 // float64 type.  Refer to the columns by V1, V2, etc. if there is no
 // header row.
-func (cs *csvReader) SetFloatVars(x []string) *csvReader {
+func (cs *CSVReader) SetFloatVars(x []string) *CSVReader {
 	cs.floatVars = x
 	return cs
 }
@@ -188,24 +188,24 @@ func (cs *csvReader) SetFloatVars(x []string) *csvReader {
 // SetStringVars sets the names of the variables to be stored as
 // string type values.  Refer to the columns by V1, V2, etc. if there
 // is no header row.
-func (cs *csvReader) SetStringVars(x []string) *csvReader {
+func (cs *CSVReader) SetStringVars(x []string) *CSVReader {
 	cs.stringVars = x
 	return cs
 }
 
 // Names returns the names of the variables in the dstream.
-func (cs *csvReader) Names() []string {
+func (cs *CSVReader) Names() []string {
 	return cs.names
 }
 
 // NumVar returns the number of variables in the dstream.
-func (cs *csvReader) NumVar() int {
+func (cs *CSVReader) NumVar() int {
 	return cs.nvar
 }
 
 // NumObs returns the number of observations in the dstream.  If the
 // dstream has not been fully read, returns -1.
-func (cs *csvReader) NumObs() int {
+func (cs *CSVReader) NumObs() int {
 	if cs.done {
 		return cs.nobs
 	}
@@ -213,12 +213,12 @@ func (cs *csvReader) NumObs() int {
 }
 
 // GetPos returns a chunk of a data column by column position.
-func (cs *csvReader) GetPos(j int) interface{} {
+func (cs *CSVReader) GetPos(j int) interface{} {
 	return cs.bdata[j]
 }
 
 // Get returns a chunk of a data column by name.
-func (cs *csvReader) Get(na string) interface{} {
+func (cs *CSVReader) Get(na string) interface{} {
 	pos, ok := cs.namepos[na]
 	if !ok {
 		msg := fmt.Sprintf("Variable '%s' not found", na)
@@ -230,9 +230,13 @@ func (cs *csvReader) Get(na string) interface{} {
 // Reset attempts to reset the Dstream that is reading from an
 // io.Reader.  This is only possible if the underlying reader is
 // seekable, so reset panics if the seek cannot be performed.
-func (cs *csvReader) Reset() {
+func (cs *CSVReader) Reset() {
 	if !cs.doneinit {
 		panic("cannot reset, Dstream has not been fully constructed")
+	}
+
+	if cs.nobs == 0 {
+		return
 	}
 
 	r, ok := cs.rdr.(io.ReadSeeker)
@@ -258,7 +262,7 @@ func (cs *csvReader) Reset() {
 }
 
 // Next advances to the next chunk.
-func (cs *csvReader) Next() bool {
+func (cs *CSVReader) Next() bool {
 
 	if cs.done {
 		return false

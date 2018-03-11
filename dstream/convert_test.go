@@ -76,7 +76,7 @@ func TestConvert2(t *testing.T) {
 	d1 := FromCSV(b1).SetFloatVars([]string{"id", "v1", "v2", "v3"}).HasHeader().Done()
 	d1 = Apply(d1, "id100", times100, "float64")
 	d1 = Convert(d1, "id100", "uint64")
-	d1 = DropCols(d1, []string{"id"})
+	d1 = DropCols(d1, "id")
 
 	if !d1.Next() {
 		t.Fail()

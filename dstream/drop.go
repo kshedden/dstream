@@ -36,7 +36,7 @@ func (d *drop) init() {
 }
 
 // DropCols removes the given variables from a Dstream.
-func DropCols(data Dstream, dropvars []string) Dstream {
+func DropCols(data Dstream, dropvars ...string) Dstream {
 	d := &drop{
 		xform: xform{
 			source: data,

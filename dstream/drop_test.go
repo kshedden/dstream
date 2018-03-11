@@ -32,7 +32,7 @@ func TestDrop1(t *testing.T) {
 	na = []string{"x1", "x3", "x5"}
 	de := NewFromArrays(dat, na)
 
-	db := DropCols(da, []string{"x2", "x4"})
+	db := DropCols(da, "x2", "x4")
 
 	if !Equal(db, de) {
 		t.Fail()

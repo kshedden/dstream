@@ -210,7 +210,7 @@ func GetCol(da Dstream, na string) interface{} {
 			return GetColPos(da, j)
 		}
 	}
-	panic(fmt.Sprintf("Variable '%s' not found", na))
+	panic(fmt.Sprintf("GetCol: variable '%s' not found", na))
 	return nil
 }
 
@@ -222,7 +222,7 @@ func GetColPos(da Dstream, j int) interface{} {
 	da.Reset()
 
 	if !da.Next() {
-		return false
+		return nil
 	}
 
 	// Get the first chunk so that we have the data type.

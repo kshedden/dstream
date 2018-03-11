@@ -91,14 +91,14 @@ func TestBColsWriter(t *testing.T) {
 		t.Fail()
 	}
 
-	dax := DropCols(da, []string{"x2"})
+	dax := DropCols(da, "x2")
 	NewBColsWriter(dax).Path("testdata/tobcols").Done()
 	db = NewBCols("testdata/tobcols", 4).Done()
 	if !EqualReport(dax, db, true) {
 		t.Fail()
 	}
 
-	dax = DropCols(da, []string{"x2"})
+	dax = DropCols(da, "x2")
 	NewBColsWriter(dax).Path("testdata/tobcols").Done()
 	db = NewBCols("testdata/tobcols", 4).Include([]string{"x1", "x3"}).Done()
 	if !EqualReport(dax, db, true) {
