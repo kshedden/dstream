@@ -217,4 +217,5 @@ functionality, and many corner-cases are not well covered by tests.
 
 Dstreams can be fed into statistical modeling tools, including
 [goglm](https://github.com/kshedden/goglm),
-[dimred](https://github.com/kshedden/dimred) and duration.
+[dimred](https://github.com/kshedden/dimred) and
+[duration](https://github.com/kshedden/duration).
