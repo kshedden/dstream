@@ -21,6 +21,11 @@ type CSVReader struct {
 	// to get the number of columns.
 	stashrec []string
 
+	// If true, skip records with unparseable CSV data, otherwise
+	// panic on them.
+	skipErrors bool
+
+	comma     rune
 	chunkSize int
 	nvar      int
 	nobs      int
@@ -33,6 +38,9 @@ type CSVReader struct {
 
 	// If true, all variables are included and converted to float.
 	allFloat bool
+
+	// If true, all variables are included and converted to string.
+	allString bool
 
 	// Names of variables to be converted to floats
 	floatVars []string
@@ -66,6 +74,13 @@ func (cs *CSVReader) Done() Dstream {
 	return cs
 }
 
+// SkipErrors results in lines with unpareable CSV content being
+// skipped (the csv.ParseError is printed to stdio).
+func (cs *CSVReader) SkipErrors() *CSVReader {
+	cs.skipErrors = true
+	return cs
+}
+
 // Close does nothing, the caller should explicitly close the
 // io.Reader passed to FromCSV if needed.
 func (cs *CSVReader) Close() {
@@ -82,13 +97,43 @@ func (cs *CSVReader) HasHeader() *CSVReader {
 	return cs
 }
 
+// Comma sets the delimiter (comma rune) for the CSVReader.
+func (cs *CSVReader) Comma(c rune) *CSVReader {
+	cs.comma = c
+	return cs
+}
+
+// Consistency checks for arguments.
+func (cs *CSVReader) checkArgs() {
+
+	if cs.allFloat && cs.allString {
+		msg := "Cannot select AllFloat and AllString.\n"
+		panic(msg)
+	}
+
+	if cs.allFloat && (len(cs.floatVars) > 0 || len(cs.stringVars) > 0) {
+		msg := "Cannot specify AllFloat and FloatVars or StringVars simultaneously"
+		panic(msg)
+	}
+
+	if cs.allString && (len(cs.floatVars) > 0 || len(cs.stringVars) > 0) {
+		msg := "Cannot specify AllString and FloatVars or StringVars simultaneously"
+		panic(msg)
+	}
+}
+
 func (cs *CSVReader) init() {
+
+	cs.checkArgs()
 
 	if cs.chunkSize == 0 {
 		cs.chunkSize = 10000
 	}
 
 	cs.csvrdr = csv.NewReader(cs.rdr)
+	if cs.comma != 0 {
+		cs.csvrdr.Comma = cs.comma
+	}
 
 	// Read the first row (may or may not be column header)
 	var row1 []string
@@ -115,13 +160,18 @@ func (cs *CSVReader) init() {
 		}
 	}
 
-	// All variables are selected and have float type
-	if cs.allFloat && len(cs.floatVars) > 0 {
-		fmt.Printf("%v\n", cs.floatVars)
-		msg := "Cannot specify AllFloat and FloatVars simultaneously"
-		panic(msg)
-	} else if cs.allFloat {
+	if cs.allFloat {
+		// All variables are selected and have float type
 		cs.floatVars = vlist
+	} else if cs.allString {
+		// All variables are selected and have float type
+		cs.stringVars = vlist
+	}
+
+	// Variables to extract must be explicitly selected.
+	if len(cs.floatVars)+len(cs.stringVars) == 0 {
+		msg := "No variables specified for reading from CSV file.\n"
+		panic(msg)
 	}
 
 	// Specify certain variables as having float type
@@ -167,6 +217,13 @@ func (cs *CSVReader) init() {
 // float64 type.
 func (cs *CSVReader) AllFloat() *CSVReader {
 	cs.allFloat = true
+	return cs
+}
+
+// AllString results in all variables being selected and treated as
+// string type.
+func (cs *CSVReader) AllString() *CSVReader {
+	cs.allString = true
 	return cs
 }
 
@@ -283,6 +340,10 @@ func (cs *CSVReader) Next() bool {
 				cs.done = true
 				return ilen(cs.bdata[0]) > 0
 			} else if err != nil {
+				if cs.skipErrors {
+					os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
+					continue
+				}
 				panic(err)
 			}
 		}
