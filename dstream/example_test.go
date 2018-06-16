@@ -161,7 +161,7 @@ func ExampleApply() {
 
 	b := bytes.NewBuffer([]byte(data))
 	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader().Done()
-	da = Apply(da, "V1p2", f, "float64")
+	da = Generate(da, "V1p2", f, "float64")
 
 	for da.Next() {
 		y := da.Get("V1p2")

@@ -87,15 +87,18 @@ func (w *Join) clearstatus() {
 
 func (w *Join) Next() bool {
 
+	// Advance the index stream
 	f := w.Data[0].Next()
 	if !f {
 		return false
 	}
 	w.id[0] = w.Data[0].GetPos(w.ipos[0]).([]uint64)
 
+	// Advance the other streams
 	w.clearstatus()
 	for j := 1; j < len(w.Data); j++ {
 
+		// Keep advancing as long as the stream is behind the index stream.
 		for w.needsadvance(j) {
 			f := w.Data[j].Next()
 			if !f {
