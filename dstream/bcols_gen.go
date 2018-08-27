@@ -18,6 +18,7 @@ import (
 
 func (b *bcols) init() {
 
+	// Prepare to read the dtypes structure
 	fname := path.Join(b.bpath, "dtypes.json")
 	fid, err := os.Open(fname)
 	if err != nil {
@@ -25,10 +26,22 @@ func (b *bcols) init() {
 	}
 	defer fid.Close()
 	dec := json.NewDecoder(fid)
-	dtypes := make(map[string]string)
-	err = dec.Decode(&dtypes)
+
+	// Dtypes for all variables
+	b.dtypesAll = make(map[string]string)
+	err = dec.Decode(&b.dtypesAll)
 	if err != nil {
 		panic(err)
+	}
+
+	// Names of variables to be used
+	usenames := b.usenames()
+	b.names = usenames
+
+	// Dtypes for variables to be used
+	dtypes := make(map[string]string)
+	for _, na := range usenames {
+		dtypes[na] = b.dtypesAll[na]
 	}
 	b.dtypes = dtypes
 
@@ -43,8 +56,6 @@ func (b *bcols) init() {
 		vf[na] = v.Name()
 	}
 
-	b.names = b.usenames()
-
 	b.namepos = make(map[string]int)
 	for k, na := range b.names {
 		b.namepos[na] = k
@@ -56,6 +67,8 @@ func (b *bcols) init() {
 
 		// Create concrete types to hold the data
 		switch b.dtypes[na] {
+
+		// Standard dtypes
 		case "float64":
 			var x []float64
 			b.bdata = append(b.bdata, x)
@@ -89,6 +102,8 @@ func (b *bcols) init() {
 		case "int":
 			var x []int
 			b.bdata = append(b.bdata, x)
+
+			// Additional dtypes
 		case "string":
 			var x []string
 			b.bdata = append(b.bdata, x)

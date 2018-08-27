@@ -19,6 +19,10 @@ type bcols struct {
 
 	dtypes map[string]string
 
+	// Data types for all variables in the source directory, including
+	// those not included in the Dstream when reading.
+	dtypesAll map[string]string
+
 	names []string
 
 	bdata []interface{}
@@ -86,34 +90,40 @@ func (bc *bcols) Done() Dstream {
 func (b *bcols) usenames() []string {
 
 	inc := make(map[string]bool)
-	exc := make(map[string]bool)
-
 	for _, v := range b.include {
 		inc[v] = true
+
+		_, ok := b.dtypesAll[v]
+		if !ok {
+			msg := fmt.Sprintf("Variable '%s' does not exist\n", v)
+			panic(msg)
+		}
 	}
+
+	// If no variables are included, default is to set include to
+	// equal all variable names.
+	if len(b.include) == 0 {
+		for k, _ := range b.dtypesAll {
+			inc[k] = true
+		}
+	}
+
+	exc := make(map[string]bool)
 	for _, v := range b.exclude {
 		exc[v] = true
+
+		_, ok := b.dtypesAll[v]
+		if !ok {
+			msg := fmt.Sprintf("Variable '%s' does not exist\n", v)
+			panic(msg)
+		}
 	}
 
 	var use []string
-
-	for v, _ := range b.dtypes {
-
-		if inc[v] && exc[v] {
-			msg := fmt.Sprintf("%s is in both the 'include' and 'exclude' lists",
-				v)
-			panic(msg)
+	for v, _ := range inc {
+		if !exc[v] {
+			use = append(use, v)
 		}
-
-		if exc[v] {
-			continue
-		}
-
-		if len(exc) > 0 && exc[v] {
-			continue
-		}
-
-		use = append(use, v)
 	}
 
 	sort.StringSlice(use).Sort()
