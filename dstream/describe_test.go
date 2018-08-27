@@ -3,11 +3,9 @@ package dstream
 import (
 	"math"
 	"testing"
-
-	"github.com/kshedden/dstream/dstream"
 )
 
-func describeData() dstream.Dstream {
+func describeData() Dstream {
 
 	x1 := []interface{}{
 		[]float64{0, 0, 0},
