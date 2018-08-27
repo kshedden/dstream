@@ -94,15 +94,18 @@ func TestBColsWriter(t *testing.T) {
 	}
 
 	dax := DropCols(da, "x2")
+	db = NewBCols("testdata/tobcols", 4).Exclude("x2").Done()
+	if !EqualReport(dax, db, true) {
+		t.Fail()
+	}
+
 	NewBColsWriter(dax).Path("testdata/tobcols").Done()
 	db = NewBCols("testdata/tobcols", 4).Done()
 	if !EqualReport(dax, db, true) {
 		t.Fail()
 	}
 
-	dax = DropCols(da, "x2")
-	NewBColsWriter(da).Path("testdata/tobcols").Done()
-	db = NewBCols("testdata/tobcols", 4).Include([]string{"x1", "x3"}).Done()
+	db = NewBCols("testdata/tobcols", 4).Include("x1", "x3").Done()
 	if !EqualReport(dax, db, true) {
 		t.Fail()
 	}

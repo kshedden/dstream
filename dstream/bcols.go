@@ -67,20 +67,22 @@ func NewBCols(path string, chunksize int) *bcols {
 	return b
 }
 
-// Include specifies variables that are included when writing the data
-// to disk (if Include is called, all other variables are excluded).
-func (bc *bcols) Include(vars []string) *bcols {
+// Include specifies variables that are included when reading the data from BCols
+// storage into a Dstream.  If Include is not called, all variables not listed in
+// a call to Exclude are read.
+func (bc *bcols) Include(vars ...string) *bcols {
 	bc.include = vars
 	return bc
 }
 
-// Exclude specifies variables that are excluded when writing the data
-// to disk.
-func (bc *bcols) Exclude(vars []string) *bcols {
+// Exclude specifies variables that are not read from the Bcols storage.
+func (bc *bcols) Exclude(vars ...string) *bcols {
 	bc.exclude = vars
 	return bc
 }
 
+// Done is called to signal the conclusion of configuring the BCols reader or
+// writer.
 func (bc *bcols) Done() Dstream {
 	bc.init()
 	return bc

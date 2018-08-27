@@ -36,26 +36,31 @@ type Join struct {
 }
 
 // NewJoin creates a Join of the given Dstreams, using the variable
-// names in inames as ids. The Dstreams in data must be segmented by
+// names in names as ids. The Dstreams in data must be segmented by
 // the inames variables before calling NewJoin.
-func NewJoin(data []Dstream, inames []string) *Join {
+func NewJoin(data []Dstream, names []string) *Join {
+
+	if len(data) != len(names) {
+		panic("NewJoin: data and names should have same length\n")
+	}
+
 	w := &Join{
 		Data:   data,
-		inames: inames,
+		inames: names,
 	}
 
 	for k, da := range data {
-		names := da.Names()
+		na := da.Names()
 		f := false
-		for j, na := range names {
-			if na == inames[k] {
+		for j, na := range na {
+			if na == names[k] {
 				w.ipos = append(w.ipos, j)
 				f = true
 				break
 			}
 		}
 		if !f {
-			msg := fmt.Sprintf("Can't find index variable %s in %dth dataset", inames[k], k)
+			msg := fmt.Sprintf("Can't find index variable %s in %dth dataset", names[k], k)
 			os.Stderr.WriteString(msg)
 			os.Exit(1)
 		}
