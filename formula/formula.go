@@ -278,7 +278,7 @@ func (fp *FormulaParser) Funcs(funcs map[string]Func) *FormulaParser {
 	return fp
 }
 
-func (fp *FormulaParser) Keep(vars []string) *FormulaParser {
+func (fp *FormulaParser) Keep(vars ...string) *FormulaParser {
 
 	names := fp.RawData.Names()
 	mp := make(map[string]bool)
