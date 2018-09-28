@@ -144,6 +144,33 @@ func NewFromArrays(data [][]interface{}, names []string) Dstream {
 	return da
 }
 
+// NewFromContigArrays creates a Dstream from raw data stored as contiguous
+// arrays.  data[i] is the data for the i^th variable.
+func NewFromContigArrays(data []interface{}, names []string) Dstream {
+
+	if len(data) != len(names) {
+		msg := fmt.Sprintf("NewFromContig: len(data) = %d != len(names) = %d",
+			len(data), len(names))
+		panic(msg)
+	}
+
+	var ar [][]interface{}
+	for _, v := range data {
+		ar = append(ar, []interface{}{v})
+	}
+
+	da := &dataArrays{
+		arrays: ar,
+		xform: xform{
+			names: names,
+		},
+	}
+
+	da.init()
+
+	return da
+}
+
 // Shallow attempts to make a shallow copy of the data stream.
 // Currently, only memory-backed data streams can be shallow copied,
 // otherwise a deep copy is returned.  Shallow copies of the same data
