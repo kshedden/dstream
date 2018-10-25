@@ -130,7 +130,7 @@ func datas2() (Dstream, Dstream) {
 func TestSegment1(t *testing.T) {
 
 	da, dm := datas1()
-	dx := Segment(da, []string{"x1", "x2"})
+	dx := Segment(da, "x1", "x2")
 
 	if !EqualReport(dm, dx, true) {
 		t.Fail()
@@ -140,7 +140,7 @@ func TestSegment1(t *testing.T) {
 func TestSegment2(t *testing.T) {
 
 	da, dm := datas2()
-	dx := Segment(da, []string{"x1", "x2"})
+	dx := Segment(da, "x1", "x2")
 
 	if !EqualReport(dm, dx, true) {
 		t.Fail()
@@ -179,7 +179,7 @@ func TestSegment3(t *testing.T) {
 		{10, 2, 10},
 	} {
 		da := gensegdat(q.a, q.b, q.n)
-		dx := Segment(da, []string{"x1"})
+		dx := Segment(da, "x1")
 
 		dx.Reset()
 		for dx.Next() {

@@ -128,7 +128,7 @@ func ExampleSegment() {
 
 	b := bytes.NewBuffer([]byte(data))
 	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader().Done()
-	da = Segment(da, []string{"V1"})
+	da = Segment(da, "V1")
 
 	for da.Next() {
 		y := da.Get("V2")
@@ -251,7 +251,7 @@ func ExampleJoin() {
 		b := bytes.NewBuffer([]byte(data))
 		d := FromCSV(b).SetFloatVars(names[j]).Done()
 		d = Convert(d, "V1", "uint64")
-		d = Segment(d, []string{"V1"})
+		d = Segment(d, "V1")
 		da = append(da, d)
 	}
 

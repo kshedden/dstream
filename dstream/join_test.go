@@ -33,7 +33,7 @@ func TestJoin1(t *testing.T) {
 	da := []Dstream{da0, da1, da2}
 
 	for j := 0; j < 3; j++ {
-		da[j] = Segment(da[j], []string{"id"})
+		da[j] = Segment(da[j], "id")
 	}
 
 	for da[0].Next() {

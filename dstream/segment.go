@@ -27,7 +27,7 @@ type segmentedData struct {
 // Segment restructures the chunks of a Dstream so that chunk
 // boundaries are determined by any change in the consecutive values
 // of a specified set of variables.
-func Segment(data Dstream, vars []string) Dstream {
+func Segment(data Dstream, vars ...string) Dstream {
 	s := &segmentedData{
 		xform: xform{
 			source: data,
