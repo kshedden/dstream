@@ -253,6 +253,7 @@ type FormulaParser struct {
 	names    []string
 }
 
+// New creates a FormulaParser from a formula and a data stream.
 func New(formula string, rawdata dstream.Dstream) *FormulaParser {
 
 	fp := &FormulaParser{
@@ -263,21 +264,29 @@ func New(formula string, rawdata dstream.Dstream) *FormulaParser {
 	return fp
 }
 
+// RefLevels specifies the reference levels of a categorical covariate, which are
+// omitted when building design matrices.
 func (fp *FormulaParser) RefLevels(reflevels map[string]string) *FormulaParser {
 	fp.refLevels = reflevels
 	return fp
 }
 
+// Codes specifies a mapping from variable names (for categorical variables)
+// to code maps, which the distinct levels of the variablle distinct integer
+// codes.
 func (fp *FormulaParser) Codes(codes map[string]map[string]int) *FormulaParser {
 	fp.codes = codes
 	return fp
 }
 
+// Funcs specifies the Go functions that can be used by name in th
 func (fp *FormulaParser) Funcs(funcs map[string]Func) *FormulaParser {
 	fp.funcs = funcs
 	return fp
 }
 
+// Keep defines variables that are retained when generating the output
+// data stream, even through they are not present in the formula.
 func (fp *FormulaParser) Keep(vars ...string) *FormulaParser {
 
 	names := fp.RawData.Names()
@@ -296,6 +305,8 @@ func (fp *FormulaParser) Keep(vars ...string) *FormulaParser {
 	return fp
 }
 
+// Done signals that the FormulaParser has been fully configured and is
+// ready for use.
 func (fp *FormulaParser) Done() dstream.Dstream {
 	err := fp.init()
 	if err != nil {

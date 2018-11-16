@@ -144,12 +144,12 @@ func NewFromArrays(data [][]interface{}, names []string) Dstream {
 	return da
 }
 
-// NewFromContigArrays creates a Dstream from raw data stored as contiguous
-// arrays.  data[i] is the data for the i^th variable.
-func NewFromContigArrays(data []interface{}, names []string) Dstream {
+// NewFromFlat creates a Dstream from raw data stored as contiguous
+// (flat) arrays.  data[i] is the data for the i^th variable.
+func NewFromFlat(data []interface{}, names []string) Dstream {
 
 	if len(data) != len(names) {
-		msg := fmt.Sprintf("NewFromContig: len(data) = %d != len(names) = %d",
+		msg := fmt.Sprintf("NewFromFlat: len(data) = %d != len(names) = %d",
 			len(data), len(names))
 		panic(msg)
 	}

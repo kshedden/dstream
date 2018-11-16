@@ -17,7 +17,7 @@ func TestNewFromContig(t *testing.T) {
 	names := []string{"x", "y"}
 
 	dchunked := NewFromArrays(chunked, names)
-	dcontig := NewFromContigArrays(contig, names)
+	dcontig := NewFromFlat(contig, names)
 
 	if !EqualReport(dchunked, dcontig, true) {
 		t.Fail()
