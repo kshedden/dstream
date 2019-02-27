@@ -1,6 +1,10 @@
 package dstream
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+	"os"
+)
 
 // Dstream streams chunks of data to a consumer.
 type Dstream interface {
@@ -142,6 +146,28 @@ func NewFromArrays(data [][]interface{}, names []string) Dstream {
 	da.init()
 
 	return da
+}
+
+func CheckValid(data Dstream) bool {
+
+	data.Reset()
+	names := data.Names()
+
+	for c := 0; data.Next(); c++ {
+
+		n0 := ilen(data.GetPos(0))
+
+		for j := 1; j < len(names); j++ {
+			n1 := ilen(data.GetPos(j))
+			if n1 != n0 {
+				msg := fmt.Sprintf("Length mismatch in chunk %d: len(%s) = %d, len(%s) = %d\n", c, names[0], n0, names[j], n1)
+				io.WriteString(os.Stderr, msg)
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 // NewFromFlat creates a Dstream from raw data stored as contiguous
