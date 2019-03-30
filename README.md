@@ -1,3 +1,5 @@
+# Preliminaries
+
 Link to Godoc [documentation](https://godoc.org/github.com/kshedden/dstream/dstream)
 
 To install:
@@ -6,13 +8,15 @@ To install:
 go get github.com/kshedden/dstream/dstream
 ```
 
+# Introduction
+
 __Dstream__ is a package for manipulating streams of typed,
 multivariate data in [Go](http://golang.org).  A Dstream is a
 [dataframe](http://pandas.pydata.org)-like container that
-(conceptually) holds a rectangular array of data in which the columns
+holds a rectangular array of data in which the columns
 are variables and the rows are cases or observations.  The Dstream
-framework facilitates processing data of this type, with a primary
-focus on feeding the data into statistical modeling tools such as
+framework facilitates processing data of this type.  One important
+application is feeding data into statistical modeling tools such as
 regression analysis.
 
 Dstream is designed to work with large datasets, where it is not
@@ -20,18 +24,18 @@ possible to load all data for all variables into memory at once.  To
 achieve this, Dstream utilizes a _chunked_, _columnar_ storage format.
 A chunk contains the data for all of the Dstream's variables for a
 consecutive subset of rows, stored by variable (column-wise) in typed
-arrays.  Only one chunk of the Dstream must be held in memory at one
+Go slices.  Only one chunk of the Dstream is held in memory at one
 time.
 
-During data processing, the chunks are visited in linear order.  When
+During data processing, the chunks are visited in order.  The
+`Next` method advances the Dstream to the next chunk.  When
 possible, the memory backing a chunk is re-used for the next chunk.
 Therefore, a chunk must either be completely processed, or copied to
 independent memory before subsequent chunks are read.  Random chunk
-access and sorting across chunks is not permitted (if processing of
-this type is needed, it should be done with other tools before forming
-the Dstream).  Most Dstreams can be Reset and read multiple times, but
+access is not permitted.  Most Dstreams can be reset with the `Reset`
+method and read multiple times, but
 this requires all the overhead of the initial read (the data will be
-fully re-processed from its source following a call to Reset).
+fully re-processed from its source following a call to `Reset`).
 
 The typical pattern for working with a Dstream is to visit the chunks
 in sequence, extract variables as needed, and perform the desired
@@ -45,31 +49,24 @@ for da.Next() {
 }
 ```
 
-Note that the Next method of a dstream attempts to advance to the next
-chunk, returning true if successful and false if not.
-
 ### Transformations
 
 A Dstream is processed by applying _transformations_ to it.  Each
 transformation yields a new Dstream, so the transformations can be
 chained.  Much like Unix pipelines, each transformation performs a
-specific (usually simple) modification to the data.  Combining several
+specific (usually simple) modification to the data.  Chaining several
 such transformations in sequence allows complex manipulations to be
 performed.
 
-When possible, the output Dstream of a transformation shares memory
-with its input, so references to the input Dstream should not be
+Since the output Dstream of a transformation may share memory
+with its input, references to the input Dstream should not be
 retained.  A typical example chaining two transformations would look
 like this:
 
 ```
-ds = DropNA(ds)         // drop all rows with any missing values
+ds = DropNA(ds)          // drop all rows with any missing values
 ds = Mutate(ds, "x1", f) // apply the function f in-place to the variable named "x1"
 ```
-
-If references to the input and output of a transformation are both
-retained, e.g. `d2 = transform(d1)`, it is extremely important to
-never mix calls on d1 and d2.
 
 The most common transformations can be grouped as follows:
 
@@ -106,8 +103,8 @@ chunk may contain all records for a single value of an index
 variable).  Here is a pipeline that illustrates both of these roles:
 
 ```
-da := dstream.FromCSV(r).SetChunkSize(1000).SetFloatVars([]string{"Index", "Speed"})
-dx = da.Segment(da, []string{"Index"})
+da := dstream.FromCSV(r).SetChunkSize(1000).SetFloat64Vars("Index", "Speed")
+dx = da.Segment(da, "Index")
 dx = dx.DiffChunk(dx, map[string][int]{"Speed", 2})
 ```
 

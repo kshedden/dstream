@@ -36,20 +36,20 @@ type CSVReader struct {
 	namepos map[string]int
 	names   []string
 
-	// If true, all variables are included and converted to float.
+	// If true, all variables are included and converted to float64 type.
 	allFloat bool
 
-	// If true, all variables are included and converted to string.
+	// If true, all variables are included and converted to string type.
 	allString bool
 
-	// Names of variables to be converted to floats
-	floatVars []string
+	// Names of variables to be converted to float64's
+	float64Vars []string
 
 	// Names of variables to be stored as strings
 	stringVars []string
 
 	// Positions of variables to be converted to floats
-	floatVarsPos []int
+	float64VarsPos []int
 
 	// Positions of variables to be stored as strings
 	stringVarsPos []int
@@ -111,12 +111,12 @@ func (cs *CSVReader) checkArgs() {
 		panic(msg)
 	}
 
-	if cs.allFloat && (len(cs.floatVars) > 0 || len(cs.stringVars) > 0) {
+	if cs.allFloat && (len(cs.float64Vars) > 0 || len(cs.stringVars) > 0) {
 		msg := "Cannot specify AllFloat and FloatVars or StringVars simultaneously"
 		panic(msg)
 	}
 
-	if cs.allString && (len(cs.floatVars) > 0 || len(cs.stringVars) > 0) {
+	if cs.allString && (len(cs.float64Vars) > 0 || len(cs.stringVars) > 0) {
 		msg := "Cannot specify AllString and FloatVars or StringVars simultaneously"
 		panic(msg)
 	}
@@ -162,27 +162,27 @@ func (cs *CSVReader) init() {
 
 	if cs.allFloat {
 		// All variables are selected and have float type
-		cs.floatVars = vlist
+		cs.float64Vars = vlist
 	} else if cs.allString {
 		// All variables are selected and have float type
 		cs.stringVars = vlist
 	}
 
 	// Variables to extract must be explicitly selected.
-	if len(cs.floatVars)+len(cs.stringVars) == 0 {
+	if len(cs.float64Vars)+len(cs.stringVars) == 0 {
 		msg := "No variables specified for reading from CSV file.\n"
 		panic(msg)
 	}
 
 	// Specify certain variables as having float type
-	cs.floatVarsPos = cs.floatVarsPos[0:0]
-	for _, v := range cs.floatVars {
+	cs.float64VarsPos = cs.float64VarsPos[0:0]
+	for _, v := range cs.float64Vars {
 		pos, ok := hdrmap[v]
 		if !ok {
 			msg := fmt.Sprintf("Variable '%s' not found", v)
 			panic(msg)
 		}
-		cs.floatVarsPos = append(cs.floatVarsPos, pos)
+		cs.float64VarsPos = append(cs.float64VarsPos, pos)
 	}
 
 	cs.stringVarsPos = cs.stringVarsPos[0:0]
@@ -195,15 +195,15 @@ func (cs *CSVReader) init() {
 		cs.stringVarsPos = append(cs.stringVarsPos, pos)
 	}
 
-	cs.nvar = len(cs.floatVars) + len(cs.stringVars)
-	for _, _ = range cs.floatVars {
+	cs.nvar = len(cs.float64Vars) + len(cs.stringVars)
+	for _, _ = range cs.float64Vars {
 		cs.bdata = append(cs.bdata, make([]float64, 0, 1000))
 	}
 	for _, _ = range cs.stringVars {
 		cs.bdata = append(cs.bdata, make([]string, 0, 1000))
 	}
 
-	cs.names = append(cs.floatVars, cs.stringVars...)
+	cs.names = append(cs.float64Vars, cs.stringVars...)
 
 	cs.namepos = make(map[string]int)
 	for k, na := range cs.names {
@@ -215,7 +215,7 @@ func (cs *CSVReader) init() {
 
 // AllFloat results in all variables being selected and converted to
 // float64 type.
-func (cs *CSVReader) AllFloat() *CSVReader {
+func (cs *CSVReader) AllFloat64() *CSVReader {
 	cs.allFloat = true
 	return cs
 }
@@ -237,15 +237,15 @@ func (cs *CSVReader) SetChunkSize(c int) *CSVReader {
 // SetFloatVars sets the names of the variables to be converted to
 // float64 type.  Refer to the columns by V1, V2, etc. if there is no
 // header row.
-func (cs *CSVReader) SetFloatVars(x []string) *CSVReader {
-	cs.floatVars = x
+func (cs *CSVReader) SetFloat64Vars(x ...string) *CSVReader {
+	cs.float64Vars = x
 	return cs
 }
 
 // SetStringVars sets the names of the variables to be stored as
 // string type values.  Refer to the columns by V1, V2, etc. if there
 // is no header row.
-func (cs *CSVReader) SetStringVars(x []string) *CSVReader {
+func (cs *CSVReader) SetStringVars(x ...string) *CSVReader {
 	cs.stringVars = x
 	return cs
 }
@@ -349,7 +349,7 @@ func (cs *CSVReader) Next() bool {
 		}
 		cs.nobs++
 
-		for k, pos := range cs.floatVarsPos {
+		for k, pos := range cs.float64VarsPos {
 			x, err := strconv.ParseFloat(rec[pos], 64)
 			if err != nil {
 				x = math.NaN()
@@ -358,7 +358,7 @@ func (cs *CSVReader) Next() bool {
 			cs.bdata[k] = append(u, x)
 		}
 
-		m := len(cs.floatVarsPos)
+		m := len(cs.float64VarsPos)
 		for k, pos := range cs.stringVarsPos {
 			u := cs.bdata[m+k].([]string)
 			cs.bdata[m+k] = append(u, rec[pos])

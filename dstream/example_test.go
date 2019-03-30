@@ -15,7 +15,7 @@ Lamb,Meat,40,76
 `
 
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).SetStringVars([]string{"Food", "Type"}).SetFloatVars([]string{"Weight"}).HasHeader().Done()
+	da := FromCSV(b).SetStringVars("Food", "Type").SetFloat64Vars("Weight").HasHeader().Done()
 
 	var buf bytes.Buffer
 	ToCSV(da).SetWriter(&buf).FloatFmt("%.0f").Done()
@@ -41,7 +41,7 @@ Lamb,Meat,40,76
 
 	b := bytes.NewBuffer([]byte(data))
 
-	da := FromCSV(b).SetStringVars([]string{"Food", "Type"}).SetFloatVars([]string{"Weight"}).HasHeader().Done()
+	da := FromCSV(b).SetStringVars("Food", "Type").SetFloat64Vars("Weight").HasHeader().Done()
 	da.Next() // Always call Next before first call to Get or GetPos
 
 	y := da.Get("Type").([]string)
@@ -72,7 +72,7 @@ func ExampleMutate() {
 	}
 
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).Done()
+	da := FromCSV(b).SetFloat64Vars("V1", "V2", "V3", "V4").Done()
 	da = Mutate(da, "V2", timesTwo)
 
 	da.Next() // Always call Next before first call to Get or GetPos
@@ -105,7 +105,7 @@ func ExampleFilter() {
 	}
 
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader().Done()
+	da := FromCSV(b).SetFloat64Vars("V1", "V2", "V3", "V4").HasHeader().Done()
 	da = Filter(da, map[string]FilterFunc{"V2": f})
 
 	da.Next() // Always call Next before first call to Get or GetPos
@@ -127,7 +127,7 @@ func ExampleSegment() {
 `
 
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader().Done()
+	da := FromCSV(b).SetFloat64Vars("V1", "V2", "V3", "V4").HasHeader().Done()
 	da = Segment(da, "V1")
 
 	for da.Next() {
@@ -160,7 +160,7 @@ func ExampleApply() {
 	}
 
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader().Done()
+	da := FromCSV(b).SetFloat64Vars("V1", "V2", "V3", "V4").HasHeader().Done()
 	da = Generate(da, "V1p2", f, "float64")
 
 	for da.Next() {
@@ -183,7 +183,7 @@ func ExampleDiffChunk() {
 `
 
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).HasHeader().Done()
+	da := FromCSV(b).SetFloat64Vars("V1", "V2", "V3", "V4").HasHeader().Done()
 	da = DiffChunk(da, map[string]int{"V2": 1, "V4": 2})
 
 	for da.Next() {
@@ -207,7 +207,7 @@ func ExampleLagChunk() {
 `
 
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3", "V4"}).Done()
+	da := FromCSV(b).SetFloat64Vars("V1", "V2", "V3", "V4").Done()
 	da = LagChunk(da, map[string]int{"V2": 2})
 
 	da.Next() // Always call Next before first call to Get or GetPos
@@ -249,7 +249,7 @@ func ExampleJoin() {
 
 	for j, data := range []string{data1, data2, data3} {
 		b := bytes.NewBuffer([]byte(data))
-		d := FromCSV(b).SetFloatVars(names[j]).Done()
+		d := FromCSV(b).SetFloat64Vars(names[j]...).Done()
 		d = Convert(d, "V1", "uint64")
 		d = Segment(d, "V1")
 		da = append(da, d)
@@ -289,7 +289,7 @@ func ExampleRegroup() {
 `
 
 	b := bytes.NewBuffer([]byte(data))
-	d := FromCSV(b).SetFloatVars([]string{"V1", "V2", "V3"}).HasHeader().Done()
+	d := FromCSV(b).SetFloat64Vars("V1", "V2", "V3").HasHeader().Done()
 	d = Convert(d, "V1", "uint64")
 	d = Regroup(d, "V1", true)
 

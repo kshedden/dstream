@@ -36,7 +36,7 @@ func TestStreamCSV1(t *testing.T) {
 
 	rdr := bytes.NewReader(bbuf.Bytes())
 
-	da := FromCSV(rdr).SetStringVars([]string{"Country"}).SetFloatVars([]string{"Id", "Age"}).SetChunkSize(3).HasHeader().Done()
+	da := FromCSV(rdr).SetStringVars("Country").SetFloat64Vars("Id", "Age").SetChunkSize(3).HasHeader().Done()
 
 	// Check first read
 	if !EqualReport(ex, da, true) {
@@ -88,7 +88,7 @@ func TestStreamCSV2(t *testing.T) {
 
 	rdr := bytes.NewReader(bbuf.Bytes())
 
-	da := FromCSV(rdr).AllFloat().SetChunkSize(3).HasHeader().Done()
+	da := FromCSV(rdr).AllFloat64().SetChunkSize(3).HasHeader().Done()
 
 	// Check first read
 	if !EqualReport(ex, da, true) {
@@ -188,7 +188,7 @@ func TestCSVWriter1(t *testing.T) {
 `
 
 	r := strings.NewReader(data1)
-	ds := FromCSV(r).SetFloatVars([]string{"id", "v1", "v2", "v3"}).SetChunkSize(2).HasHeader().Done()
+	ds := FromCSV(r).SetFloat64Vars("id", "v1", "v2", "v3").SetChunkSize(2).HasHeader().Done()
 
 	var buf bytes.Buffer
 	fm := map[string]string{"v1": "%.1f"}
