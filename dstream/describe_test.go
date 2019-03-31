@@ -7,26 +7,26 @@ import (
 
 func describeData() Dstream {
 
-	x1 := []interface{}{
-		[]float64{0, 0, 0},
-		[]float64{1, 1, 1},
-		[]float64{2, 2, 2},
-	}
-	x2 := []interface{}{
-		[]float64{1, 3, 5},
-		[]float64{1, 3, 5},
-		[]float64{1, 3, 5},
-	}
-	x3 := []interface{}{
-		[]float64{5, 5, 5},
-		[]float64{5, math.NaN(), 5},
-		[]float64{5, math.Inf(-1), math.Inf(1)},
+	x := [][]interface{}{
+		{
+			[]float64{0, 0, 0},
+			[]float64{1, 1, 1},
+			[]float64{2, 2, 2},
+		},
+		{
+			[]float64{1, 3, 5},
+			[]float64{1, 3, 5},
+			[]float64{1, 3, 5},
+		},
+		{
+			[]float64{5, 5, 5},
+			[]float64{5, math.NaN(), 5},
+			[]float64{5, math.Inf(-1), math.Inf(1)},
+		},
 	}
 
-	dat := [][]interface{}{x1, x2, x3}
 	na := []string{"x1", "x2", "x3"}
-
-	return NewFromArrays(dat, na)
+	return NewFromArrays(x, na)
 }
 
 func compareStats(a, b Stats) bool {

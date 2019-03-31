@@ -7,122 +7,129 @@ import (
 
 // All segments are within the original chunks.
 func datas1() (Dstream, Dstream) {
-	x1 := []interface{}{
-		[]float64{0, 0, 0},
-		[]float64{1, 1, 1},
-		[]float64{2, 2, 3},
-	}
-	x2 := []interface{}{
-		[]float64{0, 0, 1},
-		[]float64{1, 2, 2},
-		[]float64{3, 3, 3},
-	}
-	x3 := []interface{}{
-		[]float64{1, 2, 3},
-		[]float64{4, 5, 6},
-		[]float64{7, 8, 9},
-	}
-	x4 := []interface{}{
-		[]string{"a", "b", "c"},
-		[]string{"d", "e", "f"},
-		[]string{"g", "h", "i"},
-	}
-	dat := [][]interface{}{x1, x2, x3, x4}
-	na := []string{"x1", "x2", "x3", "x4"}
-	da := NewFromArrays(dat, na)
 
-	x1 = []interface{}{
-		[]float64{0, 0},
-		[]float64{0},
-		[]float64{1},
-		[]float64{1, 1},
-		[]float64{2, 2},
-		[]float64{3},
+	x := [][]interface{}{
+		{
+			[]float64{0, 0, 0},
+			[]float64{1, 1, 1},
+			[]float64{2, 2, 3},
+		},
+		{
+			[]float64{0, 0, 1},
+			[]float64{1, 2, 2},
+			[]float64{3, 3, 3},
+		},
+		{
+			[]float64{1, 2, 3},
+			[]float64{4, 5, 6},
+			[]float64{7, 8, 9},
+		},
+		{
+			[]string{"a", "b", "c"},
+			[]string{"d", "e", "f"},
+			[]string{"g", "h", "i"},
+		},
 	}
-	x2 = []interface{}{
-		[]float64{0, 0},
-		[]float64{1},
-		[]float64{1},
-		[]float64{2, 2},
-		[]float64{3, 3},
-		[]float64{3},
+
+	na := []string{"x1", "x2", "x3", "x4"}
+	da := NewFromArrays(x, na)
+
+	x = [][]interface{}{
+		{
+			[]float64{0, 0},
+			[]float64{0},
+			[]float64{1},
+			[]float64{1, 1},
+			[]float64{2, 2},
+			[]float64{3},
+		},
+		{
+			[]float64{0, 0},
+			[]float64{1},
+			[]float64{1},
+			[]float64{2, 2},
+			[]float64{3, 3},
+			[]float64{3},
+		},
+		{
+			[]float64{1, 2},
+			[]float64{3},
+			[]float64{4},
+			[]float64{5, 6},
+			[]float64{7, 8},
+			[]float64{9},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"c"},
+			[]string{"d"},
+			[]string{"e", "f"},
+			[]string{"g", "h"},
+			[]string{"i"},
+		},
 	}
-	x3 = []interface{}{
-		[]float64{1, 2},
-		[]float64{3},
-		[]float64{4},
-		[]float64{5, 6},
-		[]float64{7, 8},
-		[]float64{9},
-	}
-	x4 = []interface{}{
-		[]string{"a", "b"},
-		[]string{"c"},
-		[]string{"d"},
-		[]string{"e", "f"},
-		[]string{"g", "h"},
-		[]string{"i"},
-	}
-	dat = [][]interface{}{x1, x2, x3, x4}
 	na = []string{"x1", "x2", "x3", "x4"}
-	dm := NewFromArrays(dat, na)
+	dm := NewFromArrays(x, na)
 
 	return da, dm
 }
 
 // Segments span the original chunks.
 func datas2() (Dstream, Dstream) {
-	x1 := []interface{}{
-		[]float64{0, 0, 1},
-		[]float64{1, 2, 2},
-		[]float64{2, 3, 3},
-	}
-	x2 := []interface{}{
-		[]float64{1, 1, 2},
-		[]float64{2, 3, 3},
-		[]float64{3, 4, 4},
-	}
-	x3 := []interface{}{
-		[]float64{1, 2, 3},
-		[]float64{4, 5, 6},
-		[]float64{7, 8, 9},
-	}
-	x4 := []interface{}{
-		[]string{"a", "b", "c"},
-		[]string{"d", "e", "f"},
-		[]string{"g", "h", "i"},
-	}
-	dat := [][]interface{}{x1, x2, x3, x4}
-	na := []string{"x1", "x2", "x3", "x4"}
-	da := NewFromArrays(dat, na)
 
-	x1 = []interface{}{
-		[]float64{0, 0},
-		[]float64{1, 1},
-		[]float64{2, 2, 2},
-		[]float64{3, 3},
+	x := [][]interface{}{
+		{
+			[]float64{0, 0, 1},
+			[]float64{1, 2, 2},
+			[]float64{2, 3, 3},
+		},
+		{
+			[]float64{1, 1, 2},
+			[]float64{2, 3, 3},
+			[]float64{3, 4, 4},
+		},
+		{
+			[]float64{1, 2, 3},
+			[]float64{4, 5, 6},
+			[]float64{7, 8, 9},
+		},
+		{
+			[]string{"a", "b", "c"},
+			[]string{"d", "e", "f"},
+			[]string{"g", "h", "i"},
+		},
 	}
-	x2 = []interface{}{
-		[]float64{1, 1},
-		[]float64{2, 2},
-		[]float64{3, 3, 3},
-		[]float64{4, 4},
+	na := []string{"x1", "x2", "x3", "x4"}
+	da := NewFromArrays(x, na)
+
+	x = [][]interface{}{
+		{
+			[]float64{0, 0},
+			[]float64{1, 1},
+			[]float64{2, 2, 2},
+			[]float64{3, 3},
+		},
+		{
+			[]float64{1, 1},
+			[]float64{2, 2},
+			[]float64{3, 3, 3},
+			[]float64{4, 4},
+		},
+		{
+			[]float64{1, 2},
+			[]float64{3, 4},
+			[]float64{5, 6, 7},
+			[]float64{8, 9},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"c", "d"},
+			[]string{"e", "f", "g"},
+			[]string{"h", "i"},
+		},
 	}
-	x3 = []interface{}{
-		[]float64{1, 2},
-		[]float64{3, 4},
-		[]float64{5, 6, 7},
-		[]float64{8, 9},
-	}
-	x4 = []interface{}{
-		[]string{"a", "b"},
-		[]string{"c", "d"},
-		[]string{"e", "f", "g"},
-		[]string{"h", "i"},
-	}
-	dat = [][]interface{}{x1, x2, x3, x4}
 	na = []string{"x1", "x2", "x3", "x4"}
-	dm := NewFromArrays(dat, na)
+	dm := NewFromArrays(x, na)
 
 	return da, dm
 }

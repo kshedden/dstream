@@ -14,7 +14,7 @@ type addcol struct {
 
 // Addcol appends a new column of data to a Dstream.  The new data is
 // provided as a single array.
-func Addcol(da Dstream, newdat []float64, newname string) Dstream {
+func AddCol(da Dstream, newdat []float64, newname string) Dstream {
 
 	r := &addcol{
 		xform: xform{
