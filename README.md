@@ -12,11 +12,11 @@ go get github.com/kshedden/dstream/dstream
 
 __Dstream__ is a package for manipulating streams of typed,
 multivariate data in [Go](http://golang.org).  A Dstream is a
-[dataframe](http://pandas.pydata.org)-like container that
-holds a rectangular array of data in which the columns
-are variables and the rows are cases or observations.  The Dstream
-framework facilitates processing data of this type.  One important
-application for this package is feeding data into statistical modeling tools such as
+[dataframe](http://pandas.pydata.org)-like container that holds a
+rectangular array of data in which the columns are variables and the
+rows are cases or observations.  The Dstream framework facilitates
+processing data of this type.  One important application for this
+package is feeding data into statistical modeling tools such as
 regression analysis.
 
 Dstream is designed to work with large datasets, where it is not
@@ -27,15 +27,15 @@ consecutive subset of rows, stored by variable (column-wise) in typed
 Go slices.  Only one chunk of the Dstream is held in memory at one
 time.
 
-During data processing, the chunks are visited in order.  The
-`Next` method advances the Dstream to the next chunk.  When
-possible, the memory backing a chunk is re-used for the next chunk.
-Therefore, a chunk must either be completely processed, or copied to
-independent memory before subsequent calls to `Next`.  Random chunk
-access is not permitted.  Most Dstreams can be reset with the `Reset`
-method and read multiple times, but
-this requires all the overhead of the initial read (the data will be
-fully re-processed from its source following a call to `Reset`).
+During data processing, the chunks are visited in order.  The `Next`
+method advances the Dstream to the next chunk.  When possible, the
+memory backing a chunk is re-used for the next chunk.  Therefore, a
+chunk must either be completely processed, or copied to independent
+memory before subsequent calls to `Next`.  Random chunk access is not
+permitted.  Most Dstreams can be reset with the `Reset` method and
+read multiple times, but this requires all the overhead of the initial
+read (the data will be fully re-processed from its source following a
+call to `Reset`).
 
 The typical pattern for working with a Dstream is to visit the chunks
 in sequence, extract variables as needed, and perform the desired
@@ -58,10 +58,9 @@ specific (usually simple) modification to the data.  Chaining several
 such transformations in sequence allows complex manipulations to be
 performed.
 
-Since the output Dstream of a transformation may share memory
-with its input, references to the input Dstream should not be
-retained.  A typical example chaining two transformations would look
-like this:
+Since the output Dstream of a transformation may share memory with its
+input, references to the input Dstream should not be retained.  A
+typical example chaining two transformations would look like this:
 
 ```
 ds = DropNA(ds)          // drop all rows with any missing values
@@ -119,19 +118,29 @@ difference across chunk boundaries, the chunk boundaries are not
 merely a computational consideration in this example, they impact the
 output of the pipeline.
 
-### Type support
+### Types
 
-Each column in a Dstream has a fixed type.  When accessing a
-variable's values using
+Each column in a Dstream has a fixed type.  The core of the package
+supports 10 numeric types (1, 2, 3, and 8 byte signed and unsigned
+integers, and 4 and 8 byte floating point values), along with strings
+and time values.
+
+When accessing a variable's values using
 [Get](https://godoc.org/github.com/kshedden/dstream/dstream#Get) or
 [GetPos](https://godoc.org/github.com/kshedden/dstream/dstream#GetPos),
 the data for one variable, in one chunk, is provided as a slice of
-values.  To support multiple data types, this slice is returned as an
-empty interface{} which can be type-asserted to a concrete type, like
-this:
+values.  This slice is returned as an empty interface{} which can be
+type-asserted to a concrete type, like this:
 
 ```
 x := da.Get("x").([]uint8)
+```
+
+Conversion from any numeric type to any other numeric type can be
+carried out using the `Convert` transformation, for example:
+
+```
+da = Convert(da, "x1", "int32")
 ```
 
 Currently, many of the Dstream transformations are only implemented
