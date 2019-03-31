@@ -68,14 +68,16 @@ func (cs *CSVReader) SkipErrors() *CSVReader {
 	return cs
 }
 
-// TypeConf...
+// TypeConf sets the type configuration information for reading the
+// CSV file.
 func (cs *CSVReader) TypeConf(tc *CSVTypeConf) *CSVReader {
 	cs.typeConf = tc
 	return cs
 }
 
-// Close does nothing, the caller should explicitly close the
-// io.Reader passed to FromCSV if needed.
+// Close does nothing and is implemented to satisfy the Dstream interface.
+// If any io.Reader values passed to FromCSV need closing, they should be
+// closed by the caller.
 func (cs *CSVReader) Close() {
 }
 
@@ -90,7 +92,8 @@ func (cs *CSVReader) HasHeader() *CSVReader {
 	return cs
 }
 
-// Comma sets the delimiter (comma rune) for the CSVReader.
+// Comma sets the delimiter (comma rune) for the CSVReader.  By default,
+// the comma rune is a comma.
 func (cs *CSVReader) Comma(c rune) *CSVReader {
 	cs.comma = c
 	return cs

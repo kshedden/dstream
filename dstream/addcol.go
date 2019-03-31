@@ -26,7 +26,7 @@ func AddCol(da Dstream, newdat []float64, newname string) Dstream {
 
 	for _, na := range r.source.Names() {
 		if newname == na {
-			msg := fmt.Sprintf("Addcol: a variable named '%s' already exists.", na)
+			msg := fmt.Sprintf("AddCol: a variable named '%s' already exists.", na)
 			panic(msg)
 		}
 	}

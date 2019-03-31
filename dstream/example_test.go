@@ -44,6 +44,8 @@ Cheese,Dairy,12,35
 Lamb,Meat,40,76
 `
 
+	// Here we read from an in-memory byte buffer,
+	// but this can be any io.Reader, e.g. a file.
 	b := bytes.NewBuffer([]byte(data))
 
 	tc := &CSVTypeConf{
