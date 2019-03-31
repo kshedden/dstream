@@ -14,6 +14,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 func (b *bcols) init() {
@@ -69,44 +70,44 @@ func (b *bcols) init() {
 		switch b.dtypes[na] {
 
 		// Standard dtypes
-		case "float64":
-			var x []float64
+		case "string":
+			var x []string
 			b.bdata = append(b.bdata, x)
-		case "float32":
-			var x []float32
-			b.bdata = append(b.bdata, x)
-		case "uint64":
-			var x []uint64
-			b.bdata = append(b.bdata, x)
-		case "uint32":
-			var x []uint32
-			b.bdata = append(b.bdata, x)
-		case "uint16":
-			var x []uint16
+		case "time.Time":
+			var x []time.Time
 			b.bdata = append(b.bdata, x)
 		case "uint8":
 			var x []uint8
 			b.bdata = append(b.bdata, x)
-		case "int64":
-			var x []int64
+		case "uint16":
+			var x []uint16
 			b.bdata = append(b.bdata, x)
-		case "int32":
-			var x []int32
+		case "uint32":
+			var x []uint32
 			b.bdata = append(b.bdata, x)
-		case "int16":
-			var x []int16
+		case "uint64":
+			var x []uint64
 			b.bdata = append(b.bdata, x)
 		case "int8":
 			var x []int8
 			b.bdata = append(b.bdata, x)
-		case "int":
-			var x []int
+		case "int16":
+			var x []int16
+			b.bdata = append(b.bdata, x)
+		case "int32":
+			var x []int32
+			b.bdata = append(b.bdata, x)
+		case "int64":
+			var x []int64
+			b.bdata = append(b.bdata, x)
+		case "float32":
+			var x []float32
+			b.bdata = append(b.bdata, x)
+		case "float64":
+			var x []float64
 			b.bdata = append(b.bdata, x)
 
 			// Additional dtypes
-		case "string":
-			var x []string
-			b.bdata = append(b.bdata, x)
 		case "uvarint":
 			var x []uint64
 			b.bdata = append(b.bdata, x)
@@ -174,7 +175,7 @@ func (b *bcols) Next() bool {
 	for j, na := range b.names {
 		rdr := b.rdrs[j]
 
-		// Handle variable width data
+		// Handle variable-width data
 		if b.dtypes[na] == "varint" {
 			var v []int64
 			for k := 0; k < b.chunksize; k++ {
@@ -217,12 +218,16 @@ func (b *bcols) Next() bool {
 			continue
 		}
 
-		// Handle fixed width data
+		// Handle fixed-width data
 		switch v := b.bdata[j].(type) {
-		case []float64:
+		case []string:
 			for k := 0; k < b.chunksize; k++ {
-				var x float64
-				err := binary.Read(rdr, binary.LittleEndian, &x)
+				var x string
+				y, isprefix, err := rdr.ReadLine()
+				if isprefix {
+					panic("buffer overflow")
+				}
+				x = string(y)
 				if err == io.EOF {
 					b.done = true
 					break
@@ -237,63 +242,9 @@ func (b *bcols) Next() bool {
 				}
 			}
 			b.bdata[j] = v
-		case []float32:
+		case []time.Time:
 			for k := 0; k < b.chunksize; k++ {
-				var x float32
-				err := binary.Read(rdr, binary.LittleEndian, &x)
-				if err == io.EOF {
-					b.done = true
-					break
-				} else if err != nil {
-					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
-					print(msg)
-					panic(err)
-				}
-				v = append(v, x)
-				if j == 0 {
-					b.nobs++
-				}
-			}
-			b.bdata[j] = v
-		case []uint64:
-			for k := 0; k < b.chunksize; k++ {
-				var x uint64
-				err := binary.Read(rdr, binary.LittleEndian, &x)
-				if err == io.EOF {
-					b.done = true
-					break
-				} else if err != nil {
-					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
-					print(msg)
-					panic(err)
-				}
-				v = append(v, x)
-				if j == 0 {
-					b.nobs++
-				}
-			}
-			b.bdata[j] = v
-		case []uint32:
-			for k := 0; k < b.chunksize; k++ {
-				var x uint32
-				err := binary.Read(rdr, binary.LittleEndian, &x)
-				if err == io.EOF {
-					b.done = true
-					break
-				} else if err != nil {
-					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
-					print(msg)
-					panic(err)
-				}
-				v = append(v, x)
-				if j == 0 {
-					b.nobs++
-				}
-			}
-			b.bdata[j] = v
-		case []uint16:
-			for k := 0; k < b.chunksize; k++ {
-				var x uint16
+				var x time.Time
 				err := binary.Read(rdr, binary.LittleEndian, &x)
 				if err == io.EOF {
 					b.done = true
@@ -327,9 +278,9 @@ func (b *bcols) Next() bool {
 				}
 			}
 			b.bdata[j] = v
-		case []int64:
+		case []uint16:
 			for k := 0; k < b.chunksize; k++ {
-				var x int64
+				var x uint16
 				err := binary.Read(rdr, binary.LittleEndian, &x)
 				if err == io.EOF {
 					b.done = true
@@ -345,9 +296,9 @@ func (b *bcols) Next() bool {
 				}
 			}
 			b.bdata[j] = v
-		case []int32:
+		case []uint32:
 			for k := 0; k < b.chunksize; k++ {
-				var x int32
+				var x uint32
 				err := binary.Read(rdr, binary.LittleEndian, &x)
 				if err == io.EOF {
 					b.done = true
@@ -363,9 +314,9 @@ func (b *bcols) Next() bool {
 				}
 			}
 			b.bdata[j] = v
-		case []int16:
+		case []uint64:
 			for k := 0; k < b.chunksize; k++ {
-				var x int16
+				var x uint64
 				err := binary.Read(rdr, binary.LittleEndian, &x)
 				if err == io.EOF {
 					b.done = true
@@ -399,9 +350,9 @@ func (b *bcols) Next() bool {
 				}
 			}
 			b.bdata[j] = v
-		case []int:
+		case []int16:
 			for k := 0; k < b.chunksize; k++ {
-				var x int
+				var x int16
 				err := binary.Read(rdr, binary.LittleEndian, &x)
 				if err == io.EOF {
 					b.done = true
@@ -417,9 +368,10 @@ func (b *bcols) Next() bool {
 				}
 			}
 			b.bdata[j] = v
-		case []string:
+		case []int32:
 			for k := 0; k < b.chunksize; k++ {
-				x, err := rdr.ReadString('\n')
+				var x int32
+				err := binary.Read(rdr, binary.LittleEndian, &x)
 				if err == io.EOF {
 					b.done = true
 					break
@@ -428,7 +380,60 @@ func (b *bcols) Next() bool {
 					print(msg)
 					panic(err)
 				}
-				x = strings.TrimRight(x, "\n")
+				v = append(v, x)
+				if j == 0 {
+					b.nobs++
+				}
+			}
+			b.bdata[j] = v
+		case []int64:
+			for k := 0; k < b.chunksize; k++ {
+				var x int64
+				err := binary.Read(rdr, binary.LittleEndian, &x)
+				if err == io.EOF {
+					b.done = true
+					break
+				} else if err != nil {
+					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
+					print(msg)
+					panic(err)
+				}
+				v = append(v, x)
+				if j == 0 {
+					b.nobs++
+				}
+			}
+			b.bdata[j] = v
+		case []float32:
+			for k := 0; k < b.chunksize; k++ {
+				var x float32
+				err := binary.Read(rdr, binary.LittleEndian, &x)
+				if err == io.EOF {
+					b.done = true
+					break
+				} else if err != nil {
+					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
+					print(msg)
+					panic(err)
+				}
+				v = append(v, x)
+				if j == 0 {
+					b.nobs++
+				}
+			}
+			b.bdata[j] = v
+		case []float64:
+			for k := 0; k < b.chunksize; k++ {
+				var x float64
+				err := binary.Read(rdr, binary.LittleEndian, &x)
+				if err == io.EOF {
+					b.done = true
+					break
+				} else if err != nil {
+					msg := fmt.Sprintf("Error reading variable '%s' at position %d\n", na, b.nobs)
+					print(msg)
+					panic(err)
+				}
 				v = append(v, x)
 				if j == 0 {
 					b.nobs++
@@ -451,41 +456,30 @@ func (bw *BColsWriter) writeDtypes() {
 	for j, na := range names {
 		u := bw.stream.GetPos(j)
 		switch u.(type) {
-		case []float64:
-			dtypes[na] = "float64"
-
-		case []float32:
-			dtypes[na] = "float32"
-
-		case []uint64:
-			dtypes[na] = "uint64"
-
-		case []uint32:
-			dtypes[na] = "uint32"
-
-		case []uint16:
-			dtypes[na] = "uint16"
-
-		case []uint8:
-			dtypes[na] = "uint8"
-
-		case []int64:
-			dtypes[na] = "int64"
-
-		case []int32:
-			dtypes[na] = "int32"
-
-		case []int16:
-			dtypes[na] = "int16"
-
-		case []int8:
-			dtypes[na] = "int8"
-
-		case []int:
-			dtypes[na] = "int"
-
 		case []string:
 			dtypes[na] = "string"
+		case []time.Time:
+			dtypes[na] = "time.Time"
+		case []uint8:
+			dtypes[na] = "uint8"
+		case []uint16:
+			dtypes[na] = "uint16"
+		case []uint32:
+			dtypes[na] = "uint32"
+		case []uint64:
+			dtypes[na] = "uint64"
+		case []int8:
+			dtypes[na] = "int8"
+		case []int16:
+			dtypes[na] = "int16"
+		case []int32:
+			dtypes[na] = "int32"
+		case []int64:
+			dtypes[na] = "int64"
+		case []float32:
+			dtypes[na] = "float32"
+		case []float64:
+			dtypes[na] = "float64"
 		}
 	}
 
@@ -507,32 +501,16 @@ func (bw *BColsWriter) write() {
 		for j := range names {
 			u := bw.stream.GetPos(j)
 			switch u.(type) {
-			case []float64:
-				v := u.([]float64)
-				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
-				if err != nil {
-					panic(err)
+			case []string:
+				v := u.([]string)
+				for _, x := range v {
+					_, err := bw.wtrs[j].Write([]byte(x + "\n"))
+					if err != nil {
+						panic(err)
+					}
 				}
-			case []float32:
-				v := u.([]float32)
-				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
-				if err != nil {
-					panic(err)
-				}
-			case []uint64:
-				v := u.([]uint64)
-				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
-				if err != nil {
-					panic(err)
-				}
-			case []uint32:
-				v := u.([]uint32)
-				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
-				if err != nil {
-					panic(err)
-				}
-			case []uint16:
-				v := u.([]uint16)
+			case []time.Time:
+				v := u.([]time.Time)
 				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
@@ -543,20 +521,20 @@ func (bw *BColsWriter) write() {
 				if err != nil {
 					panic(err)
 				}
-			case []int64:
-				v := u.([]int64)
+			case []uint16:
+				v := u.([]uint16)
 				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
-			case []int32:
-				v := u.([]int32)
+			case []uint32:
+				v := u.([]uint32)
 				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
-			case []int16:
-				v := u.([]int16)
+			case []uint64:
+				v := u.([]uint64)
 				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
@@ -567,19 +545,35 @@ func (bw *BColsWriter) write() {
 				if err != nil {
 					panic(err)
 				}
-			case []int:
-				v := u.([]int)
+			case []int16:
+				v := u.([]int16)
 				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
 				if err != nil {
 					panic(err)
 				}
-			case []string:
-				v := u.([]string)
-				for _, x := range v {
-					_, err := bw.wtrs[j].Write([]byte(x + "\n"))
-					if err != nil {
-						panic(err)
-					}
+			case []int32:
+				v := u.([]int32)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
+				if err != nil {
+					panic(err)
+				}
+			case []int64:
+				v := u.([]int64)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
+				if err != nil {
+					panic(err)
+				}
+			case []float32:
+				v := u.([]float32)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
+				if err != nil {
+					panic(err)
+				}
+			case []float64:
+				v := u.([]float64)
+				err := binary.Write(bw.wtrs[j], binary.LittleEndian, &v)
+				if err != nil {
+					panic(err)
 				}
 			}
 		}

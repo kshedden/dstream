@@ -15,11 +15,13 @@ type CSVReader struct {
 	rdr    io.Reader
 	csvrdr *csv.Reader
 
+	// bdata holds the data
 	bdata []interface{}
 
-	// Used to hold the first row of data if we needed to read it
-	// to get the number of columns.
-	stashrec []string
+	// We need to reed the first row to get the number of columns.
+	// We can store it here so that it is included in the first data
+	// chunk.
+	firstrow []string
 
 	// If true, skip records with unparseable CSV data, otherwise
 	// panic on them.
@@ -36,23 +38,7 @@ type CSVReader struct {
 	namepos map[string]int
 	names   []string
 
-	// If true, all variables are included and converted to float64 type.
-	allFloat bool
-
-	// If true, all variables are included and converted to string type.
-	allString bool
-
-	// Names of variables to be converted to float64's
-	float64Vars []string
-
-	// Names of variables to be stored as strings
-	stringVars []string
-
-	// Positions of variables to be converted to floats
-	float64VarsPos []int
-
-	// Positions of variables to be stored as strings
-	stringVarsPos []int
+	typeConf *CSVTypeConf
 }
 
 // FromCSV returns a Dstream that reads from a CSV source.  Call at
@@ -68,7 +54,8 @@ func FromCSV(r io.Reader) *CSVReader {
 	return dr
 }
 
-// Done is called when all configuration is complete to obtain a Dstream.
+// Done is called when all configuration is complete.  After calling
+// Done, the DStream can be used.
 func (cs *CSVReader) Done() Dstream {
 	cs.init()
 	return cs
@@ -78,6 +65,12 @@ func (cs *CSVReader) Done() Dstream {
 // skipped (the csv.ParseError is printed to stdio).
 func (cs *CSVReader) SkipErrors() *CSVReader {
 	cs.skipErrors = true
+	return cs
+}
+
+// TypeConf...
+func (cs *CSVReader) TypeConf(tc *CSVTypeConf) *CSVReader {
+	cs.typeConf = tc
 	return cs
 }
 
@@ -106,20 +99,6 @@ func (cs *CSVReader) Comma(c rune) *CSVReader {
 // Consistency checks for arguments.
 func (cs *CSVReader) checkArgs() {
 
-	if cs.allFloat && cs.allString {
-		msg := "Cannot select AllFloat and AllString.\n"
-		panic(msg)
-	}
-
-	if cs.allFloat && (len(cs.float64Vars) > 0 || len(cs.stringVars) > 0) {
-		msg := "Cannot specify AllFloat and FloatVars or StringVars simultaneously"
-		panic(msg)
-	}
-
-	if cs.allString && (len(cs.float64Vars) > 0 || len(cs.stringVars) > 0) {
-		msg := "Cannot specify AllString and FloatVars or StringVars simultaneously"
-		panic(msg)
-	}
 }
 
 func (cs *CSVReader) init() {
@@ -136,117 +115,47 @@ func (cs *CSVReader) init() {
 	}
 
 	// Read the first row (may or may not be column header)
-	var row1 []string
+	var firstrow []string
 	var err error
-	row1, err = cs.csvrdr.Read()
+	firstrow, err = cs.csvrdr.Read()
 	if err != nil {
 		panic(err)
 	}
 
 	// Create a variable name to column index map
-	hdrmap := make(map[string]int)
-	var vlist []string
 	if cs.hasheader {
-		for k, v := range row1 {
-			hdrmap[v] = k
-			vlist = append(vlist, v)
-		}
+		cs.typeConf.SetPos(firstrow)
 	} else {
-		cs.stashrec = row1
-		for k := range row1 {
+		// Save the first row since it contains data
+		cs.firstrow = firstrow
+
+		// Names are V0, V1, ...
+		var vlist []string
+		for k := range firstrow {
 			v := fmt.Sprintf("V%d", k+1)
-			hdrmap[v] = k
 			vlist = append(vlist, v)
 		}
+
+		cs.typeConf.SetPos(vlist)
 	}
 
-	if cs.allFloat {
-		// All variables are selected and have float type
-		cs.float64Vars = vlist
-	} else if cs.allString {
-		// All variables are selected and have float type
-		cs.stringVars = vlist
-	}
-
-	// Variables to extract must be explicitly selected.
-	if len(cs.float64Vars)+len(cs.stringVars) == 0 {
-		msg := "No variables specified for reading from CSV file.\n"
-		panic(msg)
-	}
-
-	// Specify certain variables as having float type
-	cs.float64VarsPos = cs.float64VarsPos[0:0]
-	for _, v := range cs.float64Vars {
-		pos, ok := hdrmap[v]
-		if !ok {
-			msg := fmt.Sprintf("Variable '%s' not found", v)
-			panic(msg)
-		}
-		cs.float64VarsPos = append(cs.float64VarsPos, pos)
-	}
-
-	cs.stringVarsPos = cs.stringVarsPos[0:0]
-	for _, v := range cs.stringVars {
-		pos, ok := hdrmap[v]
-		if !ok {
-			msg := fmt.Sprintf("Variable '%s' not found", v)
-			panic(msg)
-		}
-		cs.stringVarsPos = append(cs.stringVarsPos, pos)
-	}
-
-	cs.nvar = len(cs.float64Vars) + len(cs.stringVars)
-	for _, _ = range cs.float64Vars {
-		cs.bdata = append(cs.bdata, make([]float64, 0, 1000))
-	}
-	for _, _ = range cs.stringVars {
-		cs.bdata = append(cs.bdata, make([]string, 0, 1000))
-	}
-
-	cs.names = append(cs.float64Vars, cs.stringVars...)
+	cs.setNames()
+	cs.nvar = len(cs.names)
 
 	cs.namepos = make(map[string]int)
 	for k, na := range cs.names {
 		cs.namepos[na] = k
 	}
 
+	cs.setbdata()
+
 	cs.doneinit = true
-}
-
-// AllFloat results in all variables being selected and converted to
-// float64 type.
-func (cs *CSVReader) AllFloat64() *CSVReader {
-	cs.allFloat = true
-	return cs
-}
-
-// AllString results in all variables being selected and treated as
-// string type.
-func (cs *CSVReader) AllString() *CSVReader {
-	cs.allString = true
-	return cs
 }
 
 // SetChunkSize sets the size of chunks for this Dstream, it can only
 // be called before reading begins.
 func (cs *CSVReader) SetChunkSize(c int) *CSVReader {
 	cs.chunkSize = c
-	return cs
-}
-
-// SetFloatVars sets the names of the variables to be converted to
-// float64 type.  Refer to the columns by V1, V2, etc. if there is no
-// header row.
-func (cs *CSVReader) SetFloat64Vars(x ...string) *CSVReader {
-	cs.float64Vars = x
-	return cs
-}
-
-// SetStringVars sets the names of the variables to be stored as
-// string type values.  Refer to the columns by V1, V2, etc. if there
-// is no header row.
-func (cs *CSVReader) SetStringVars(x ...string) *CSVReader {
-	cs.stringVars = x
 	return cs
 }
 
@@ -318,58 +227,8 @@ func (cs *CSVReader) Reset() {
 	}
 }
 
-// Next advances to the next chunk.
-func (cs *CSVReader) Next() bool {
-
-	if cs.done {
-		return false
-	}
-
-	truncate(cs.bdata)
-
-	for j := 0; j < cs.chunkSize; j++ {
-
-		var rec []string
-		var err error
-		if cs.stashrec != nil {
-			rec = cs.stashrec
-			cs.stashrec = nil
-		} else {
-			rec, err = cs.csvrdr.Read()
-			if err == io.EOF {
-				cs.done = true
-				return ilen(cs.bdata[0]) > 0
-			} else if err != nil {
-				if cs.skipErrors {
-					os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
-					continue
-				}
-				panic(err)
-			}
-		}
-		cs.nobs++
-
-		for k, pos := range cs.float64VarsPos {
-			x, err := strconv.ParseFloat(rec[pos], 64)
-			if err != nil {
-				x = math.NaN()
-			}
-			u := cs.bdata[k].([]float64)
-			cs.bdata[k] = append(u, x)
-		}
-
-		m := len(cs.float64VarsPos)
-		for k, pos := range cs.stringVarsPos {
-			u := cs.bdata[m+k].([]string)
-			cs.bdata[m+k] = append(u, rec[pos])
-		}
-	}
-
-	return true
-}
-
-// csvWriter supports writing a Dstream to an io.Writer in csv format.
-type csvWriter struct {
+// CSVWriter supports writing a Dstream to an io.Writer in csv format.
+type CSVWriter struct {
 
 	// The Dstream to be written.
 	stream Dstream
@@ -387,8 +246,8 @@ type csvWriter struct {
 // to configure the underlying writer, then call additional methods
 // for customization as desired, and finally call Done to complete the
 // writing.
-func ToCSV(d Dstream) *csvWriter {
-	c := &csvWriter{
+func ToCSV(d Dstream) *CSVWriter {
+	c := &CSVWriter{
 		stream: d,
 	}
 	return c
@@ -397,7 +256,7 @@ func ToCSV(d Dstream) *csvWriter {
 // FloatFmt sets the format string to be used when writing float
 // values.  This value is ignored for columns specified in a call to
 // the Formats method.
-func (dw *csvWriter) FloatFmt(fmt string) *csvWriter {
+func (dw *CSVWriter) FloatFmt(fmt string) *CSVWriter {
 
 	dw.floatFmt = fmt
 	return dw
@@ -406,7 +265,7 @@ func (dw *csvWriter) FloatFmt(fmt string) *csvWriter {
 // Formats sets format strings to be used when writing the Dstream.
 // The provided argument is a map from variable names to variable
 // formats.
-func (dw *csvWriter) Formats(fmts map[string]string) *csvWriter {
+func (dw *CSVWriter) Formats(fmts map[string]string) *CSVWriter {
 
 	vp := VarPos(dw.stream)
 
@@ -427,7 +286,7 @@ func (dw *csvWriter) Formats(fmts map[string]string) *csvWriter {
 }
 
 // Filename configures the CSVWriter to write to the given named file.
-func (dw *csvWriter) Filename(name string) *csvWriter {
+func (dw *CSVWriter) Filename(name string) *CSVWriter {
 
 	var err error
 	dw.wtr, err = os.Create(name)
@@ -439,7 +298,7 @@ func (dw *csvWriter) Filename(name string) *csvWriter {
 }
 
 // SetWriter configures the CSVWriter to write to the given io stream.
-func (dw *csvWriter) SetWriter(w io.Writer) *csvWriter {
+func (dw *CSVWriter) SetWriter(w io.Writer) *CSVWriter {
 
 	dw.wtr = w
 	return dw
@@ -447,7 +306,7 @@ func (dw *csvWriter) SetWriter(w io.Writer) *csvWriter {
 
 // getFmt is a utility for getting the format string for a given
 // column.
-func (dw *csvWriter) getFmt(t string, col int) string {
+func (dw *CSVWriter) getFmt(t string, col int) string {
 
 	if dw.fmts != nil && dw.fmts[col] != "" {
 		return dw.fmts[col]
@@ -469,7 +328,7 @@ func (dw *csvWriter) getFmt(t string, col int) string {
 
 // Done completes writing a Dstream to a specified io.Writer in csv
 // format.
-func (dw *csvWriter) Done() error {
+func (dw *CSVWriter) Done() error {
 
 	if dw.wtr == nil {
 		return errors.New("ToCSV: writer must be set before calling Done")
@@ -515,4 +374,160 @@ func (dw *csvWriter) Done() error {
 	csw.Flush()
 
 	return nil
+}
+
+// Next advances to the next chunk.
+func (cs *CSVReader) Next() bool {
+
+	// This can't be code-generated because...
+
+	if cs.done {
+		return false
+	}
+
+	truncate(cs.bdata)
+
+	for j := 0; j < cs.chunkSize; j++ {
+
+		// Try to read a row, return false if done.
+		var rec []string
+		var err error
+		if cs.firstrow != nil {
+			rec = cs.firstrow
+			cs.firstrow = nil
+		} else {
+			rec, err = cs.csvrdr.Read()
+			if err == io.EOF {
+				cs.done = true
+				return ilen(cs.bdata[0]) > 0
+			} else if err != nil {
+				if cs.skipErrors {
+					os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
+					continue
+				}
+				panic(err)
+			}
+		}
+		cs.nobs++
+
+		tc := cs.typeConf
+
+		for k, pos := range tc.Uint8Pos {
+			x, err := strconv.Atoi(rec[pos])
+			if err != nil {
+				panic(err)
+			}
+			i := cs.namepos[tc.Uint8[k]]
+			u := cs.bdata[i].([]uint8)
+			cs.bdata[i] = append(u, uint8(x))
+		}
+
+		for k, pos := range tc.Uint16Pos {
+			x, err := strconv.Atoi(rec[pos])
+			if err != nil {
+				panic(err)
+			}
+			i := cs.namepos[tc.Uint16[k]]
+			u := cs.bdata[i].([]uint16)
+			cs.bdata[i] = append(u, uint16(x))
+		}
+
+		for k, pos := range tc.Uint32Pos {
+			x, err := strconv.Atoi(rec[pos])
+			if err != nil {
+				panic(err)
+			}
+			i := cs.namepos[tc.Uint32[k]]
+			u := cs.bdata[i].([]uint32)
+			cs.bdata[i] = append(u, uint32(x))
+		}
+
+		for k, pos := range tc.Uint64Pos {
+			x, err := strconv.Atoi(rec[pos])
+			if err != nil {
+				panic(err)
+			}
+			i := cs.namepos[tc.Uint64[k]]
+			u := cs.bdata[i].([]uint64)
+			cs.bdata[i] = append(u, uint64(x))
+		}
+
+		for k, pos := range tc.Int8Pos {
+			x, err := strconv.Atoi(rec[pos])
+			if err != nil {
+				panic(err)
+			}
+			i := cs.namepos[tc.Int8[k]]
+			u := cs.bdata[i].([]int8)
+			cs.bdata[i] = append(u, int8(x))
+		}
+
+		for k, pos := range tc.Int16Pos {
+			x, err := strconv.Atoi(rec[pos])
+			if err != nil {
+				panic(err)
+			}
+			i := cs.namepos[tc.Int16[k]]
+			u := cs.bdata[i].([]int16)
+			cs.bdata[i] = append(u, int16(x))
+		}
+
+		for k, pos := range tc.Int32Pos {
+			x, err := strconv.Atoi(rec[pos])
+			if err != nil {
+				panic(err)
+			}
+			i := cs.namepos[tc.Int32[k]]
+			u := cs.bdata[i].([]int32)
+			cs.bdata[i] = append(u, int32(x))
+		}
+
+		for k, pos := range tc.Int64Pos {
+			x, err := strconv.Atoi(rec[pos])
+			if err != nil {
+				panic(err)
+			}
+			i := cs.namepos[tc.Int64[k]]
+			u := cs.bdata[i].([]int64)
+			cs.bdata[i] = append(u, int64(x))
+		}
+
+		for k, pos := range tc.Float32Pos {
+			x, err := strconv.ParseFloat(rec[pos], 64)
+			if err != nil {
+				panic(err)
+			}
+			i := cs.namepos[tc.Float32[k]]
+			u := cs.bdata[i].([]float32)
+			cs.bdata[i] = append(u, float32(x))
+		}
+
+		for k, pos := range tc.Float64Pos {
+			x, err := strconv.ParseFloat(rec[pos], 64)
+			if err != nil {
+				x = math.NaN()
+			}
+			i := cs.namepos[tc.Float64[k]]
+			u := cs.bdata[i].([]float64)
+			cs.bdata[i] = append(u, float64(x))
+		}
+
+		for k, pos := range tc.StringPos {
+			i := cs.namepos[tc.String[k]]
+			u := cs.bdata[i].([]string)
+			cs.bdata[i] = append(u, rec[pos])
+		}
+
+		for _, pos := range tc.TimePos {
+			_ = pos
+			//x, err := strconv.Atoi(rec[pos])
+			//if err != nil {
+			//			panic(err)
+			//		}
+			//		u := cs.bdata[i].([]time.Time)
+			//		cs.bdata[i] = append(u, time.Time{}) // DEBUG
+		}
+	}
+
+	return true
 }

@@ -1,7 +1,8 @@
 package dstream
 
 import (
-        "fmt"
+	"fmt"
+	"time"
 )
 
 func (sd *segmentedData) GetPos(j int) interface{} {
@@ -66,7 +67,7 @@ func (sd *segmentedData) setstash() {
 		if sd.stash[j] != nil {
                     z = sd.stash[j].([]{{ .Type }})
                 }
-	        z = resize{{ .Type }}(z, len(x))
+	        z = resize{{ .Utype }}(z, len(x))
 		copy(z, x)
 		sd.stash[j] = z
   	    {{- end }}

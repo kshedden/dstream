@@ -4,6 +4,7 @@ package dstream
 
 import (
 	"fmt"
+	"time"
 )
 
 // Dechunk combines all chunks into a single chunk.
@@ -32,34 +33,10 @@ func Dechunk(source Dstream) Dstream {
 					z = data[j][0].([]string)
 				}
 				data[j][0] = append(z, x...)
-			case []float64:
-				var z []float64
+			case []time.Time:
+				var z []time.Time
 				if data[j][0] != nil {
-					z = data[j][0].([]float64)
-				}
-				data[j][0] = append(z, x...)
-			case []float32:
-				var z []float32
-				if data[j][0] != nil {
-					z = data[j][0].([]float32)
-				}
-				data[j][0] = append(z, x...)
-			case []uint64:
-				var z []uint64
-				if data[j][0] != nil {
-					z = data[j][0].([]uint64)
-				}
-				data[j][0] = append(z, x...)
-			case []uint32:
-				var z []uint32
-				if data[j][0] != nil {
-					z = data[j][0].([]uint32)
-				}
-				data[j][0] = append(z, x...)
-			case []uint16:
-				var z []uint16
-				if data[j][0] != nil {
-					z = data[j][0].([]uint16)
+					z = data[j][0].([]time.Time)
 				}
 				data[j][0] = append(z, x...)
 			case []uint8:
@@ -68,22 +45,22 @@ func Dechunk(source Dstream) Dstream {
 					z = data[j][0].([]uint8)
 				}
 				data[j][0] = append(z, x...)
-			case []int64:
-				var z []int64
+			case []uint16:
+				var z []uint16
 				if data[j][0] != nil {
-					z = data[j][0].([]int64)
+					z = data[j][0].([]uint16)
 				}
 				data[j][0] = append(z, x...)
-			case []int32:
-				var z []int32
+			case []uint32:
+				var z []uint32
 				if data[j][0] != nil {
-					z = data[j][0].([]int32)
+					z = data[j][0].([]uint32)
 				}
 				data[j][0] = append(z, x...)
-			case []int16:
-				var z []int16
+			case []uint64:
+				var z []uint64
 				if data[j][0] != nil {
-					z = data[j][0].([]int16)
+					z = data[j][0].([]uint64)
 				}
 				data[j][0] = append(z, x...)
 			case []int8:
@@ -92,10 +69,34 @@ func Dechunk(source Dstream) Dstream {
 					z = data[j][0].([]int8)
 				}
 				data[j][0] = append(z, x...)
-			case []int:
-				var z []int
+			case []int16:
+				var z []int16
 				if data[j][0] != nil {
-					z = data[j][0].([]int)
+					z = data[j][0].([]int16)
+				}
+				data[j][0] = append(z, x...)
+			case []int32:
+				var z []int32
+				if data[j][0] != nil {
+					z = data[j][0].([]int32)
+				}
+				data[j][0] = append(z, x...)
+			case []int64:
+				var z []int64
+				if data[j][0] != nil {
+					z = data[j][0].([]int64)
+				}
+				data[j][0] = append(z, x...)
+			case []float32:
+				var z []float32
+				if data[j][0] != nil {
+					z = data[j][0].([]float32)
+				}
+				data[j][0] = append(z, x...)
+			case []float64:
+				var z []float64
+				if data[j][0] != nil {
+					z = data[j][0].([]float64)
 				}
 				data[j][0] = append(z, x...)
 			default:

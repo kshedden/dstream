@@ -100,7 +100,7 @@ func (df *diffChunk) Next() bool {
 				if df.bdata[jj] != nil {
 					y = df.bdata[jj].([]float64)
 				}
-				y = resizefloat64(y, n)
+				y = resizeFloat64(y, n)
 				copy(y, v)
 				y = diff(y, q)
 				if q < maxorder {

@@ -1,7 +1,5 @@
 package dstream
 
-//go:generate go run gen.go -template=bcols.template -numeric
-
 import (
 	"bufio"
 	"compress/gzip"

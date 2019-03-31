@@ -1,8 +1,9 @@
 package dstream
 
 import (
-        "fmt"
+    "fmt"
 	"os"
+	"time"
 )
 
 // EqualReport compares two Dstream values.  If they are not equal,
@@ -14,8 +15,8 @@ func EqualReport(x, y Dstream, report bool) bool {
 	x.Reset()
 	y.Reset()
 
-        // Check variable names
-	if !aequalstring(x.Names(), y.Names()) {
+    // Check variable names
+	if !aequalString(x.Names(), y.Names()) {
 		if report {
 			msg := fmt.Sprintf("Names are not equal:\nx: %v\ny: %v\n",
 				x.Names(), y.Names())
@@ -46,7 +47,7 @@ func EqualReport(x, y Dstream, report bool) bool {
                         {{ range . }}
                         case []{{ .Type }}:
 				u, ok := y.GetPos(j).([]{{ .Type }})
-				if !ok || !aequal{{ .Type }}(v, u) {
+				if !ok || !aequal{{ .Utype }}(v, u) {
 					if report {
 						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
@@ -76,7 +77,7 @@ func EqualReport(x, y Dstream, report bool) bool {
 
 
 {{ range . }}
-func aequal{{ .Type}}(x, y []{{ .Type }}) bool {
+func aequal{{ .Utype}}(x, y []{{ .Type }}) bool {
 	if len(x) != len(y) {
 		return false
 	}

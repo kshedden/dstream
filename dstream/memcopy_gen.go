@@ -2,6 +2,10 @@
 
 package dstream
 
+import (
+	"time"
+)
+
 // MemCopy returns a Dstream that copies the provided Dstream into
 // in-memory storage.
 func MemCopy(data Dstream) Dstream {
@@ -19,48 +23,48 @@ func MemCopy(data Dstream) Dstream {
 				z := make([]string, len(v))
 				copy(z, v)
 				y = z
-			case []float64:
-				z := make([]float64, len(v))
-				copy(z, v)
-				y = z
-			case []float32:
-				z := make([]float32, len(v))
-				copy(z, v)
-				y = z
-			case []uint64:
-				z := make([]uint64, len(v))
-				copy(z, v)
-				y = z
-			case []uint32:
-				z := make([]uint32, len(v))
-				copy(z, v)
-				y = z
-			case []uint16:
-				z := make([]uint16, len(v))
+			case []time.Time:
+				z := make([]time.Time, len(v))
 				copy(z, v)
 				y = z
 			case []uint8:
 				z := make([]uint8, len(v))
 				copy(z, v)
 				y = z
-			case []int64:
-				z := make([]int64, len(v))
+			case []uint16:
+				z := make([]uint16, len(v))
 				copy(z, v)
 				y = z
-			case []int32:
-				z := make([]int32, len(v))
+			case []uint32:
+				z := make([]uint32, len(v))
 				copy(z, v)
 				y = z
-			case []int16:
-				z := make([]int16, len(v))
+			case []uint64:
+				z := make([]uint64, len(v))
 				copy(z, v)
 				y = z
 			case []int8:
 				z := make([]int8, len(v))
 				copy(z, v)
 				y = z
-			case []int:
-				z := make([]int, len(v))
+			case []int16:
+				z := make([]int16, len(v))
+				copy(z, v)
+				y = z
+			case []int32:
+				z := make([]int32, len(v))
+				copy(z, v)
+				y = z
+			case []int64:
+				z := make([]int64, len(v))
+				copy(z, v)
+				y = z
+			case []float32:
+				z := make([]float32, len(v))
+				copy(z, v)
+				y = z
+			case []float64:
+				z := make([]float64, len(v))
 				copy(z, v)
 				y = z
 			}

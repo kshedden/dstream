@@ -1,0 +1,77 @@
+package dstream
+
+import (
+    "fmt"
+	"time"
+)
+
+type CSVTypeConf struct {
+
+	// Names of the variables
+	{{- range . }}
+	    {{ .Utype }} []string
+	{{- end }}
+
+    // Positions of the variables in the CSV file
+	{{- range . }}
+  	    {{ .Utype }}Pos []int
+	{{- end }}
+
+	// The names of the variables, in the order that the columns
+	// are stored.  If nil, the ordering is determined by the
+	// types.
+	Names []string
+}
+
+func (cs *CSVReader) setNames() {
+
+	tc := cs.typeConf
+
+	if len(tc.Names) > 0 {
+		cs.names = tc.Names
+		return
+	}
+
+	cs.names = cs.names[0:0]
+	{{- range . }}
+	cs.names = append(cs.names, tc.{{ .Utype }}...)
+    {{- end }}
+}
+
+// SetPos derermines the positions in the provided list of columns
+// of all configured variables.  The configured variables are given
+// in the type-specific slices named Float64, Int64, etc.
+func (tc *CSVTypeConf) SetPos(h []string) {
+
+	m := make(map[string]int)
+	for k, v := range h {
+		m[v] = k
+	}
+
+	{{- range . }}
+	tc.{{ .Utype }}Pos = tc.{{ .Utype }}Pos[0:0]
+	for _, v := range tc.{{ .Utype }} {
+		p, ok := m[v]
+		if !ok {
+			msg := fmt.Sprintf("{{ .Utype }} variable '%s' not found.\n", v)
+			panic(msg)
+		}
+		tc.{{ .Utype }}Pos = append(tc.{{ .Utype }}Pos, p)
+	}
+	{{ end }}
+}
+
+func (cs *CSVReader) setbdata() {
+
+	tc := cs.typeConf
+
+	cs.bdata = make([]interface{}, len(cs.names))
+
+	{{ range . }}
+	for _, na := range tc.{{ .Utype }} {
+		p := cs.namepos[na]
+		cs.bdata[p] = make([]{{ .Type }}, 0)
+	}
+	{{- end}}
+}
+

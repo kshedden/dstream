@@ -1,6 +1,6 @@
 # Preliminaries
 
-Link to Godoc [documentation](https://godoc.org/github.com/kshedden/dstream/dstream)
+[Package documentation](https://godoc.org/github.com/kshedden/dstream/dstream) at (Godoc.org).
 
 To install:
 
@@ -16,7 +16,7 @@ multivariate data in [Go](http://golang.org).  A Dstream is a
 holds a rectangular array of data in which the columns
 are variables and the rows are cases or observations.  The Dstream
 framework facilitates processing data of this type.  One important
-application is feeding data into statistical modeling tools such as
+application for this package is feeding data into statistical modeling tools such as
 regression analysis.
 
 Dstream is designed to work with large datasets, where it is not
@@ -31,7 +31,7 @@ During data processing, the chunks are visited in order.  The
 `Next` method advances the Dstream to the next chunk.  When
 possible, the memory backing a chunk is re-used for the next chunk.
 Therefore, a chunk must either be completely processed, or copied to
-independent memory before subsequent chunks are read.  Random chunk
+independent memory before subsequent calls to `Next`.  Random chunk
 access is not permitted.  Most Dstreams can be reset with the `Reset`
 method and read multiple times, but
 this requires all the overhead of the initial read (the data will be
@@ -39,12 +39,12 @@ fully re-processed from its source following a call to `Reset`).
 
 The typical pattern for working with a Dstream is to visit the chunks
 in sequence, extract variables as needed, and perform the desired
-processing.  A template for this operation using a Dstream named _da_
+processing.  A template for this operation using a Dstream named _ds_
 is:
 
 ```
-for da.Next() {
-    x := da.Get("x3").([]float64) // extract the variable named "x3"
+for ds.Next() {
+    x := ds.Get("x3").([]float64) // extract the variable named "x3"
     // do something with x
 }
 ```
@@ -72,9 +72,9 @@ The most common transformations can be grouped as follows:
 
 * _Extension_: add new variables to the dstream, usually derived from
   the existing variables.  Examples include
+  [Generate](https://godoc.org/github.com/kshedden/dstream/dstream#Generate),
   [DiffChunk](https://godoc.org/github.com/kshedden/dstream/dstream#DiffChunk),
   [LagChunk](https://godoc.org/github.com/kshedden/dstream/dstream#LagChunk),
-  [Apply](https://godoc.org/github.com/kshedden/dstream/dstream#DropNA),
   and
   [LinApply](https://godoc.org/github.com/kshedden/dstream/dstream#LinApply).
 

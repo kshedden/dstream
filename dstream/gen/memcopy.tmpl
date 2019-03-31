@@ -1,5 +1,9 @@
 package dstream
 
+import (
+    "time"
+)
+
 // MemCopy returns a Dstream that copies the provided Dstream into
 // in-memory storage.
 func MemCopy(data Dstream) Dstream {
@@ -13,14 +17,14 @@ func MemCopy(data Dstream) Dstream {
 			var y interface{}
 			v := data.GetPos(j)
 			switch v := v.(type) {
-			        {{- range . }}
-                                        case []{{ .Type }}:
+			    {{- range . }}
+                    case []{{ .Type }}:
 				        z := make([]{{ .Type }}, len(v))
 				        copy(z, v)
 				        y = z
-			        {{- end }}
+			    {{- end }}
 			}
-		        bdata[j] = append(bdata[j], y)
+		    bdata[j] = append(bdata[j], y)
 		}
 	}
 

@@ -1,0 +1,23 @@
+package dstream
+
+import (
+    "fmt"
+    "time"
+)
+
+func (r *replace) GetPos(j int) interface{} {
+
+	if j != r.colpos {
+		return r.source.GetPos(j)
+	}
+
+        switch z := r.coldata.(type) {
+            {{- range . }}
+            case []{{ .Type }}:
+	            return z[r.rowpos:r.rowpos+r.csize]
+     	    {{- end }}
+	    default:
+	        msg := fmt.Sprintf("Convert: unknown type %T\n", z)
+        	panic(msg)
+	}
+}

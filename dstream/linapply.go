@@ -66,7 +66,7 @@ func (a *linapply) Next() bool {
 		if a.bdata[q+j] != nil {
 			z = a.bdata[q+j].([]float64)
 		}
-		z = resizefloat64(z, n)
+		z = resizeFloat64(z, n)
 		a.bdata[q+j] = z
 		zeroFloat(z)
 

@@ -2,10 +2,13 @@ package dstream
 
 import (
         "fmt"
+        "time"
 )
 
-{{ range . }}
-func resize{{ .Type }}(x []{{ .Type }}, n int) []{{ .Type }} {
+{{- range . }}
+// Resize returns a slice of the given type having size n,
+// re-using the provided slice if it is big enough.
+func resize{{ .Utype }}(x []{{ .Type }}, n int) []{{ .Type }} {
 	if cap(x) < n {
 		x = make([]{{ .Type }}, n)
 	}

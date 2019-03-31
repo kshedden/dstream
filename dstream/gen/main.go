@@ -7,31 +7,33 @@ import (
 	"flag"
 	"go/format"
 	"os"
+	"path"
 	"strings"
 	"text/template"
 )
 
 type Dtype struct {
-	Type string
+	Type  string
+	Utype string
 }
 
 var (
 	NumTypes = []Dtype{
-		Dtype{Type: "float64"},
-		Dtype{Type: "float32"},
-		Dtype{Type: "uint64"},
-		Dtype{Type: "uint32"},
-		Dtype{Type: "uint16"},
-		Dtype{Type: "uint8"},
-		Dtype{Type: "int64"},
-		Dtype{Type: "int32"},
-		Dtype{Type: "int16"},
-		Dtype{Type: "int8"},
-		Dtype{Type: "int"},
+		Dtype{"uint8", "Uint8"},
+		Dtype{"uint16", "Uint16"},
+		Dtype{"uint32", "Uint32"},
+		Dtype{"uint64", "Uint64"},
+		Dtype{"int8", "Int8"},
+		Dtype{"int16", "Int16"},
+		Dtype{"int32", "Int32"},
+		Dtype{"int64", "Int64"},
+		Dtype{"float32", "Float32"},
+		Dtype{"float64", "Float64"},
 	}
 
 	AllTypes = []Dtype{
-		Dtype{Type: "string"},
+		Dtype{"string", "String"},
+		Dtype{"time.Time", "Time"},
 	}
 )
 
@@ -41,6 +43,10 @@ func main() {
 	numeric := flag.Bool("numeric", false, "only use numeric types")
 	templatefile := flag.String("template", "", "template file")
 	flag.Parse()
+
+	if *templatefile == "" {
+		panic("'template' is a required argument")
+	}
 
 	AllTypes = append(AllTypes, NumTypes...)
 
@@ -60,17 +66,17 @@ func main() {
 	}
 
 	var p []byte
-	if !*noformat {
+	if *noformat {
+		p = buf.Bytes()
+	} else {
 		p, err = format.Source(buf.Bytes())
 		if err != nil {
 			panic(err)
 		}
-	} else {
-		p = buf.Bytes()
 	}
 
-	outname := strings.Replace(*templatefile, ".template", "_gen.go", 1)
-	out, err := os.Create(outname)
+	outname := strings.Replace(*templatefile, ".tmpl", "_gen.go", 1)
+	out, err := os.Create(path.Join("..", outname))
 	if err != nil {
 		panic(err)
 	}

@@ -5,6 +5,7 @@ package dstream
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 // EqualReport compares two Dstream values.  If they are not equal,
@@ -17,7 +18,7 @@ func EqualReport(x, y Dstream, report bool) bool {
 	y.Reset()
 
 	// Check variable names
-	if !aequalstring(x.Names(), y.Names()) {
+	if !aequalString(x.Names(), y.Names()) {
 		if report {
 			msg := fmt.Sprintf("Names are not equal:\nx: %v\ny: %v\n",
 				x.Names(), y.Names())
@@ -48,7 +49,7 @@ func EqualReport(x, y Dstream, report bool) bool {
 
 			case []string:
 				u, ok := y.GetPos(j).([]string)
-				if !ok || !aequalstring(v, u) {
+				if !ok || !aequalString(v, u) {
 					if report {
 						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
@@ -56,49 +57,9 @@ func EqualReport(x, y Dstream, report bool) bool {
 					return false
 				}
 
-			case []float64:
-				u, ok := y.GetPos(j).([]float64)
-				if !ok || !aequalfloat64(v, u) {
-					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
-						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
-					}
-					return false
-				}
-
-			case []float32:
-				u, ok := y.GetPos(j).([]float32)
-				if !ok || !aequalfloat32(v, u) {
-					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
-						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
-					}
-					return false
-				}
-
-			case []uint64:
-				u, ok := y.GetPos(j).([]uint64)
-				if !ok || !aequaluint64(v, u) {
-					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
-						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
-					}
-					return false
-				}
-
-			case []uint32:
-				u, ok := y.GetPos(j).([]uint32)
-				if !ok || !aequaluint32(v, u) {
-					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
-						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
-					}
-					return false
-				}
-
-			case []uint16:
-				u, ok := y.GetPos(j).([]uint16)
-				if !ok || !aequaluint16(v, u) {
+			case []time.Time:
+				u, ok := y.GetPos(j).([]time.Time)
+				if !ok || !aequalTime(v, u) {
 					if report {
 						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
@@ -108,7 +69,7 @@ func EqualReport(x, y Dstream, report bool) bool {
 
 			case []uint8:
 				u, ok := y.GetPos(j).([]uint8)
-				if !ok || !aequaluint8(v, u) {
+				if !ok || !aequalUint8(v, u) {
 					if report {
 						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
@@ -116,9 +77,9 @@ func EqualReport(x, y Dstream, report bool) bool {
 					return false
 				}
 
-			case []int64:
-				u, ok := y.GetPos(j).([]int64)
-				if !ok || !aequalint64(v, u) {
+			case []uint16:
+				u, ok := y.GetPos(j).([]uint16)
+				if !ok || !aequalUint16(v, u) {
 					if report {
 						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
@@ -126,9 +87,9 @@ func EqualReport(x, y Dstream, report bool) bool {
 					return false
 				}
 
-			case []int32:
-				u, ok := y.GetPos(j).([]int32)
-				if !ok || !aequalint32(v, u) {
+			case []uint32:
+				u, ok := y.GetPos(j).([]uint32)
+				if !ok || !aequalUint32(v, u) {
 					if report {
 						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
@@ -136,9 +97,9 @@ func EqualReport(x, y Dstream, report bool) bool {
 					return false
 				}
 
-			case []int16:
-				u, ok := y.GetPos(j).([]int16)
-				if !ok || !aequalint16(v, u) {
+			case []uint64:
+				u, ok := y.GetPos(j).([]uint64)
+				if !ok || !aequalUint64(v, u) {
 					if report {
 						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
@@ -148,7 +109,7 @@ func EqualReport(x, y Dstream, report bool) bool {
 
 			case []int8:
 				u, ok := y.GetPos(j).([]int8)
-				if !ok || !aequalint8(v, u) {
+				if !ok || !aequalInt8(v, u) {
 					if report {
 						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
@@ -156,9 +117,49 @@ func EqualReport(x, y Dstream, report bool) bool {
 					return false
 				}
 
-			case []int:
-				u, ok := y.GetPos(j).([]int)
-				if !ok || !aequalint(v, u) {
+			case []int16:
+				u, ok := y.GetPos(j).([]int16)
+				if !ok || !aequalInt16(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+
+			case []int32:
+				u, ok := y.GetPos(j).([]int32)
+				if !ok || !aequalInt32(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+
+			case []int64:
+				u, ok := y.GetPos(j).([]int64)
+				if !ok || !aequalInt64(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+
+			case []float32:
+				u, ok := y.GetPos(j).([]float32)
+				if !ok || !aequalFloat32(v, u) {
+					if report {
+						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					}
+					return false
+				}
+
+			case []float64:
+				u, ok := y.GetPos(j).([]float64)
+				if !ok || !aequalFloat64(v, u) {
 					if report {
 						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
@@ -186,7 +187,7 @@ func EqualReport(x, y Dstream, report bool) bool {
 	return true
 }
 
-func aequalstring(x, y []string) bool {
+func aequalString(x, y []string) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -198,7 +199,7 @@ func aequalstring(x, y []string) bool {
 	return true
 }
 
-func aequalfloat64(x, y []float64) bool {
+func aequalTime(x, y []time.Time) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -210,7 +211,7 @@ func aequalfloat64(x, y []float64) bool {
 	return true
 }
 
-func aequalfloat32(x, y []float32) bool {
+func aequalUint8(x, y []uint8) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -222,7 +223,7 @@ func aequalfloat32(x, y []float32) bool {
 	return true
 }
 
-func aequaluint64(x, y []uint64) bool {
+func aequalUint16(x, y []uint16) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -234,7 +235,7 @@ func aequaluint64(x, y []uint64) bool {
 	return true
 }
 
-func aequaluint32(x, y []uint32) bool {
+func aequalUint32(x, y []uint32) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -246,7 +247,7 @@ func aequaluint32(x, y []uint32) bool {
 	return true
 }
 
-func aequaluint16(x, y []uint16) bool {
+func aequalUint64(x, y []uint64) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -258,7 +259,7 @@ func aequaluint16(x, y []uint16) bool {
 	return true
 }
 
-func aequaluint8(x, y []uint8) bool {
+func aequalInt8(x, y []int8) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -270,7 +271,7 @@ func aequaluint8(x, y []uint8) bool {
 	return true
 }
 
-func aequalint64(x, y []int64) bool {
+func aequalInt16(x, y []int16) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -282,7 +283,7 @@ func aequalint64(x, y []int64) bool {
 	return true
 }
 
-func aequalint32(x, y []int32) bool {
+func aequalInt32(x, y []int32) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -294,7 +295,7 @@ func aequalint32(x, y []int32) bool {
 	return true
 }
 
-func aequalint16(x, y []int16) bool {
+func aequalInt64(x, y []int64) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -306,7 +307,7 @@ func aequalint16(x, y []int16) bool {
 	return true
 }
 
-func aequalint8(x, y []int8) bool {
+func aequalFloat32(x, y []float32) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -318,7 +319,7 @@ func aequalint8(x, y []int8) bool {
 	return true
 }
 
-func aequalint(x, y []int) bool {
+func aequalFloat64(x, y []float64) bool {
 	if len(x) != len(y) {
 		return false
 	}

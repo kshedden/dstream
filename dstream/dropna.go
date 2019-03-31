@@ -88,7 +88,7 @@ func (dna *dropNA) Next() bool {
 			if data[j] != nil {
 				x = data[j].([]float64)
 			}
-			x = resizefloat64(x, m)
+			x = resizeFloat64(x, m)
 			for i, p := range dna.pos {
 				x[i] = v[p]
 			}
@@ -98,7 +98,7 @@ func (dna *dropNA) Next() bool {
 			if data[j] != nil {
 				x = data[j].([]string)
 			}
-			x = resizestring(x, m)
+			x = resizeString(x, m)
 			for i, p := range dna.pos {
 				x[i] = v[p]
 			}

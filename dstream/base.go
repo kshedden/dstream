@@ -212,5 +212,3 @@ func Shallow(data Dstream) Dstream {
 		return MemCopy(data)
 	}
 }
-
-//go:generate go run gen.go -template=memcopy.template

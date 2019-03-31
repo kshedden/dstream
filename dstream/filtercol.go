@@ -115,7 +115,7 @@ func (fc *filterCol) Next() bool {
 				if fc.bdata[j] != nil {
 					u = fc.bdata[j].([]float64)
 				}
-				u = resizefloat64(u, nkp)
+				u = resizeFloat64(u, nkp)
 				for i, j := range fc.keeppos {
 					u[i] = v[j]
 				}
@@ -129,7 +129,7 @@ func (fc *filterCol) Next() bool {
 				if fc.bdata[j] != nil {
 					u = fc.bdata[j].([]string)
 				}
-				u = resizestring(u, nkp)
+				u = resizeString(u, nkp)
 				for i, j := range fc.keeppos {
 					u[i] = v[j]
 				}

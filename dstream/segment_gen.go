@@ -4,6 +4,7 @@ package dstream
 
 import (
 	"fmt"
+	"time"
 )
 
 func (sd *segmentedData) GetPos(j int) interface{} {
@@ -22,31 +23,7 @@ func (sd *segmentedData) GetPos(j int) interface{} {
 			pos = len(x)
 		}
 		return x[0:pos]
-	case []float64:
-		pos := sd.pos
-		if stash {
-			pos = len(x)
-		}
-		return x[0:pos]
-	case []float32:
-		pos := sd.pos
-		if stash {
-			pos = len(x)
-		}
-		return x[0:pos]
-	case []uint64:
-		pos := sd.pos
-		if stash {
-			pos = len(x)
-		}
-		return x[0:pos]
-	case []uint32:
-		pos := sd.pos
-		if stash {
-			pos = len(x)
-		}
-		return x[0:pos]
-	case []uint16:
+	case []time.Time:
 		pos := sd.pos
 		if stash {
 			pos = len(x)
@@ -58,19 +35,19 @@ func (sd *segmentedData) GetPos(j int) interface{} {
 			pos = len(x)
 		}
 		return x[0:pos]
-	case []int64:
+	case []uint16:
 		pos := sd.pos
 		if stash {
 			pos = len(x)
 		}
 		return x[0:pos]
-	case []int32:
+	case []uint32:
 		pos := sd.pos
 		if stash {
 			pos = len(x)
 		}
 		return x[0:pos]
-	case []int16:
+	case []uint64:
 		pos := sd.pos
 		if stash {
 			pos = len(x)
@@ -82,7 +59,31 @@ func (sd *segmentedData) GetPos(j int) interface{} {
 			pos = len(x)
 		}
 		return x[0:pos]
-	case []int:
+	case []int16:
+		pos := sd.pos
+		if stash {
+			pos = len(x)
+		}
+		return x[0:pos]
+	case []int32:
+		pos := sd.pos
+		if stash {
+			pos = len(x)
+		}
+		return x[0:pos]
+	case []int64:
+		pos := sd.pos
+		if stash {
+			pos = len(x)
+		}
+		return x[0:pos]
+	case []float32:
+		pos := sd.pos
+		if stash {
+			pos = len(x)
+		}
+		return x[0:pos]
+	case []float64:
 		pos := sd.pos
 		if stash {
 			pos = len(x)
@@ -108,48 +109,48 @@ func (sd *segmentedData) fixstash() bool {
 			z := sd.stash[j].([]string)
 			sd.stash[j] = append(z, x[0:pos]...)
 			sd.bdata[j] = x[pos:len(x)]
-		case []float64:
-			z := sd.stash[j].([]float64)
-			sd.stash[j] = append(z, x[0:pos]...)
-			sd.bdata[j] = x[pos:len(x)]
-		case []float32:
-			z := sd.stash[j].([]float32)
-			sd.stash[j] = append(z, x[0:pos]...)
-			sd.bdata[j] = x[pos:len(x)]
-		case []uint64:
-			z := sd.stash[j].([]uint64)
-			sd.stash[j] = append(z, x[0:pos]...)
-			sd.bdata[j] = x[pos:len(x)]
-		case []uint32:
-			z := sd.stash[j].([]uint32)
-			sd.stash[j] = append(z, x[0:pos]...)
-			sd.bdata[j] = x[pos:len(x)]
-		case []uint16:
-			z := sd.stash[j].([]uint16)
+		case []time.Time:
+			z := sd.stash[j].([]time.Time)
 			sd.stash[j] = append(z, x[0:pos]...)
 			sd.bdata[j] = x[pos:len(x)]
 		case []uint8:
 			z := sd.stash[j].([]uint8)
 			sd.stash[j] = append(z, x[0:pos]...)
 			sd.bdata[j] = x[pos:len(x)]
-		case []int64:
-			z := sd.stash[j].([]int64)
+		case []uint16:
+			z := sd.stash[j].([]uint16)
 			sd.stash[j] = append(z, x[0:pos]...)
 			sd.bdata[j] = x[pos:len(x)]
-		case []int32:
-			z := sd.stash[j].([]int32)
+		case []uint32:
+			z := sd.stash[j].([]uint32)
 			sd.stash[j] = append(z, x[0:pos]...)
 			sd.bdata[j] = x[pos:len(x)]
-		case []int16:
-			z := sd.stash[j].([]int16)
+		case []uint64:
+			z := sd.stash[j].([]uint64)
 			sd.stash[j] = append(z, x[0:pos]...)
 			sd.bdata[j] = x[pos:len(x)]
 		case []int8:
 			z := sd.stash[j].([]int8)
 			sd.stash[j] = append(z, x[0:pos]...)
 			sd.bdata[j] = x[pos:len(x)]
-		case []int:
-			z := sd.stash[j].([]int)
+		case []int16:
+			z := sd.stash[j].([]int16)
+			sd.stash[j] = append(z, x[0:pos]...)
+			sd.bdata[j] = x[pos:len(x)]
+		case []int32:
+			z := sd.stash[j].([]int32)
+			sd.stash[j] = append(z, x[0:pos]...)
+			sd.bdata[j] = x[pos:len(x)]
+		case []int64:
+			z := sd.stash[j].([]int64)
+			sd.stash[j] = append(z, x[0:pos]...)
+			sd.bdata[j] = x[pos:len(x)]
+		case []float32:
+			z := sd.stash[j].([]float32)
+			sd.stash[j] = append(z, x[0:pos]...)
+			sd.bdata[j] = x[pos:len(x)]
+		case []float64:
+			z := sd.stash[j].([]float64)
 			sd.stash[j] = append(z, x[0:pos]...)
 			sd.bdata[j] = x[pos:len(x)]
 		default:
@@ -171,47 +172,15 @@ func (sd *segmentedData) setstash() {
 			if sd.stash[j] != nil {
 				z = sd.stash[j].([]string)
 			}
-			z = resizestring(z, len(x))
+			z = resizeString(z, len(x))
 			copy(z, x)
 			sd.stash[j] = z
-		case []float64:
-			var z []float64
+		case []time.Time:
+			var z []time.Time
 			if sd.stash[j] != nil {
-				z = sd.stash[j].([]float64)
+				z = sd.stash[j].([]time.Time)
 			}
-			z = resizefloat64(z, len(x))
-			copy(z, x)
-			sd.stash[j] = z
-		case []float32:
-			var z []float32
-			if sd.stash[j] != nil {
-				z = sd.stash[j].([]float32)
-			}
-			z = resizefloat32(z, len(x))
-			copy(z, x)
-			sd.stash[j] = z
-		case []uint64:
-			var z []uint64
-			if sd.stash[j] != nil {
-				z = sd.stash[j].([]uint64)
-			}
-			z = resizeuint64(z, len(x))
-			copy(z, x)
-			sd.stash[j] = z
-		case []uint32:
-			var z []uint32
-			if sd.stash[j] != nil {
-				z = sd.stash[j].([]uint32)
-			}
-			z = resizeuint32(z, len(x))
-			copy(z, x)
-			sd.stash[j] = z
-		case []uint16:
-			var z []uint16
-			if sd.stash[j] != nil {
-				z = sd.stash[j].([]uint16)
-			}
-			z = resizeuint16(z, len(x))
+			z = resizeTime(z, len(x))
 			copy(z, x)
 			sd.stash[j] = z
 		case []uint8:
@@ -219,31 +188,31 @@ func (sd *segmentedData) setstash() {
 			if sd.stash[j] != nil {
 				z = sd.stash[j].([]uint8)
 			}
-			z = resizeuint8(z, len(x))
+			z = resizeUint8(z, len(x))
 			copy(z, x)
 			sd.stash[j] = z
-		case []int64:
-			var z []int64
+		case []uint16:
+			var z []uint16
 			if sd.stash[j] != nil {
-				z = sd.stash[j].([]int64)
+				z = sd.stash[j].([]uint16)
 			}
-			z = resizeint64(z, len(x))
+			z = resizeUint16(z, len(x))
 			copy(z, x)
 			sd.stash[j] = z
-		case []int32:
-			var z []int32
+		case []uint32:
+			var z []uint32
 			if sd.stash[j] != nil {
-				z = sd.stash[j].([]int32)
+				z = sd.stash[j].([]uint32)
 			}
-			z = resizeint32(z, len(x))
+			z = resizeUint32(z, len(x))
 			copy(z, x)
 			sd.stash[j] = z
-		case []int16:
-			var z []int16
+		case []uint64:
+			var z []uint64
 			if sd.stash[j] != nil {
-				z = sd.stash[j].([]int16)
+				z = sd.stash[j].([]uint64)
 			}
-			z = resizeint16(z, len(x))
+			z = resizeUint64(z, len(x))
 			copy(z, x)
 			sd.stash[j] = z
 		case []int8:
@@ -251,15 +220,47 @@ func (sd *segmentedData) setstash() {
 			if sd.stash[j] != nil {
 				z = sd.stash[j].([]int8)
 			}
-			z = resizeint8(z, len(x))
+			z = resizeInt8(z, len(x))
 			copy(z, x)
 			sd.stash[j] = z
-		case []int:
-			var z []int
+		case []int16:
+			var z []int16
 			if sd.stash[j] != nil {
-				z = sd.stash[j].([]int)
+				z = sd.stash[j].([]int16)
 			}
-			z = resizeint(z, len(x))
+			z = resizeInt16(z, len(x))
+			copy(z, x)
+			sd.stash[j] = z
+		case []int32:
+			var z []int32
+			if sd.stash[j] != nil {
+				z = sd.stash[j].([]int32)
+			}
+			z = resizeInt32(z, len(x))
+			copy(z, x)
+			sd.stash[j] = z
+		case []int64:
+			var z []int64
+			if sd.stash[j] != nil {
+				z = sd.stash[j].([]int64)
+			}
+			z = resizeInt64(z, len(x))
+			copy(z, x)
+			sd.stash[j] = z
+		case []float32:
+			var z []float32
+			if sd.stash[j] != nil {
+				z = sd.stash[j].([]float32)
+			}
+			z = resizeFloat32(z, len(x))
+			copy(z, x)
+			sd.stash[j] = z
+		case []float64:
+			var z []float64
+			if sd.stash[j] != nil {
+				z = sd.stash[j].([]float64)
+			}
+			z = resizeFloat64(z, len(x))
 			copy(z, x)
 			sd.stash[j] = z
 		default:
@@ -277,27 +278,27 @@ func (sd *segmentedData) leftsliceb(pos int) {
 		switch x := x.(type) {
 		case []string:
 			sd.bdata[j] = x[pos:len(x)]
-		case []float64:
-			sd.bdata[j] = x[pos:len(x)]
-		case []float32:
-			sd.bdata[j] = x[pos:len(x)]
-		case []uint64:
-			sd.bdata[j] = x[pos:len(x)]
-		case []uint32:
-			sd.bdata[j] = x[pos:len(x)]
-		case []uint16:
+		case []time.Time:
 			sd.bdata[j] = x[pos:len(x)]
 		case []uint8:
 			sd.bdata[j] = x[pos:len(x)]
-		case []int64:
+		case []uint16:
 			sd.bdata[j] = x[pos:len(x)]
-		case []int32:
+		case []uint32:
 			sd.bdata[j] = x[pos:len(x)]
-		case []int16:
+		case []uint64:
 			sd.bdata[j] = x[pos:len(x)]
 		case []int8:
 			sd.bdata[j] = x[pos:len(x)]
-		case []int:
+		case []int16:
+			sd.bdata[j] = x[pos:len(x)]
+		case []int32:
+			sd.bdata[j] = x[pos:len(x)]
+		case []int64:
+			sd.bdata[j] = x[pos:len(x)]
+		case []float32:
+			sd.bdata[j] = x[pos:len(x)]
+		case []float64:
 			sd.bdata[j] = x[pos:len(x)]
 		default:
 			msg := fmt.Sprintf("Segment: unknown type %T\n", x)
@@ -323,47 +324,7 @@ func (sd *segmentedData) findSegment(start int) int {
 					break
 				}
 			}
-		case []float64:
-			for i := start + 1; i < len(x); i++ {
-				if pos != -1 && i >= pos {
-					break
-				}
-				if x[i] != x[i-1] {
-					pos = i
-					break
-				}
-			}
-		case []float32:
-			for i := start + 1; i < len(x); i++ {
-				if pos != -1 && i >= pos {
-					break
-				}
-				if x[i] != x[i-1] {
-					pos = i
-					break
-				}
-			}
-		case []uint64:
-			for i := start + 1; i < len(x); i++ {
-				if pos != -1 && i >= pos {
-					break
-				}
-				if x[i] != x[i-1] {
-					pos = i
-					break
-				}
-			}
-		case []uint32:
-			for i := start + 1; i < len(x); i++ {
-				if pos != -1 && i >= pos {
-					break
-				}
-				if x[i] != x[i-1] {
-					pos = i
-					break
-				}
-			}
-		case []uint16:
+		case []time.Time:
 			for i := start + 1; i < len(x); i++ {
 				if pos != -1 && i >= pos {
 					break
@@ -383,7 +344,7 @@ func (sd *segmentedData) findSegment(start int) int {
 					break
 				}
 			}
-		case []int64:
+		case []uint16:
 			for i := start + 1; i < len(x); i++ {
 				if pos != -1 && i >= pos {
 					break
@@ -393,7 +354,7 @@ func (sd *segmentedData) findSegment(start int) int {
 					break
 				}
 			}
-		case []int32:
+		case []uint32:
 			for i := start + 1; i < len(x); i++ {
 				if pos != -1 && i >= pos {
 					break
@@ -403,7 +364,7 @@ func (sd *segmentedData) findSegment(start int) int {
 					break
 				}
 			}
-		case []int16:
+		case []uint64:
 			for i := start + 1; i < len(x); i++ {
 				if pos != -1 && i >= pos {
 					break
@@ -423,7 +384,47 @@ func (sd *segmentedData) findSegment(start int) int {
 					break
 				}
 			}
-		case []int:
+		case []int16:
+			for i := start + 1; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
+		case []int32:
+			for i := start + 1; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
+		case []int64:
+			for i := start + 1; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
+		case []float32:
+			for i := start + 1; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != x[i-1] {
+					pos = i
+					break
+				}
+			}
+		case []float64:
 			for i := start + 1; i < len(x); i++ {
 				if pos != -1 && i >= pos {
 					break
@@ -465,61 +466,9 @@ func (sd *segmentedData) findSegmentStash() (int, bool) {
 					break
 				}
 			}
-		case []float64:
+		case []time.Time:
 			m = len(x)
-			y := sd.stash[j].([]float64)
-			v := y[len(y)-1]
-			for i := 0; i < len(x); i++ {
-				if pos != -1 && i >= pos {
-					break
-				}
-				if x[i] != v {
-					pos = i
-					break
-				}
-			}
-		case []float32:
-			m = len(x)
-			y := sd.stash[j].([]float32)
-			v := y[len(y)-1]
-			for i := 0; i < len(x); i++ {
-				if pos != -1 && i >= pos {
-					break
-				}
-				if x[i] != v {
-					pos = i
-					break
-				}
-			}
-		case []uint64:
-			m = len(x)
-			y := sd.stash[j].([]uint64)
-			v := y[len(y)-1]
-			for i := 0; i < len(x); i++ {
-				if pos != -1 && i >= pos {
-					break
-				}
-				if x[i] != v {
-					pos = i
-					break
-				}
-			}
-		case []uint32:
-			m = len(x)
-			y := sd.stash[j].([]uint32)
-			v := y[len(y)-1]
-			for i := 0; i < len(x); i++ {
-				if pos != -1 && i >= pos {
-					break
-				}
-				if x[i] != v {
-					pos = i
-					break
-				}
-			}
-		case []uint16:
-			m = len(x)
-			y := sd.stash[j].([]uint16)
+			y := sd.stash[j].([]time.Time)
 			v := y[len(y)-1]
 			for i := 0; i < len(x); i++ {
 				if pos != -1 && i >= pos {
@@ -543,9 +492,9 @@ func (sd *segmentedData) findSegmentStash() (int, bool) {
 					break
 				}
 			}
-		case []int64:
+		case []uint16:
 			m = len(x)
-			y := sd.stash[j].([]int64)
+			y := sd.stash[j].([]uint16)
 			v := y[len(y)-1]
 			for i := 0; i < len(x); i++ {
 				if pos != -1 && i >= pos {
@@ -556,9 +505,9 @@ func (sd *segmentedData) findSegmentStash() (int, bool) {
 					break
 				}
 			}
-		case []int32:
+		case []uint32:
 			m = len(x)
-			y := sd.stash[j].([]int32)
+			y := sd.stash[j].([]uint32)
 			v := y[len(y)-1]
 			for i := 0; i < len(x); i++ {
 				if pos != -1 && i >= pos {
@@ -569,9 +518,9 @@ func (sd *segmentedData) findSegmentStash() (int, bool) {
 					break
 				}
 			}
-		case []int16:
+		case []uint64:
 			m = len(x)
-			y := sd.stash[j].([]int16)
+			y := sd.stash[j].([]uint64)
 			v := y[len(y)-1]
 			for i := 0; i < len(x); i++ {
 				if pos != -1 && i >= pos {
@@ -595,9 +544,61 @@ func (sd *segmentedData) findSegmentStash() (int, bool) {
 					break
 				}
 			}
-		case []int:
+		case []int16:
 			m = len(x)
-			y := sd.stash[j].([]int)
+			y := sd.stash[j].([]int16)
+			v := y[len(y)-1]
+			for i := 0; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
+		case []int32:
+			m = len(x)
+			y := sd.stash[j].([]int32)
+			v := y[len(y)-1]
+			for i := 0; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
+		case []int64:
+			m = len(x)
+			y := sd.stash[j].([]int64)
+			v := y[len(y)-1]
+			for i := 0; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
+		case []float32:
+			m = len(x)
+			y := sd.stash[j].([]float32)
+			v := y[len(y)-1]
+			for i := 0; i < len(x); i++ {
+				if pos != -1 && i >= pos {
+					break
+				}
+				if x[i] != v {
+					pos = i
+					break
+				}
+			}
+		case []float64:
+			m = len(x)
+			y := sd.stash[j].([]float64)
 			v := y[len(y)-1]
 			for i := 0; i < len(x); i++ {
 				if pos != -1 && i >= pos {
