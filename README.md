@@ -14,16 +14,13 @@ __Dstream__ is a package for manipulating streams of typed,
 multivariate data in [Go](http://golang.org).  A Dstream is a
 [dataframe](http://pandas.pydata.org)-like container that holds a
 rectangular array of data in which the columns are variables and the
-rows are cases or observations.  The Dstream framework facilitates
-processing data of this type.  One important application for this
-package is feeding data into statistical modeling tools such as
-regression analysis.
+rows are cases or observations.
 
 Dstream is designed to work with large datasets, where it is not
 possible to load all data for all variables into memory at once.  To
 achieve this, Dstream utilizes a _chunked_, _columnar_ storage format.
-A chunk contains the data for all of the Dstream's variables for a
-consecutive subset of rows, stored by variable (column-wise) in typed
+A chunk contains the data for all variables, for a
+consecutive subset of rows. The data are stored by variable (column-wise) in typed
 Go slices.  Only one chunk of the Dstream is held in memory at one
 time.
 
@@ -32,7 +29,7 @@ method advances the Dstream to the next chunk.  When possible, the
 memory backing a chunk is re-used for the next chunk.  Therefore, a
 chunk must either be completely processed, or copied to independent
 memory before subsequent calls to `Next`.  Random chunk access is not
-permitted.  Most Dstreams can be reset with the `Reset` method and
+supported.  Most Dstreams can be reset with the `Reset` method and
 read multiple times, but this requires all the overhead of the initial
 read (the data will be fully re-processed from its source following a
 call to `Reset`).
@@ -92,6 +89,10 @@ The most common transformations can be grouped as follows:
 * _Copying_:
   [MemCopy](https://godoc.org/github.com/kshedden/dstream/dstream#DropNA)
   returns an in-memory Dstream that is a copy of a given Dstream.
+
+* _Type conversion_:
+  [Convert](https://godoc.org/github.com/kshedden/dstream/dstream#Convert)
+  converts among numeric types.
 
 ### Chunks
 

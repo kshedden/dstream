@@ -2,8 +2,6 @@ package dstream
 
 import "fmt"
 
-//go:generate go run gen.go -template=convert.template -numeric
-
 type convert struct {
 	xform
 
@@ -14,12 +12,12 @@ type convert struct {
 	vpos int
 
 	// The new type of the variable
-	dtype string
+	dtype Dtype
 }
 
 // Convert returns a Dstream in which the named variable is converted
 // to the given type.
-func Convert(da Dstream, vname string, dtype string) Dstream {
+func Convert(da Dstream, vname string, dtype Dtype) Dstream {
 
 	vpos := -1
 	for k, na := range da.Names() {

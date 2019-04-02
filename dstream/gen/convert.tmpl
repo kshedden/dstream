@@ -22,11 +22,11 @@ func (c *convert) Next() bool {
         if to == nil {
                 switch c.dtype {
 		        {{- range . }}
-		        case "{{ .Type }}":
+		        case {{ .Utype }}:
 			        to = make([]{{ .Type }}, 0, 100)
 			{{- end }}
 			default:
-			        msg := fmt.Sprintf("Convert: unknown type %s\n", c.dtype)
+			        msg := fmt.Sprintf("Convert: unknown type %v\n", c.dtype)
 				panic(msg)
 	        }
 	}

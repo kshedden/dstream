@@ -184,7 +184,7 @@ func ExampleApply() {
 		Float64: []string{"V1", "V2", "V3", "V4"},
 	}
 	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
-	da = Generate(da, "V1p2", f, "float64")
+	da = Generate(da, "V1p2", f, Float64)
 
 	for da.Next() {
 		y := da.Get("V1p2")
@@ -282,7 +282,7 @@ func ExampleJoin() {
 			Float64: names[j],
 		}
 		d := FromCSV(b).TypeConf(tc).Done()
-		d = Convert(d, "V1", "uint64")
+		d = Convert(d, "V1", Uint64)
 		d = Segment(d, "V1")
 		da = append(da, d)
 	}
@@ -325,7 +325,7 @@ func ExampleRegroup() {
 		Float64: []string{"V1", "V2", "V3"},
 	}
 	d := FromCSV(b).TypeConf(tc).HasHeader().Done()
-	d = Convert(d, "V1", "uint64")
+	d = Convert(d, "V1", Uint64)
 	d = Regroup(d, "V1", true)
 
 	for d.Next() {

@@ -39,6 +39,23 @@ type Dstream interface {
 	Close()
 }
 
+type Dtype uint8
+
+const (
+	Uint8 Dtype = iota
+	Uint16
+	Uint32
+	Uint64
+	Int8
+	Int16
+	Int32
+	Int64
+	Float32
+	Float64
+	Time
+	String
+)
+
 // dataArrays is an implementation of Dstream based on sharded arrays.
 type dataArrays struct {
 	xform // bdata is not used

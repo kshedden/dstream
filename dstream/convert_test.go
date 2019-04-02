@@ -47,8 +47,8 @@ func TestConvert(t *testing.T) {
 	db := NewFromArrays(z, na)
 
 	// Perform two conversions
-	da = Convert(da, "x1", "int32")
-	da = Convert(da, "x3", "float32")
+	da = Convert(da, "x1", Int32)
+	da = Convert(da, "x3", Float32)
 
 	if !EqualReport(da, db, true) {
 		t.Fail()
@@ -82,8 +82,8 @@ func TestConvert2(t *testing.T) {
 	}
 	d1 := FromCSV(b1).TypeConf(tc).HasHeader().Done()
 
-	d1 = Generate(d1, "id100", times100, "float64")
-	d1 = Convert(d1, "id100", "uint64")
+	d1 = Generate(d1, "id100", times100, Float64)
+	d1 = Convert(d1, "id100", Uint64)
 	d1 = DropCols(d1, "id")
 
 	if !d1.Next() {

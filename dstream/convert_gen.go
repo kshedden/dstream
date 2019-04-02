@@ -23,28 +23,28 @@ func (c *convert) Next() bool {
 	to := c.bdata[c.vpos]
 	if to == nil {
 		switch c.dtype {
-		case "uint8":
+		case Uint8:
 			to = make([]uint8, 0, 100)
-		case "uint16":
+		case Uint16:
 			to = make([]uint16, 0, 100)
-		case "uint32":
+		case Uint32:
 			to = make([]uint32, 0, 100)
-		case "uint64":
+		case Uint64:
 			to = make([]uint64, 0, 100)
-		case "int8":
+		case Int8:
 			to = make([]int8, 0, 100)
-		case "int16":
+		case Int16:
 			to = make([]int16, 0, 100)
-		case "int32":
+		case Int32:
 			to = make([]int32, 0, 100)
-		case "int64":
+		case Int64:
 			to = make([]int64, 0, 100)
-		case "float32":
+		case Float32:
 			to = make([]float32, 0, 100)
-		case "float64":
+		case Float64:
 			to = make([]float64, 0, 100)
 		default:
-			msg := fmt.Sprintf("Convert: unknown type %s\n", c.dtype)
+			msg := fmt.Sprintf("Convert: unknown type %v\n", c.dtype)
 			panic(msg)
 		}
 	}
