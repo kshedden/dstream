@@ -13,27 +13,28 @@ import (
 )
 
 type Dtype struct {
-	Type  string
-	Utype string
+	Type      string
+	Utype     string
+	ConvGroup string
 }
 
 var (
 	NumTypes = []Dtype{
-		Dtype{"uint8", "Uint8"},
-		Dtype{"uint16", "Uint16"},
-		Dtype{"uint32", "Uint32"},
-		Dtype{"uint64", "Uint64"},
-		Dtype{"int8", "Int8"},
-		Dtype{"int16", "Int16"},
-		Dtype{"int32", "Int32"},
-		Dtype{"int64", "Int64"},
-		Dtype{"float32", "Float32"},
-		Dtype{"float64", "Float64"},
+		Dtype{"uint8", "Uint8", "i"},
+		Dtype{"uint16", "Uint16", "i"},
+		Dtype{"uint32", "Uint32", "i"},
+		Dtype{"uint64", "Uint64", "i"},
+		Dtype{"int8", "Int8", "i"},
+		Dtype{"int16", "Int16", "i"},
+		Dtype{"int32", "Int32", "i"},
+		Dtype{"int64", "Int64", "i"},
+		Dtype{"float32", "Float32", "f"},
+		Dtype{"float64", "Float64", "f"},
 	}
 
 	AllTypes = []Dtype{
-		Dtype{"string", "String"},
-		Dtype{"time.Time", "Time"},
+		Dtype{"string", "String", "s"},
+		Dtype{"time.Time", "Time", "t"},
 	}
 )
 

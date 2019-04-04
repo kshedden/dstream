@@ -6,6 +6,32 @@ import (
 	"time"
 )
 
+func namesEqual(x, y []string) string {
+
+    na := make([]map[string]bool, 2)
+    for j, m := range [][]string{x, y} {
+    	na[j] = make(map[string]bool)
+		for _, v := range m {
+			na[j][v] = true
+		}
+	}
+
+	for v, _ := range na[0] {
+		if !na[1][v] {
+			return fmt.Sprintf("x variable '%s' not found in y.", v)
+		}
+	}
+
+	for v, _ := range na[1] {
+		if !na[0][v] {
+			return fmt.Sprintf("y variable '%s' not found in x.", v)
+		}
+	}
+
+    return ""
+}
+
+
 // EqualReport compares two Dstream values.  If they are not equal,
 // further information is written to the standard error stream.  Equality
 // here implies that the data values, types, order, and chunk
@@ -15,26 +41,22 @@ func EqualReport(x, y Dstream, report bool) bool {
 	x.Reset()
 	y.Reset()
 
-    // Check variable names
-	if !aequalString(x.Names(), y.Names()) {
-		if report {
-			msg := fmt.Sprintf("Names are not equal:\nx: %v\ny: %v\n",
-				x.Names(), y.Names())
-			os.Stderr.WriteString(msg)
-		}
-		return false
-	}
-
 	if x.NumVar() != y.NumVar() {
 		if report {
-			msg := fmt.Sprintf("Number of variables are not equal:\nx: %d\ny: %d\n",
+			msg := fmt.Sprintf("Number of variables differ:\nx: %d\ny: %d\n",
 				x.NumVar(), y.NumVar())
 			os.Stderr.WriteString(msg)
 		}
 		return false
 	}
 
+    // Check variable names
+	if msg := namesEqual(x.Names(), y.Names()); msg != "" {
+		panic(msg)
+	}
+
 	for chunk := 0; x.Next(); chunk++ {
+
 		if !y.Next() {
 			if report {
 				msg := fmt.Sprintf("unequal numbers of chunks (y has fewer chunks than x)\n")
@@ -42,24 +64,25 @@ func EqualReport(x, y Dstream, report bool) bool {
 			}
 			return false
 		}
-		for j := 0; j < x.NumVar(); j++ {
-			switch v := x.GetPos(j).(type) {
-                        {{ range . }}
-                        case []{{ .Type }}:
-				u, ok := y.GetPos(j).([]{{ .Type }})
-				if !ok || !aequal{{ .Utype }}(v, u) {
-					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
-						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
-					}
-					return false
-				}
-			{{ end }}
-			default:
-				if report {
-					print("mismatched types")
-				}
-				return false
+
+		for _, na := range x.Names() {
+			switch v := x.Get(na).(type) {
+                {{ range . }}
+                    case []{{ .Type }}:
+				        u, ok := y.Get(na).([]{{ .Type }})
+				        if !ok || !aequal{{ .Utype }}(v, u) {
+					        if report {
+						        fmt.Printf("Chunk %d, %s\n", chunk, na)
+						        fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
+					        }
+					        return false
+				        }
+			    {{ end }}
+			    default:
+				    if report {
+					    print("mismatched types")
+				    }
+				    return false
 			}
 		}
 	}

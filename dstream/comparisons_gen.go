@@ -8,6 +8,31 @@ import (
 	"time"
 )
 
+func namesEqual(x, y []string) string {
+
+	na := make([]map[string]bool, 2)
+	for j, m := range [][]string{x, y} {
+		na[j] = make(map[string]bool)
+		for _, v := range m {
+			na[j][v] = true
+		}
+	}
+
+	for v, _ := range na[0] {
+		if !na[1][v] {
+			return fmt.Sprintf("x variable '%s' not found in y.", v)
+		}
+	}
+
+	for v, _ := range na[1] {
+		if !na[0][v] {
+			return fmt.Sprintf("y variable '%s' not found in x.", v)
+		}
+	}
+
+	return ""
+}
+
 // EqualReport compares two Dstream values.  If they are not equal,
 // further information is written to the standard error stream.  Equality
 // here implies that the data values, types, order, and chunk
@@ -17,26 +42,22 @@ func EqualReport(x, y Dstream, report bool) bool {
 	x.Reset()
 	y.Reset()
 
-	// Check variable names
-	if !aequalString(x.Names(), y.Names()) {
-		if report {
-			msg := fmt.Sprintf("Names are not equal:\nx: %v\ny: %v\n",
-				x.Names(), y.Names())
-			os.Stderr.WriteString(msg)
-		}
-		return false
-	}
-
 	if x.NumVar() != y.NumVar() {
 		if report {
-			msg := fmt.Sprintf("Number of variables are not equal:\nx: %d\ny: %d\n",
+			msg := fmt.Sprintf("Number of variables differ:\nx: %d\ny: %d\n",
 				x.NumVar(), y.NumVar())
 			os.Stderr.WriteString(msg)
 		}
 		return false
 	}
 
+	// Check variable names
+	if msg := namesEqual(x.Names(), y.Names()); msg != "" {
+		panic(msg)
+	}
+
 	for chunk := 0; x.Next(); chunk++ {
+
 		if !y.Next() {
 			if report {
 				msg := fmt.Sprintf("unequal numbers of chunks (y has fewer chunks than x)\n")
@@ -44,124 +65,125 @@ func EqualReport(x, y Dstream, report bool) bool {
 			}
 			return false
 		}
-		for j := 0; j < x.NumVar(); j++ {
-			switch v := x.GetPos(j).(type) {
+
+		for _, na := range x.Names() {
+			switch v := x.Get(na).(type) {
 
 			case []string:
-				u, ok := y.GetPos(j).([]string)
+				u, ok := y.Get(na).([]string)
 				if !ok || !aequalString(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []time.Time:
-				u, ok := y.GetPos(j).([]time.Time)
+				u, ok := y.Get(na).([]time.Time)
 				if !ok || !aequalTime(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []uint8:
-				u, ok := y.GetPos(j).([]uint8)
+				u, ok := y.Get(na).([]uint8)
 				if !ok || !aequalUint8(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []uint16:
-				u, ok := y.GetPos(j).([]uint16)
+				u, ok := y.Get(na).([]uint16)
 				if !ok || !aequalUint16(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []uint32:
-				u, ok := y.GetPos(j).([]uint32)
+				u, ok := y.Get(na).([]uint32)
 				if !ok || !aequalUint32(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []uint64:
-				u, ok := y.GetPos(j).([]uint64)
+				u, ok := y.Get(na).([]uint64)
 				if !ok || !aequalUint64(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []int8:
-				u, ok := y.GetPos(j).([]int8)
+				u, ok := y.Get(na).([]int8)
 				if !ok || !aequalInt8(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []int16:
-				u, ok := y.GetPos(j).([]int16)
+				u, ok := y.Get(na).([]int16)
 				if !ok || !aequalInt16(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []int32:
-				u, ok := y.GetPos(j).([]int32)
+				u, ok := y.Get(na).([]int32)
 				if !ok || !aequalInt32(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []int64:
-				u, ok := y.GetPos(j).([]int64)
+				u, ok := y.Get(na).([]int64)
 				if !ok || !aequalInt64(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []float32:
-				u, ok := y.GetPos(j).([]float32)
+				u, ok := y.Get(na).([]float32)
 				if !ok || !aequalFloat32(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false
 				}
 
 			case []float64:
-				u, ok := y.GetPos(j).([]float64)
+				u, ok := y.Get(na).([]float64)
 				if !ok || !aequalFloat64(v, u) {
 					if report {
-						fmt.Printf("Chunk %d, %s\n", chunk, x.Names()[j])
+						fmt.Printf("Chunk %d, %s\n", chunk, na)
 						fmt.Printf("  Unequal floats:\n    (1) %v\n    (2) %v\n", v, u)
 					}
 					return false

@@ -3,6 +3,10 @@ package dstream
 import (
     "fmt"
 	"time"
+    "io"
+    "os"
+    "strconv"
+    "math"
 )
 
 type CSVTypeConf struct {
@@ -17,28 +21,94 @@ type CSVTypeConf struct {
   	    {{ .Utype }}Pos []int
 	{{- end }}
 
-	// The names of the variables, in the order that the columns
-	// are stored.  If nil, the ordering is determined by the
-	// types.
-	Names []string
+	// Function used to parse time strings
+	ParseTime func(string)time.Time
+}
+
+func (tc *CSVTypeConf) hasValidPositions() bool {
+
+	{{- range . }}
+	if len(tc.{{ .Utype}}) != len(tc.{{ .Utype }}Pos) {
+		return false
+	}
+	{{- end }}
+
+	return true
 }
 
 func (cs *CSVReader) setNames() {
 
 	tc := cs.typeConf
 
-	if len(tc.Names) > 0 {
-		cs.names = tc.Names
-		return
-	}
-
 	cs.names = cs.names[0:0]
 	{{- range . }}
-	cs.names = append(cs.names, tc.{{ .Utype }}...)
+        cs.names = append(cs.names, tc.{{ .Utype }}...)
     {{- end }}
 }
 
-// SetPos derermines the positions in the provided list of columns
+// Next advances to the next chunk.
+func (cs *CSVReader) Next() bool {
+
+	if cs.done {
+		return false
+	}
+
+	tc := cs.typeConf
+	truncate(cs.bdata)
+
+	for j := 0; j < cs.chunkSize; j++ {
+
+		// Try to read a row, return false if done.
+		var rec []string
+		var err error
+		if cs.firstrow != nil {
+			rec = cs.firstrow
+			cs.firstrow = nil
+		} else {
+			rec, err = cs.csvrdr.Read()
+			if err == io.EOF {
+				cs.done = true
+				return ilen(cs.bdata[0]) > 0
+			} else if err != nil {
+				if cs.skipErrors {
+					os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
+					continue
+				}
+				panic(err)
+			}
+		}
+		cs.nobs++
+
+		i := 0
+		{{- range . }}
+			for _, pos := range tc.{{ .Utype }}Pos {
+			    {{- if eq .ConvGroup "i" }}
+				    x, err := strconv.Atoi(rec[pos])
+				    if err != nil {
+					    panic(err)
+				    }
+				{{- else if eq .ConvGroup "f" }}
+				    x, err := strconv.ParseFloat(rec[pos], 64)
+				    if err != nil {
+					    x = math.NaN()
+				    }
+				{{- else if eq .ConvGroup "s" }}
+				    x := rec[pos]
+				{{- else }}
+				    x := tc.ParseTime(rec[pos])
+				{{- end }}
+				u := cs.bdata[i].([]{{ .Type }})
+				cs.bdata[i] = append(u, {{ .Type }}(x))
+				i++
+			}
+		{{- end }}
+    }
+
+	return true
+}
+
+
+// SetPos determines the positions in the provided list of column names
 // of all configured variables.  The configured variables are given
 // in the type-specific slices named Float64, Int64, etc.
 func (tc *CSVTypeConf) SetPos(h []string) {

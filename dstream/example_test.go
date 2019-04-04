@@ -18,7 +18,6 @@ Lamb,Meat,40,76
 	tc := &CSVTypeConf{
 		String:  []string{"Food", "Type"},
 		Float64: []string{"Weight"},
-		Names:   []string{"Weight", "Food", "Type"},
 	}
 	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
 
@@ -28,11 +27,11 @@ Lamb,Meat,40,76
 	fmt.Printf("%s\n", string(buf.Bytes()))
 
 	// Output:
-	//Weight,Food,Type
-	//13,Banana,Fruit
-	//15,Cucumber,Vegetable
-	//12,Cheese,Dairy
-	//40,Lamb,Meat
+	// Food,Type,Weight
+	// Banana,Fruit,13
+	// Cucumber,Vegetable,15
+	// Cheese,Dairy,12
+	// Lamb,Meat,40
 }
 
 func ExampleFromCSV() {
@@ -68,7 +67,8 @@ Lamb,Meat,40,76
 
 func ExampleMutate() {
 
-	data := `1,2,3,4
+	data := `V1,V2,V3,V4
+1,2,3,4
 2,3,4,5
 3,4,5,6
 4,5,6,7
@@ -86,7 +86,7 @@ func ExampleMutate() {
 		Float64: []string{"V1", "V2", "V3", "V4"},
 	}
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).TypeConf(tc).Done()
+	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
 	da = Mutate(da, "V2", timesTwo)
 
 	da.Next() // Always call Next before first call to Get or GetPos
@@ -234,7 +234,8 @@ func ExampleLagChunk() {
 
 	b := bytes.NewBuffer([]byte(data))
 	tc := &CSVTypeConf{
-		Float64: []string{"V1", "V2", "V3", "V4"},
+		Float64:    []string{"V1", "V2", "V3", "V4"},
+		Float64Pos: []int{0, 1, 2, 3},
 	}
 	da := FromCSV(b).TypeConf(tc).Done()
 	da = LagChunk(da, map[string]int{"V2": 2})
@@ -253,19 +254,22 @@ func ExampleLagChunk() {
 
 func ExampleJoin() {
 
-	data1 := `1,2,3,4
+	data1 := `V1,V2,V3,V4
+1,2,3,4
 1,3,4,5
 3,4,5,6
 3,5,6,7
 `
 
-	data2 := `1,2,3
+	data2 := `V1,V2,V3
+1,2,3
 1,3,4
 1,4,5
 3,5,6
 `
 
-	data3 := `2,2,3,5,6
+	data3 := `V1,V2,V3,V4,V5
+2,2,3,5,6
 2,3,4,7,5
 3,4,5,3,4
 4,5,6,2,3
@@ -281,7 +285,7 @@ func ExampleJoin() {
 		tc := &CSVTypeConf{
 			Float64: names[j],
 		}
-		d := FromCSV(b).TypeConf(tc).Done()
+		d := FromCSV(b).TypeConf(tc).HasHeader().Done()
 		d = Convert(d, "V1", Uint64)
 		d = Segment(d, "V1")
 		da = append(da, d)

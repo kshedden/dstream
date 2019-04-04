@@ -39,9 +39,8 @@ func TestStreamCSV1(t *testing.T) {
 	tc := &CSVTypeConf{
 		Float64: []string{"Id", "Age"},
 		String:  []string{"Country"},
-		Names:   []string{"Id", "Age", "Country"},
 	}
-	da := FromCSV(rdr).TypeConf(tc).SetChunkSize(3).HasHeader().Done()
+	da := FromCSV(rdr).TypeConf(tc).ChunkSize(3).HasHeader().Done()
 
 	// Check first read
 	if !EqualReport(ex, da, true) {
@@ -95,7 +94,7 @@ func TestStreamCSV2(t *testing.T) {
 	tc := &CSVTypeConf{
 		Float64: []string{"Id", "Age"},
 	}
-	da := FromCSV(rdr).TypeConf(tc).SetChunkSize(3).HasHeader().Done()
+	da := FromCSV(rdr).TypeConf(tc).ChunkSize(3).HasHeader().Done()
 
 	// Check first read
 	if !EqualReport(ex, da, true) {
@@ -153,7 +152,7 @@ func TestStreamCSV3(t *testing.T) {
 	tc := &CSVTypeConf{
 		String: []string{"Id", "Age"},
 	}
-	da := FromCSV(rdr).TypeConf(tc).SetChunkSize(3).HasHeader().Done()
+	da := FromCSV(rdr).TypeConf(tc).ChunkSize(3).HasHeader().Done()
 
 	// Check first read
 	if !EqualReport(ex, da, true) {
@@ -200,7 +199,7 @@ func TestCSVWriter1(t *testing.T) {
 	tc := &CSVTypeConf{
 		Float64: []string{"id", "v1", "v2", "v3"},
 	}
-	ds := FromCSV(r).TypeConf(tc).SetChunkSize(2).HasHeader().Done()
+	ds := FromCSV(r).TypeConf(tc).ChunkSize(2).HasHeader().Done()
 
 	var buf bytes.Buffer
 	fm := map[string]string{"v1": "%.1f"}

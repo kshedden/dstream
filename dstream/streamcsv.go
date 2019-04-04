@@ -5,9 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"os"
-	"strconv"
 )
 
 // CSVReader supports reading a Dstream from an io.Reader.
@@ -132,14 +130,9 @@ func (cs *CSVReader) init() {
 		// Save the first row since it contains data
 		cs.firstrow = firstrow
 
-		// Names are V0, V1, ...
-		var vlist []string
-		for k := range firstrow {
-			v := fmt.Sprintf("V%d", k+1)
-			vlist = append(vlist, v)
+		if !cs.typeConf.hasValidPositions() {
+			panic("When no header is provided in a csv file, the positions must be set manually.")
 		}
-
-		cs.typeConf.SetPos(vlist)
 	}
 
 	cs.setNames()
@@ -155,9 +148,9 @@ func (cs *CSVReader) init() {
 	cs.doneinit = true
 }
 
-// SetChunkSize sets the size of chunks for this Dstream, it can only
+// ChunkSize sets the size of chunks for this Dstream, it can only
 // be called before reading begins.
-func (cs *CSVReader) SetChunkSize(c int) *CSVReader {
+func (cs *CSVReader) ChunkSize(c int) *CSVReader {
 	cs.chunkSize = c
 	return cs
 }
@@ -377,160 +370,4 @@ func (dw *CSVWriter) Done() error {
 	csw.Flush()
 
 	return nil
-}
-
-// Next advances to the next chunk.
-func (cs *CSVReader) Next() bool {
-
-	// This can't be code-generated because...
-
-	if cs.done {
-		return false
-	}
-
-	truncate(cs.bdata)
-
-	for j := 0; j < cs.chunkSize; j++ {
-
-		// Try to read a row, return false if done.
-		var rec []string
-		var err error
-		if cs.firstrow != nil {
-			rec = cs.firstrow
-			cs.firstrow = nil
-		} else {
-			rec, err = cs.csvrdr.Read()
-			if err == io.EOF {
-				cs.done = true
-				return ilen(cs.bdata[0]) > 0
-			} else if err != nil {
-				if cs.skipErrors {
-					os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
-					continue
-				}
-				panic(err)
-			}
-		}
-		cs.nobs++
-
-		tc := cs.typeConf
-
-		for k, pos := range tc.Uint8Pos {
-			x, err := strconv.Atoi(rec[pos])
-			if err != nil {
-				panic(err)
-			}
-			i := cs.namepos[tc.Uint8[k]]
-			u := cs.bdata[i].([]uint8)
-			cs.bdata[i] = append(u, uint8(x))
-		}
-
-		for k, pos := range tc.Uint16Pos {
-			x, err := strconv.Atoi(rec[pos])
-			if err != nil {
-				panic(err)
-			}
-			i := cs.namepos[tc.Uint16[k]]
-			u := cs.bdata[i].([]uint16)
-			cs.bdata[i] = append(u, uint16(x))
-		}
-
-		for k, pos := range tc.Uint32Pos {
-			x, err := strconv.Atoi(rec[pos])
-			if err != nil {
-				panic(err)
-			}
-			i := cs.namepos[tc.Uint32[k]]
-			u := cs.bdata[i].([]uint32)
-			cs.bdata[i] = append(u, uint32(x))
-		}
-
-		for k, pos := range tc.Uint64Pos {
-			x, err := strconv.Atoi(rec[pos])
-			if err != nil {
-				panic(err)
-			}
-			i := cs.namepos[tc.Uint64[k]]
-			u := cs.bdata[i].([]uint64)
-			cs.bdata[i] = append(u, uint64(x))
-		}
-
-		for k, pos := range tc.Int8Pos {
-			x, err := strconv.Atoi(rec[pos])
-			if err != nil {
-				panic(err)
-			}
-			i := cs.namepos[tc.Int8[k]]
-			u := cs.bdata[i].([]int8)
-			cs.bdata[i] = append(u, int8(x))
-		}
-
-		for k, pos := range tc.Int16Pos {
-			x, err := strconv.Atoi(rec[pos])
-			if err != nil {
-				panic(err)
-			}
-			i := cs.namepos[tc.Int16[k]]
-			u := cs.bdata[i].([]int16)
-			cs.bdata[i] = append(u, int16(x))
-		}
-
-		for k, pos := range tc.Int32Pos {
-			x, err := strconv.Atoi(rec[pos])
-			if err != nil {
-				panic(err)
-			}
-			i := cs.namepos[tc.Int32[k]]
-			u := cs.bdata[i].([]int32)
-			cs.bdata[i] = append(u, int32(x))
-		}
-
-		for k, pos := range tc.Int64Pos {
-			x, err := strconv.Atoi(rec[pos])
-			if err != nil {
-				panic(err)
-			}
-			i := cs.namepos[tc.Int64[k]]
-			u := cs.bdata[i].([]int64)
-			cs.bdata[i] = append(u, int64(x))
-		}
-
-		for k, pos := range tc.Float32Pos {
-			x, err := strconv.ParseFloat(rec[pos], 64)
-			if err != nil {
-				panic(err)
-			}
-			i := cs.namepos[tc.Float32[k]]
-			u := cs.bdata[i].([]float32)
-			cs.bdata[i] = append(u, float32(x))
-		}
-
-		for k, pos := range tc.Float64Pos {
-			x, err := strconv.ParseFloat(rec[pos], 64)
-			if err != nil {
-				x = math.NaN()
-			}
-			i := cs.namepos[tc.Float64[k]]
-			u := cs.bdata[i].([]float64)
-			cs.bdata[i] = append(u, float64(x))
-		}
-
-		for k, pos := range tc.StringPos {
-			i := cs.namepos[tc.String[k]]
-			u := cs.bdata[i].([]string)
-			cs.bdata[i] = append(u, rec[pos])
-		}
-
-		for _, pos := range tc.TimePos {
-			_ = pos
-			//x, err := strconv.Atoi(rec[pos])
-			//if err != nil {
-			//			panic(err)
-			//		}
-			//		u := cs.bdata[i].([]time.Time)
-			//		cs.bdata[i] = append(u, time.Time{}) // DEBUG
-		}
-	}
-
-	return true
 }
