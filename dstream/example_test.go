@@ -108,14 +108,11 @@ func ExampleFilter() {
 `
 
 	// A filtering function, selects if not equal to 0.
-	f := func(x interface{}, b []bool) bool {
-		v := x.([]float64)
-		var any bool
-		for i := range v {
-			b[i] = v[i] != 0
-			any = any || !b[i]
+	f := func(v map[string]interface{}, b []bool) {
+		x := v["V2"].([]float64)
+		for i := range x {
+			b[i] = x[i] != 0
 		}
-		return any
 	}
 
 	tc := &CSVTypeConf{
@@ -123,7 +120,7 @@ func ExampleFilter() {
 	}
 	b := bytes.NewBuffer([]byte(data))
 	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
-	da = Filter(da, map[string]FilterFunc{"V2": f})
+	da = Filter(da, f)
 
 	da.Next() // Always call Next before first call to Get or GetPos
 

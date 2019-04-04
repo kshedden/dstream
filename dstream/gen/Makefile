@@ -1,6 +1,6 @@
-all: bcols base comparisons segment utils convert regroup dechunk replace generate memcopy streamcsv
+all: bcols base comparisons segment utils convert regroup dechunk replace generate memcopy streamcsv filtercol
 
-.PHONY: bcols base comparisons segment utils convert regroup dechunk replace generate memcopy streamcsv
+.PHONY: bcols base comparisons segment utils convert regroup dechunk replace generate memcopy streamcsv filtercol
 
 bcols:
 	go run main.go -template=bcols.tmpl
@@ -24,3 +24,5 @@ memcopy:
 	go run main.go -template=memcopy.tmpl
 streamcsv:
 	go run main.go -template=streamcsv.tmpl
+filtercol:
+	go run main.go -template=filtercol.tmpl

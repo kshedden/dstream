@@ -15,6 +15,18 @@ func VarPos(d Dstream) map[string]int {
 	return mp
 }
 
+// VarMap returns a map from variable names to data slices, in the current chunk.
+func VarMap(d Dstream) map[string]interface{} {
+
+	mp := make(map[string]interface{})
+
+	for _, na := range d.Names() {
+		mp[na] = d.Get(na)
+	}
+
+	return mp
+}
+
 func wherefalse(ma []bool, pos []int) []int {
 	pos = pos[0:0]
 	for i, v := range ma {
