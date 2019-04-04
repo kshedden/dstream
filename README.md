@@ -19,8 +19,8 @@ rows are cases or observations.
 Dstream is designed to work with large datasets, where it is not
 possible to load all data for all variables into memory at once.  To
 achieve this, Dstream utilizes a _chunked_, _columnar_ storage format.
-A chunk contains the data for all variables, for a
-consecutive subset of rows. The data are stored by variable (column-wise) in typed
+A chunk contains the data for a contiguous block of rows.
+The data are stored by variable (column-wise) in typed
 Go slices.  Only one chunk of the Dstream is held in memory at one
 time.
 
@@ -28,8 +28,8 @@ During data processing, the chunks are visited in order.  The `Next`
 method advances the Dstream to the next chunk.  When possible, the
 memory backing a chunk is re-used for the next chunk.  Therefore, a
 chunk must either be completely processed, or copied to independent
-memory before subsequent calls to `Next`.  Random chunk access is not
-supported.  Most Dstreams can be reset with the `Reset` method and
+memory before subsequent calls to `Next`.
+Most Dstreams can be reset with the `Reset` method and
 read multiple times, but this requires all the overhead of the initial
 read (the data will be fully re-processed from its source following a
 call to `Reset`).
@@ -84,7 +84,7 @@ The most common transformations can be grouped as follows:
 * _Selection_: dropping rows or columns, examples include
   [DropNa](https://godoc.org/github.com/kshedden/dstream/dstream#DropNA),
   [Drop](https://godoc.org/github.com/kshedden/dstream/dstream#Drop),
-  [FilterCol](https://godoc.org/github.com/kshedden/dstream/dstream#FilterCol).
+  [Filter](https://godoc.org/github.com/kshedden/dstream/dstream#Filter).
 
 * _Copying_:
   [MemCopy](https://godoc.org/github.com/kshedden/dstream/dstream#DropNA)
@@ -103,16 +103,21 @@ chunk may contain all records for a single value of an index
 variable).  Here is a pipeline that illustrates both of these roles:
 
 ```
-da := dstream.FromCSV(r).SetChunkSize(1000).SetFloat64Vars("Index", "Speed")
+tc := dstream.CSVTypeConf {
+	Float64: []string{"Index", "Speed"}
+	Flaot64Pos: []int{0, 1}
+}
+da := dstream.FromCSV(r).TypeConf(tc).ChunkSize(1000).Done()
 dx = da.Segment(da, "Index")
 dx = dx.DiffChunk(dx, map[string][int]{"Speed", 2})
 ```
 
 In the above example, we first set up a Dstream to read CSV-formatted
 data from an io.Reader, using a chunk size of 1 million to limit the
-number of distinct raw reads.  We then use Segment to redefine the
+number of rows held in memory at one time.  We then use Segment to redefine the
 chunk boundaries, so that each chunk contains the values for one level
-of the Index variable (note that the data must be pre-sorted by Index
+of the Index variable (note that the data must be pre-sorted with
+respect to the Index variable
 for this to work).  We then difference the Speed variable within each
 level of Index (i.e. within each chunk).  Since DiffChunk does not
 difference across chunk boundaries, the chunk boundaries are not
