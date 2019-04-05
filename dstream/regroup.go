@@ -50,7 +50,7 @@ func Regroup(ds Dstream, groupvar string, sortchunks bool) Dstream {
 
 	if sortchunks {
 		var x []uint64
-		for _, v := range r.arrays[idpos] {
+		for _, v := range r.data[idpos] {
 			y := v.([]uint64)
 			x = append(x, y[0])
 		}
@@ -61,15 +61,15 @@ func Regroup(ds Dstream, groupvar string, sortchunks bool) Dstream {
 		a := argsort{x, ii}
 		sort.Sort(a)
 
-		nchunk := len(r.arrays[0])
-		newar := make([][]interface{}, len(r.arrays))
+		nchunk := len(r.data[0])
+		newar := make([][]interface{}, len(r.data))
 		for j := 0; j < ds.NumVar(); j++ {
 			newar[j] = make([]interface{}, nchunk)
 			for k, i := range ii {
-				newar[j][k] = r.arrays[j][i]
+				newar[j][k] = r.data[j][i]
 			}
 		}
-		r.arrays = newar
+		r.data = newar
 	}
 
 	return r

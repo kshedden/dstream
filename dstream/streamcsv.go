@@ -33,6 +33,12 @@ type CSVReader struct {
 	doneinit  bool
 	done      bool
 
+	// Index of current chunk
+	chunknum int
+
+	// If limitchunk > 0, read only this many chunks, otherwise read all chunks.
+	limitchunk int
+
 	namepos map[string]int
 	names   []string
 
@@ -70,6 +76,12 @@ func (cs *CSVReader) SkipErrors() *CSVReader {
 // CSV file.
 func (cs *CSVReader) TypeConf(tc *CSVTypeConf) *CSVReader {
 	cs.typeConf = tc
+	return cs
+}
+
+// LimitChunk sets the number of chunks to read.
+func (cs *CSVReader) LimitChunk(n int) *CSVReader {
+	cs.limitchunk = n
 	return cs
 }
 
@@ -211,6 +223,7 @@ func (cs *CSVReader) Reset() {
 	}
 	cs.nobs = 0
 	cs.done = false
+	cs.chunknum = 0
 	cs.rdr = r                   // is this needed?
 	cs.csvrdr = csv.NewReader(r) // is this needed?
 

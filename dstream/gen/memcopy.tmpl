@@ -28,8 +28,8 @@ func MemCopy(data Dstream) Dstream {
 		}
 	}
 
-	da := &dataArrays{
-		arrays: bdata,
+	da := &DataFrame{
+		data: bdata,
 		xform: xform{
 			names: data.Names(),
 		},

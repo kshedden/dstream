@@ -1,13 +1,10 @@
 package dstream
 
-// FilterFunc is a filtering function for use with Filter. The empty
-// interface holds a slice of values of length n, the boolean array,
-// denoted "Keep" below, also has length n.  The FilterFunc should set
-// elements of Keep to false wherever the corresponding Dstream record
-// is to be excluded.  Never set any element of Keep to true, as this
-// may interfere with other FilterFuncs acting jointly with this
-// one. The returned boolean indicates whether the FilterFunc entered
-// any new false values into Keep.
+// FilterFunc is a filtering function for use with Filter. The first
+// argument holds a map from variable names to data slices. The second
+// argument is a boolean slice that is initialized to all 'true'.  The
+// FilterFunc should set elements of the boolean slice to false wherever
+// the corresponding dstream record should be excluded.
 type FilterFunc func(map[string]interface{}, []bool)
 
 type filterCol struct {
@@ -20,9 +17,10 @@ type filterCol struct {
 	nobsKnown bool
 }
 
-// Filter applies filtering functions to one or more data columns,
-// and retains only the rows where all filtering functions are true.
+// Filter selects rows from the dstream.  A filtering function determines
+// which rows are selected.
 func Filter(data Dstream, f FilterFunc) Dstream {
+
 	fc := &filterCol{
 		xform: xform{
 			source: data,
@@ -30,6 +28,7 @@ func Filter(data Dstream, f FilterFunc) Dstream {
 		filter: f,
 	}
 	fc.init()
+
 	return fc
 }
 

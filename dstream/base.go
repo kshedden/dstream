@@ -56,42 +56,42 @@ const (
 	String
 )
 
-// dataArrays is an implementation of Dstream based on sharded arrays.
-type dataArrays struct {
+// DataFrame is an implementation of Dstream based on sharded arrays.
+type DataFrame struct {
 	xform // bdata is not used
 
-	// arrays is the underlying data to be passed to the
+	// data is the underlying data to be passed to the
 	// consumer.
-	arrays [][]interface{}
+	data [][]interface{}
 
 	chunk int // 1-based
 	done  bool
 	nobs  int
 }
 
-func (da *dataArrays) Next() bool {
+func (da *DataFrame) Next() bool {
 
 	da.chunk++
-	if da.chunk <= len(da.arrays[0]) {
+	if da.chunk <= len(da.data[0]) {
 		return true
 	}
 	da.done = true
 	return false
 }
 
-func (da *dataArrays) NumObs() int {
+func (da *DataFrame) NumObs() int {
 
 	if da.nobs > 0 {
 		return da.nobs
 	}
 
-	if da.arrays == nil || len(da.arrays) == 0 {
+	if da.data == nil || len(da.data) == 0 {
 		// Not yet known
 		return -1
 	}
 
 	var nobs int
-	for _, v := range da.arrays[0] {
+	for _, v := range da.data[0] {
 		nobs += ilen(v)
 	}
 	da.nobs = nobs
@@ -99,29 +99,29 @@ func (da *dataArrays) NumObs() int {
 	return nobs
 }
 
-func (da *dataArrays) init() {
+func (da *DataFrame) init() {
 	da.setNamePos() // TODO should get rid of this
 }
 
-func (da *dataArrays) Names() []string {
+func (da *DataFrame) Names() []string {
 	return da.names
 }
 
-func (da *dataArrays) Reset() {
+func (da *DataFrame) Reset() {
 	da.chunk = 0
 	da.nobs = 0
 	da.done = false
 }
 
-func (da *dataArrays) GetPos(j int) interface{} {
+func (da *DataFrame) GetPos(j int) interface{} {
 	if da.done {
 		return nil
 	}
 
-	return da.arrays[j][da.chunk-1]
+	return da.data[j][da.chunk-1]
 }
 
-func (da *dataArrays) Get(na string) interface{} {
+func (da *DataFrame) Get(na string) interface{} {
 
 	pos := -1
 	for j, nm := range da.Names() {
@@ -139,8 +139,8 @@ func (da *dataArrays) Get(na string) interface{} {
 	return da.GetPos(pos)
 }
 
-func (da *dataArrays) NumVar() int {
-	return len(da.arrays)
+func (da *DataFrame) NumVar() int {
+	return len(da.data)
 }
 
 // NewFromArrays creates a Dstream from raw data stored as slices;
@@ -153,8 +153,8 @@ func NewFromArrays(data [][]interface{}, names []string) Dstream {
 		panic(msg)
 	}
 
-	da := &dataArrays{
-		arrays: data,
+	da := &DataFrame{
+		data: data,
 		xform: xform{
 			names: names,
 		},
@@ -202,8 +202,8 @@ func NewFromFlat(data []interface{}, names []string) Dstream {
 		ar = append(ar, []interface{}{v})
 	}
 
-	da := &dataArrays{
-		arrays: ar,
+	da := &DataFrame{
+		data: ar,
 		xform: xform{
 			names: names,
 		},
@@ -222,8 +222,8 @@ func Shallow(data Dstream) Dstream {
 
 	data.Reset()
 	switch data := data.(type) {
-	case *dataArrays:
-		var dy dataArrays = *data
+	case *DataFrame:
+		var dy DataFrame = *data
 		return &dy
 	default:
 		return MemCopy(data)

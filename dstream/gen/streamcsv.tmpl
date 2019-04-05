@@ -53,6 +53,13 @@ func (cs *CSVReader) Next() bool {
 		return false
 	}
 
+	if cs.limitchunk > 0 && cs.limitchunk <= cs.chunknum {
+		cs.done = true
+		return false
+	}
+
+	cs.chunknum++
+
 	tc := cs.typeConf
 	truncate(cs.bdata)
 
