@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (r *replace) GetPos(j int) interface{} {
+func (r *replaceColumn) GetPos(j int) interface{} {
 
 	if j != r.colpos {
 		return r.source.GetPos(j)

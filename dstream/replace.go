@@ -2,7 +2,7 @@ package dstream
 
 import "fmt"
 
-type replace struct {
+type replaceColumn struct {
 
 	// The data stream in which we are replacing a column
 	source Dstream
@@ -26,11 +26,11 @@ type replace struct {
 	vpos map[string]int
 }
 
-// Replace returns a new Dstream in which the column with the given
+// ReplaceColumn returns a new Dstream in which the column with the given
 // name is replaced with the given data.  The col value must be an
 // array type of a valid primitive type (e.g. int, float64, string),
 // and must have length equal to the number of rows of data.
-func Replace(data Dstream, name string, coldata interface{}) Dstream {
+func ReplaceColumn(data Dstream, name string, coldata interface{}) Dstream {
 
 	vpos := make(map[string]int)
 	for q, na := range data.Names() {
@@ -49,7 +49,7 @@ func Replace(data Dstream, name string, coldata interface{}) Dstream {
 		panic(msg)
 	}
 
-	r := &replace{
+	r := &replaceColumn{
 		source:  data,
 		name:    name,
 		colpos:  colpos,
@@ -60,7 +60,7 @@ func Replace(data Dstream, name string, coldata interface{}) Dstream {
 	return r
 }
 
-func (r *replace) Next() bool {
+func (r *replaceColumn) Next() bool {
 
 	if !r.source.Next() {
 		return false
@@ -72,29 +72,29 @@ func (r *replace) Next() bool {
 	return true
 }
 
-func (r *replace) Names() []string {
+func (r *replaceColumn) Names() []string {
 	return r.source.Names()
 }
 
-func (r *replace) NumVar() int {
+func (r *replaceColumn) NumVar() int {
 	return r.source.NumVar()
 }
 
-func (r *replace) NumObs() int {
+func (r *replaceColumn) NumObs() int {
 	return r.source.NumObs()
 }
 
-func (r *replace) Reset() {
+func (r *replaceColumn) Reset() {
 	r.rowpos = 0
 	r.csize = 0
 	r.source.Reset()
 }
 
-func (r *replace) Close() {
+func (r *replaceColumn) Close() {
 	r.source.Close()
 }
 
-func (r *replace) Get(name string) interface{} {
+func (r *replaceColumn) Get(name string) interface{} {
 
 	j, ok := r.vpos[name]
 	if !ok {
