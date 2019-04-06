@@ -17,7 +17,7 @@ func (r *replaceColumn) GetPos(j int) interface{} {
 	            return z[r.rowpos:r.rowpos+r.csize]
      	{{- end }}
 	default:
-	    msg := fmt.Sprintf("Convert: unknown type %T\n", z)
+	    msg := fmt.Sprintf("unknown type %T\n", z)
         panic(msg)
 	}
 }
