@@ -10,15 +10,19 @@ import (
 
 // CSVReader supports reading a Dstream from an io.Reader.
 type CSVReader struct {
-	rdr    io.Reader
+
+	// The reader for the file
+	rdr io.Reader
+
+	// The csv reader that parses the raw text
 	csvrdr *csv.Reader
 
 	// bdata holds the data
 	bdata []interface{}
 
-	// We need to reed the first row to get the number of columns.
-	// We can store it here so that it is included in the first data
-	// chunk.
+	// We need to read the first row to get the number of columns.
+	// or the header.  We can then store it here so that it is
+	// included in the first data chunk.
 	firstrow []string
 
 	// If true, skip records with unparseable CSV data, otherwise
