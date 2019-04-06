@@ -83,7 +83,7 @@ func TestFilter1(t *testing.T) {
 
 		// Check the number of observations
 		if dx.NumObs() != db.NumObs() {
-			fmt.Printf("NumObs mismatch: %d != %d\n", dx.NumObs(), db.NumObs())
+			fmt.Printf("NumObs mismatch: %d != %d, pass %d\n", dx.NumObs(), db.NumObs(), k+1)
 			t.Fail()
 		}
 
