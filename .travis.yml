@@ -7,10 +7,9 @@ go:
  - master
 
 script:
- - go test ./...
+ - go test -v ./...
 
 before_install:
- - go get gonum.org/v1/gonum/floats
  - go get github.com/kshedden/dstream/dstream
  - go get github.com/kshedden/dstream/formula
 
