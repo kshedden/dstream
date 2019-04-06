@@ -1,0 +1,58 @@
+package dstream
+
+import "testing"
+
+func TestGenerate1(t *testing.T) {
+
+	x := [][]interface{}{
+		{
+			[]float64{0, 0, 0},
+			[]float64{1, 1, 1},
+			[]float64{2, 2, 3},
+		},
+		{
+			[]float64{0, 0, 1},
+			[]float64{1, 2, 2},
+			[]float64{3, 3, 3},
+		},
+		{
+			[]float64{1, 2, 3},
+			[]float64{4, 5, 6},
+			[]float64{7, 8, 9},
+		},
+		{
+			[]string{"a", "b", "c"},
+			[]string{"d", "e", "f"},
+			[]string{"g", "h", "i"},
+		},
+	}
+
+	na := []string{"x1", "x2", "x3", "x4"}
+	da := NewFromArrays(x, na)
+
+	x = append(x,
+		[]interface{}{
+			[]float64{0, 0, 0},
+			[]float64{1, 2, 2},
+			[]float64{6, 6, 9},
+		})
+	na = []string{"x1", "x2", "x3", "x4", "x5"}
+	ex := NewFromArrays(x, na)
+
+	f := func(v map[string]interface{}, x interface{}) {
+		z := x.([]float64)
+
+		x1 := v["x1"].([]float64)
+		x2 := v["x2"].([]float64)
+
+		for i := range x1 {
+			z[i] = x1[i] * x2[i]
+		}
+	}
+
+	db := Generate(da, "x5", f, Float64)
+
+	if !EqualReport(db, ex, true) {
+		t.Fail()
+	}
+}
