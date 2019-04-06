@@ -1,7 +1,5 @@
 package dstream
 
-//go:generate go run gen.go -template=replace.template
-
 import "fmt"
 
 type replace struct {

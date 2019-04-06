@@ -5,8 +5,6 @@ import (
 	"sort"
 )
 
-//go:generate go run gen.go -template=regroup.template
-
 type argsort struct {
 	s    []uint64
 	inds []int
