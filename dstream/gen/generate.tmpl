@@ -1,0 +1,64 @@
+package dstream
+
+import (
+    "fmt"
+    "time"
+)
+
+func (gen *generate) init() {
+
+	for _, na := range gen.source.Names() {
+		if gen.newvarname == na {
+			msg := fmt.Sprintf("Generate: variable '%s' already exists.\n", gen.newvarname)
+			panic(msg)
+		}
+	}
+
+	gen.names = append(gen.source.Names(), gen.newvarname)
+	gen.bdata = make([]interface{}, len(gen.names))
+
+	switch gen.dtype {
+	{{- range . }}
+	case {{ .Utype }}:
+		gen.bdata[len(gen.bdata)-1] = make([]{{ .Type }}, 0)
+	{{ end }}
+	default:
+		panic("Generate: unknown dtype")
+	}
+}
+
+func (gen *generate) Next() bool {
+
+	if !gen.source.Next() {
+		return false
+	}
+
+	// All but new variable
+	for j := 0; j < gen.source.NumVar(); j++ {
+		gen.bdata[j] = gen.source.GetPos(j)
+	}
+
+	n := ilen(gen.GetPos(0))
+
+	// The new variable goes in the last position
+	q := len(gen.names) - 1
+
+	switch x := gen.bdata[q].(type) {
+	{{- range . }}
+	case []{{ .Type }}:
+		gen.bdata[q] = resize{{ .Utype }}(x, n)
+	{{ end }}
+	default:
+		panic("unknown type")
+	}
+
+	mp := make(map[string]interface{})
+	for k, na := range gen.names {
+		if na != gen.newvarname {
+			mp[na] = gen.bdata[k]
+		}
+	}
+
+	gen.gfunc(mp, gen.bdata[q])
+	return true
+}
