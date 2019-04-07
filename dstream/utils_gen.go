@@ -116,7 +116,8 @@ func resizeFloat64(x []float64, n int) []float64 {
 }
 
 // VarTypes returns a map relating each variable by name to its corresponding
-// data type.
+// data type.  The dstream should be readable before calling (Reset and call
+// Next if needed).
 func VarTypes(d Dstream) map[string]string {
 	types := make(map[string]string)
 	for k, na := range d.Names() {

@@ -39,7 +39,7 @@ func (r *replaceColumn) GetPos(j int) interface{} {
 	case []float64:
 		return z[r.rowpos : r.rowpos+r.csize]
 	default:
-		msg := fmt.Sprintf("Convert: unknown type %T\n", z)
+		msg := fmt.Sprintf("unknown type %T\n", z)
 		panic(msg)
 	}
 }

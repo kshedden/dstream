@@ -17,21 +17,22 @@ func resize{{ .Utype }}(x []{{ .Type }}, n int) []{{ .Type }} {
 {{ end }}
 
 // VarTypes returns a map relating each variable by name to its corresponding
-// data type.
+// data type.  The dstream should be readable before calling (Reset and call
+// Next if needed).
 func VarTypes(d Dstream) map[string]string {
 	types := make(map[string]string)
 	for k, na := range d.Names() {
 		v := d.GetPos(k)
-                switch v.(type) {
-		{{- range . }}
-		case []{{ .Type }}:
-			types[na] = "{{ .Type }}"
-		{{- end }}
-		default:
-			types[na] = "unknown type"
+        switch v.(type) {
+		    {{- range . }}
+		        case []{{ .Type }}:
+			        types[na] = "{{ .Type }}"
+		    {{- end }}
+		    default:
+			    types[na] = "unknown type"
 		}
 	}
-        return types
+    return types
 }
 
 func ilen(x interface{}) int {
@@ -70,14 +71,14 @@ func truncate(z []interface{}) {
 // from the first chunk.
 func GetCol(da Dstream, na string) interface{} {
 
-        vn := da.Names()
+    vn := da.Names()
 	for j, x := range vn {
-                if na == x {
-                        return GetColPos(da, j)
-                }
+        if na == x {
+            return GetColPos(da, j)
         }
-        panic(fmt.Sprintf("GetCol: variable '%s' not found", na))
-        return nil
+    }
+    panic(fmt.Sprintf("GetCol: variable '%s' not found", na))
+    return nil
 }
 
 // GetColPos returns a copy of the data for one variable.
@@ -85,30 +86,30 @@ func GetCol(da Dstream, na string) interface{} {
 // underlying data.
 func GetColPos(da Dstream, j int) interface{} {
 
-        da.Reset()
+    da.Reset()
 
-        if !da.Next() {
-                return nil
+    if !da.Next() {
+        return nil
 	}
 
-        // Get the first chunk so that we have the data type.
-        v := da.GetPos(j)
+    // Get the first chunk so that we have the data type.
+    v := da.GetPos(j)
 
 	switch v := v.(type) {
 	    {{- range . }}
-	    case []{{ .Type }}:
-	        var x []{{ .Type }}
-		x = append(x, v...)
-		for da.Next() {
-		        y := da.GetPos(j).([]{{ .Type }})
-                        x = append(x, y...)
+	        case []{{ .Type }}:
+	            var x []{{ .Type }}
+		        x = append(x, v...)
+		        for da.Next() {
+		            y := da.GetPos(j).([]{{ .Type }})
+                    x = append(x, y...)
                 }
-		return x
-            {{- end }}
+		        return x
+        {{- end }}
 	    case nil:
-                    return nil
-            default:
-	            msg := fmt.Sprintf("GetCol: unknown data type %T.\n", v)
+            return nil
+        default:
+	        msg := fmt.Sprintf("GetCol: unknown data type %T.\n", v)
 		    panic(msg)
-        }
+    }
 }
