@@ -2,12 +2,14 @@
 
 # Preliminaries
 
-[Package documentation](https://godoc.org/github.com/kshedden/dstream/dstream) at (Godoc.org).
+[Dstream package documentation](https://godoc.org/github.com/kshedden/dstream/dstream)
+
+[Formula package documentation](https://godoc.org/github.com/kshedden/dstream/formula)
 
 To install:
 
 ```
-go get github.com/kshedden/dstream/dstream
+go get github.com/kshedden/dstream...
 ```
 
 # Introduction
@@ -18,9 +20,9 @@ multivariate data in [Go](http://golang.org).  A Dstream is a
 rectangular array of data in which the columns are variables and the
 rows are cases or observations.
 
-Dstream is designed to work with large datasets, where it is not
+Dstream is designed to handle large datasets, where it is not
 possible to load all data for all variables into memory at once.  To
-achieve this, Dstream utilizes a _chunked_, _columnar_ storage format.
+achieve this, Dstream utilizes a _chunked_, _column-based_ storage format.
 A chunk contains the data for a contiguous block of rows.
 The data are stored by variable (column-wise) in typed
 Go slices.  Only one chunk of the Dstream is held in memory at one
@@ -30,7 +32,7 @@ During data processing, the chunks are visited in order.  The `Next`
 method advances the Dstream to the next chunk.  When possible, the
 memory backing a chunk is re-used for the next chunk.  Therefore, a
 chunk must either be completely processed, or copied to independent
-memory before subsequent calls to `Next`.
+memory before making subsequent calls to `Next`.
 Most Dstreams can be reset with the `Reset` method and
 read multiple times, but this requires all the overhead of the initial
 read (the data will be fully re-processed from its source following a
@@ -198,24 +200,40 @@ its methods as needed.
 
 ### The memory-backed reference implementation
 
-The dataArrays type serves as a reference implementation for a
+The `DataFrame` type serves as a reference implementation for a
 Dstream.  This implementation uses in-memory sharded arrays to store
-the values for each variable.  The dataArrays type is useful for
+the values for each variable.  The `DataFrame` type is useful for
 smaller datasets.  After substantial reduction (e.g. filtering), a
-large disk-backed Dstream may be converted to a dataArrays type using
+large disk-backed Dstream may be converted to a `DataFrame` type using
 `MemCopy` (much like use of `collect` in Spark).
 
 ### Data sources
 
-A Dstream is created from a data source.  We provide two functions
-[StreamCSV](https://godoc.org/github.com/kshedden/dstream/dstream#StreamCSV)
-and
+A Dstream is created from a data source.  We provide three frameworks for
+reading data from files.  For CSV files, use the
+[StreamCSV](https://godoc.org/github.com/kshedden/dstream/dstream#StreamCSV).
 [Bcols](https://godoc.org/github.com/kshedden/dstream/dstream#DropNAhttps://godoc.org/github.com/kshedden/dstream/dstream#Bcols)
-for constructing Dstreams from certain types of text (csv) and binary
-data.  A Dstream is based on a minimal Go
+saves the data in files in native binary format.
+
+A `DataFrame` is a memory-backed Dstream which can be loaded and saved
+to a file.  If `df` is a Dstream that can fit into memory,
+it can be converted to a `DataFrame` using `MemCopy`, then saved:
+
+```
+da := dstream.MemCopy(df)
+da.Save("file.dat")
+```
+
+The data can be loaded as follows:
+
+```
+da := dstream.DataFrame{}
+da.Load("file.dat")
+```
+
+Since a Dstream is based on a minimal Go
 [interface](https://golang.org/doc/effective_go.html#interfaces_and_types),
-so Dstreams can be obtained from other data sources by implementing a
-reader that implements the Dstream interface.
+Dstreams readers for other data sources can be easily implemented.
 
 ### Status
 

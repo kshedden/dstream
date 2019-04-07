@@ -20,6 +20,7 @@ func Dechunk(source Dstream) Dstream {
 	nvar := source.NumVar()
 	data := make([][]interface{}, nvar)
 	for j := 0; j < nvar; j++ {
+		// The result has only one chunk
 		data[j] = make([]interface{}, 1)
 	}
 
