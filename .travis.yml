@@ -7,12 +7,13 @@ go:
  - master
 
 script:
- - go test -v ./...
+  - go test -race -coverprofile=coverage.txt -covermode=atomic
 
 notifications:
  email: false
 
 before_install:
- - go get github.com/kshedden/dstream/dstream
- - go get github.com/kshedden/dstream/formula
+ - go get -t -v ./...
 
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
