@@ -44,7 +44,7 @@ func resizeBool(x []bool, n int) []bool {
 
 func zeroFloat(z []float64) {
 	z = z[0:cap(z)]
-	for i, _ := range z {
+	for i := range z {
 		z[i] = 0
 	}
 }

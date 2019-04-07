@@ -18,5 +18,4 @@
 // from simple components.  Examples of transformations are Mutate
 // (modify a column in-place) and DropCols (drop one or more columns
 // from the Dstream).
-
 package dstream

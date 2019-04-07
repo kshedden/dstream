@@ -457,7 +457,7 @@ func (fp *FormulaParser) codeStrings(na, ref string, s []string) {
 	codes := fp.codes[na]
 
 	var dat []interface{}
-	for _, _ = range codes {
+	for range codes {
 		dat = append(dat, make([]float64, len(s)))
 	}
 
@@ -552,7 +552,7 @@ func (fp *FormulaParser) doTimes(a, b string) *ColSet {
 			d1 := ds1.Data[j1].([]float64)
 			d2 := ds2.Data[j2].([]float64)
 			x := make([]float64, len(d1))
-			for i, _ := range x {
+			for i := range x {
 				x[i] = d1[i] * d2[i]
 			}
 			names = append(names, na1+":"+na2)
@@ -588,7 +588,7 @@ func (fp *FormulaParser) createIcept() bool {
 	}
 
 	x := make([]float64, n)
-	for i, _ := range x {
+	for i := range x {
 		x[i] = 1
 	}
 	fp.workData["icept"] = &ColSet{Names: []string{"icept"}, Data: []interface{}{x}}
@@ -596,6 +596,7 @@ func (fp *FormulaParser) createIcept() bool {
 	return true
 }
 
+// Names returns the names of the variables.
 func (fp *FormulaParser) Names() []string {
 	return fp.names
 }
@@ -701,7 +702,7 @@ func (fp *FormulaParser) doFormula(rpn []*token) bool {
 	return true
 }
 
-// Parse builds a design matrix out of the formula and raw data.
+// Next builds a design matrix based on the formula for one chunk of data..
 func (fp *FormulaParser) Next() bool {
 
 	fp.Data = new(ColSet)

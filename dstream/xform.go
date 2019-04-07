@@ -74,9 +74,8 @@ func (x *xform) Names() []string {
 	// through to the source.
 	if x.names != nil {
 		return x.names
-	} else {
-		return x.source.Names()
 	}
+	return x.source.Names()
 }
 
 func (x *xform) GetPos(j int) interface{} {

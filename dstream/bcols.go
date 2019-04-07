@@ -131,48 +131,48 @@ func (b *bcols) usenames() []string {
 	return use
 }
 
-func (b *bcols) Names() []string {
-	return b.names
+func (bc *bcols) Names() []string {
+	return bc.names
 }
 
-func (b *bcols) Close() {
-	for _, x := range b.toclose {
+func (bc *bcols) Close() {
+	for _, x := range bc.toclose {
 		x.Close()
 	}
 }
 
-func (b *bcols) Reset() {
-	b.Close()
-	b.toclose = b.toclose[0:0]
-	b.rdrs = b.rdrs[0:0]
-	b.init()
-	b.nobsKnown = false
-	b.nobs = 0
-	b.done = false
+func (bc *bcols) Reset() {
+	bc.Close()
+	bc.toclose = bc.toclose[0:0]
+	bc.rdrs = bc.rdrs[0:0]
+	bc.init()
+	bc.nobsKnown = false
+	bc.nobs = 0
+	bc.done = false
 }
 
-func (b *bcols) NumVar() int {
-	return len(b.names)
+func (bc *bcols) NumVar() int {
+	return len(bc.names)
 }
 
-func (b *bcols) NumObs() int {
-	if !b.nobsKnown {
+func (bc *bcols) NumObs() int {
+	if !bc.nobsKnown {
 		return -1
 	}
-	return b.nobs
+	return bc.nobs
 }
 
-func (b *bcols) GetPos(j int) interface{} {
-	return b.bdata[j]
+func (bc *bcols) GetPos(j int) interface{} {
+	return bc.bdata[j]
 }
 
-func (b *bcols) Get(na string) interface{} {
-	pos, ok := b.namepos[na]
+func (bc *bcols) Get(na string) interface{} {
+	pos, ok := bc.namepos[na]
 	if !ok {
 		msg := fmt.Sprintf("Variable '%s' not found", na)
 		panic(msg)
 	}
-	return b.bdata[pos]
+	return bc.bdata[pos]
 }
 
 // BColsWriter writes a dstream to disk in bcols format.

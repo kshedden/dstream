@@ -74,7 +74,7 @@ func (a *linapply) Next() bool {
 		for k := 0; k < q; k++ {
 			switch x := a.bdata[k].(type) {
 			case []float64:
-				for i, _ := range z {
+				for i := range z {
 					z[i] += v[k] * x[i]
 				}
 			case []string:

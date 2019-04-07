@@ -2,6 +2,7 @@ package dstream
 
 import "fmt"
 
+// MutateFunc is a function that can be used to change the values of a variable in-place.
 type MutateFunc func(interface{})
 
 type mutated struct {
