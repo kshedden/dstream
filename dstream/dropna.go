@@ -5,7 +5,7 @@ import "math"
 // TODO: change this to DropNaN, then add a separate dropna that uses
 // a function to define what is missing.
 
-// DropDA returns a Dstream in which all rows containing any missing
+// DropNA returns a Dstream in which all rows containing any missing
 // values are dropped.
 func DropNA(data Dstream) Dstream {
 	dna := &dropNA{
@@ -29,9 +29,8 @@ type dropNA struct {
 func (dna *dropNA) NumObs() int {
 	if dna.nobsKnown {
 		return dna.nobs
-	} else {
-		return -1
 	}
+	return -1
 }
 
 func (dna *dropNA) Reset() {
@@ -51,7 +50,7 @@ func (dna *dropNA) Next() bool {
 	n := ilen(dna.source.GetPos(0))
 
 	dna.mask = resizeBool(dna.mask, n)
-	for j, _ := range dna.mask {
+	for j := range dna.mask {
 		dna.mask[j] = false
 	}
 

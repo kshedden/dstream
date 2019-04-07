@@ -329,13 +329,12 @@ func (dw *CSVWriter) getFmt(t string, col int) string {
 	case "float":
 		if dw.floatFmt == "" {
 			return "%.8f"
-		} else {
-			return dw.floatFmt
 		}
+		return dw.floatFmt
 	case "int":
 		return "%d"
 	default:
-		panic("unkown type")
+		panic("unknown type")
 	}
 }
 

@@ -73,7 +73,7 @@ func (sc *maxchunksize) Next() bool {
 		case []string:
 			sc.bdata[j] = x[sc.pos : sc.pos+m]
 		default:
-			panic("unkown type")
+			panic("unknown type")
 		}
 	}
 

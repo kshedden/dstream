@@ -57,9 +57,8 @@ func (df *diffChunk) init() {
 func (df *diffChunk) Nobs() int {
 	if df.nobsKnown {
 		return df.nobs
-	} else {
-		return -1
 	}
+	return -1
 }
 
 func (df *diffChunk) Next() bool {
@@ -115,7 +114,7 @@ func (df *diffChunk) Next() bool {
 			df.bdata[jj] = v[maxorder:len(v)]
 			jj++
 		default:
-			msg := fmt.Sprintf("unkown data type: %T", v)
+			msg := fmt.Sprintf("unknown data type: %T", v)
 			panic(msg)
 		}
 	}

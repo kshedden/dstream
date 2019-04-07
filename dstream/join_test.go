@@ -11,7 +11,7 @@ func TestJoin1(t *testing.T) {
 	ar := make([][]uint64, 3)
 	for j := 0; j < 3; j++ {
 		x := make([]uint64, 20+3*j)
-		for i, _ := range x {
+		for i := range x {
 			x[i] = uint64(math.Floor(float64(i) / float64(j+3)))
 		}
 		ar[j] = x

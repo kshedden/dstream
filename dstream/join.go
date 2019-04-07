@@ -85,7 +85,7 @@ func (w *Join) needsadvance(j int) bool {
 }
 
 func (w *Join) clearstatus() {
-	for j, _ := range w.Status {
+	for j := range w.Status {
 		w.Status[j] = false
 	}
 }

@@ -373,7 +373,6 @@ func (fp *FormulaParser) Missing() []bool {
 
 func (fp *FormulaParser) NumObs() int {
 	panic("FormulaParser does not know the sample size")
-	return 0
 }
 
 func (fp *FormulaParser) NumVar() int {
@@ -394,7 +393,6 @@ func (fp *FormulaParser) Get(na string) interface{} {
 
 	msg := fmt.Sprintf("Formula: variable '%s' not found", na)
 	panic(msg)
-	return nil
 }
 
 // setCodes inspects the data to determine integer codes for the
@@ -515,7 +513,7 @@ func (fp *FormulaParser) convertColumn(na string) {
 			Data:  []interface{}{s},
 		}
 	default:
-		panic(fmt.Sprintf("unkown type %T in convertColumn", s))
+		panic(fmt.Sprintf("unknown type %T in convertColumn", s))
 	}
 }
 

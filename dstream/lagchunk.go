@@ -72,9 +72,8 @@ func (lc *lagChunk) init() {
 func (lc *lagChunk) NumObs() int {
 	if lc.nobsKnown {
 		return lc.nobs
-	} else {
-		return -1
 	}
+	return -1
 }
 
 func (lc *lagChunk) Reset() {
@@ -125,7 +124,7 @@ func (lc *lagChunk) Next() bool {
 				jj++
 			}
 		default:
-			panic("unkown data type")
+			panic("unknown data type")
 
 		}
 	}

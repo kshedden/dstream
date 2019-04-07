@@ -80,7 +80,7 @@ func (a *linapply) Next() bool {
 			case []string:
 				// do nothing
 			default:
-				panic("unkown type")
+				panic("unknown type")
 			}
 		}
 	}
