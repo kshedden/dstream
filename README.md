@@ -1,3 +1,5 @@
+https://travis-ci.com/kshedden/dstream.svg?branch=master
+
 # Preliminaries
 
 [Package documentation](https://godoc.org/github.com/kshedden/dstream/dstream) at (Godoc.org).
