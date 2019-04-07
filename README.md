@@ -249,6 +249,6 @@ functionality, and many corner-cases are not well covered by tests.
 ### Statistical analysis
 
 Dstreams can be fed into statistical modeling tools, including
-[glm](https://github.com/kshedden/statmodel/glm),
+[glm](https://github.com/kshedden/statmodel/tree/master/glm),
 [dimred](https://github.com/kshedden/dimred) and
 [duration](https://github.com/kshedden/statmodel/duration).
