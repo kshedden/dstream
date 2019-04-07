@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.com/kshedden/dstream.svg?branch=master)](https://travis-ci.com/kshedden/dstream)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kshedden/dstream)](https://goreportcard.com/report/github.com/kshedden/dstream)
+[![codecov](https://codecov.io/gh/kshedden/dstream/branch/master/graph/badge.svg)](https://codecov.io/gh/kshedden/dstream)
 
 # Preliminaries
 
