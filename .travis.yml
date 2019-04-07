@@ -13,7 +13,7 @@ notifications:
  email: false
 
 before_install:
- - go get -t -v ./...
+ - go get github.com/kshedden/dstream...
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
