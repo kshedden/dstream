@@ -1,4 +1,4 @@
-https://travis-ci.com/kshedden/dstream.svg?branch=master
+[![Build Status](https://travis-ci.com/kshedden/dstream.svg?branch=master)](https://travis-ci.com/kshedden/dstream)
 
 # Preliminaries
 
