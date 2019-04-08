@@ -177,7 +177,7 @@ func NewFromArrays(data [][]interface{}, names []string) Dstream {
 	return da
 }
 
-// CheckValid runs thhrough the chunks and confirms that the lenghts of the slices within
+// CheckValid runs through the chunks and confirms that the lengths of the slices within
 // the chunks are the same.  If CheckValid returns false, the dstream is in a corrupted
 // state.  On completion, the dstream is in its initial state.
 func CheckValid(data Dstream) bool {
