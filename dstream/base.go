@@ -39,6 +39,7 @@ type Dstream interface {
 	Close()
 }
 
+// Dtype represents a data type
 type Dtype uint8
 
 const (
@@ -69,6 +70,8 @@ type DataFrame struct {
 	nobs  int
 }
 
+// Next advances to the next chunk and returns true if successful. If there are
+// no more chunks, it returns false.
 func (da *DataFrame) Next() bool {
 
 	da.chunk++
@@ -79,6 +82,8 @@ func (da *DataFrame) Next() bool {
 	return false
 }
 
+// NumObs returns the number of observations in the DataFrame, if known. If the number
+// of observations is not known, it returns -1.
 func (da *DataFrame) NumObs() int {
 
 	if da.nobs > 0 {
@@ -103,16 +108,20 @@ func (da *DataFrame) init() {
 	da.setNamePos() // TODO should get rid of this
 }
 
+// Names returns the variable (column) names of the dstream.
 func (da *DataFrame) Names() []string {
 	return da.names
 }
 
+// Reset resets the dstream so that after the next call to Next, the
+// dstream is at chunk zero.
 func (da *DataFrame) Reset() {
 	da.chunk = 0
 	da.nobs = 0
 	da.done = false
 }
 
+// GetPos returns the data slice for the variable at the given position.
 func (da *DataFrame) GetPos(j int) interface{} {
 	if da.done {
 		return nil
@@ -121,6 +130,7 @@ func (da *DataFrame) GetPos(j int) interface{} {
 	return da.data[j][da.chunk-1]
 }
 
+// Get returns the data slice for the variable with the given name.
 func (da *DataFrame) Get(na string) interface{} {
 
 	pos := -1
@@ -139,6 +149,7 @@ func (da *DataFrame) Get(na string) interface{} {
 	return da.GetPos(pos)
 }
 
+// NumVar returns the number of variables in the dstream.
 func (da *DataFrame) NumVar() int {
 	return len(da.data)
 }
@@ -165,24 +176,28 @@ func NewFromArrays(data [][]interface{}, names []string) Dstream {
 	return da
 }
 
+// CheckValid runs thhrough the chunks and confirms that the lenghts of the slices within
+// the chunks are the same.  If CheckValid returns false, the dstream is in a corrupted
+// state.  On completion, the dstream is in its initial state.
 func CheckValid(data Dstream) bool {
 
 	data.Reset()
 	names := data.Names()
 
 	for c := 0; data.Next(); c++ {
-
 		n0 := ilen(data.GetPos(0))
-
 		for j := 1; j < len(names); j++ {
 			n1 := ilen(data.GetPos(j))
 			if n1 != n0 {
-				msg := fmt.Sprintf("Length mismatch in chunk %d: len(%s) = %d, len(%s) = %d\n", c, names[0], n0, names[j], n1)
+				msg := fmt.Sprintf("Length mismatch in chunk %d: len(%s) = %d, len(%s) = %d\n",
+					c, names[0], n0, names[j], n1)
 				io.WriteString(os.Stderr, msg)
 				return false
 			}
 		}
 	}
+
+	data.Reset()
 
 	return true
 }
