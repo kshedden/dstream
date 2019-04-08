@@ -42,6 +42,7 @@ type Dstream interface {
 // Dtype represents a data type
 type Dtype uint8
 
+// Uint8, etc. are constants defining data types
 const (
 	Uint8 Dtype = iota
 	Uint16

@@ -42,8 +42,8 @@ func TestLinapply1(t *testing.T) {
 	ex := NewFromArrays(x, na)
 
 	coeffs := [][]float64{
-		[]float64{1, 0, 2},
-		[]float64{-1, 1, 1},
+		{1, 0, 2},
+		{-1, 1, 1},
 	}
 	db := Linapply(da, coeffs, "z")
 

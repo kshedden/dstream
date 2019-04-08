@@ -70,15 +70,15 @@ func TestBcols1(t *testing.T) {
 func TestBColsWriter(t *testing.T) {
 
 	x := [][]interface{}{
-		[]interface{}{
+		{
 			[]float64{0, 1, 2, 3},
 			[]float64{4, 5, 6},
 		},
-		[]interface{}{
+		{
 			[]float32{1, 2, 3, 4},
 			[]float32{5, 6, 7},
 		},
-		[]interface{}{
+		{
 			[]string{"a", "b", "c", "d"},
 			[]string{"e", "f", "g"},
 		},
