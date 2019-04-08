@@ -6,18 +6,21 @@ import (
 )
 
 // Join performs a streaming join on several Dstreams that have been
-// segmented by id variables.  Join.Data[i] is the current chunk of
-// the i^th stream.  All streams being joined must have been segmented
-// by an id variable.  A call to the Next method advances the first
-// stream (Data[0]) by one chunk.  The other elements of Data are
-// advanced until their id variable is equal to (if possible) or
-// greater than the id variable of Data[0].  If equality is achieved,
-// the corresponding element of Status is set to true.  Status[0] is
-// always false and has no meaning.
+// segmented by id variables.  If join has type Join, then
+// join.Data[i] is the current chunk of the i^th stream.  All streams
+// being joined must have been segmented by an id variable whose
+// values are ascending.  The id variable must have type uint64.
 //
-// The Data values are assumed to be segmented so that the id variable
-// is constant within chunks, and increases in numeric value with
-// subsequent calls to Next.
+// A call to the Next method always advances the first stream
+// (Data[0]) by one chunk.  The other elements of Data are advanced
+// until their id variable is equal to (if possible) or greater than
+// the id variable of Data[0].  If equality is achieved, the
+// corresponding element of join.status is set to true.
+// join.Status[0] is always false and has no meaning.
+//
+// The dstream values to be joined must be segmented so that the id
+// variable is constant within chunks, and increases in numeric value
+// with subsequent calls to the Next method.
 type Join struct {
 
 	// A sequence of segmented Dstreams to advance in unison.
@@ -90,6 +93,13 @@ func (w *Join) clearstatus() {
 	}
 }
 
+// Next advances to the next chunk.  The first dstream, which is
+// contained in join.Data[0], always advances to the next sequential
+// value of its id variable.  The other dstreams (join.Data[j] for j >
+// 0) advance until their id variables are equal to or greater than
+// the id variable for the current chunk of join.Data[0].  The status
+// field (join.status) indicates which dstreams in the join are
+// currently on the same id value as the first dstream (join.Data[0]).
 func (w *Join) Next() bool {
 
 	// Advance the index stream

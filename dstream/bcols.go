@@ -45,7 +45,7 @@ type bcols struct {
 	exclude []string
 }
 
-// BCols takes data stored in a column-wise compressed format under
+// NewBCols takes data stored in a column-wise compressed format under
 // the given directory path, and returns it as a Dstream.  'path' is
 // the directory containing the data, 'chunksize' is the number of
 // values included in each chunk, 'include' and 'exclude' are lists of
@@ -87,13 +87,13 @@ func (bc *bcols) Done() Dstream {
 }
 
 // usenames returns the variable names to include in the Dstream.
-func (b *bcols) usenames() []string {
+func (bc *bcols) usenames() []string {
 
 	inc := make(map[string]bool)
-	for _, v := range b.include {
+	for _, v := range bc.include {
 		inc[v] = true
 
-		_, ok := b.dtypesAll[v]
+		_, ok := bc.dtypesAll[v]
 		if !ok {
 			msg := fmt.Sprintf("Variable '%s' does not exist\n", v)
 			panic(msg)
@@ -102,17 +102,17 @@ func (b *bcols) usenames() []string {
 
 	// If no variables are included, default is to set include to
 	// equal all variable names.
-	if len(b.include) == 0 {
-		for k, _ := range b.dtypesAll {
+	if len(bc.include) == 0 {
+		for k := range bc.dtypesAll {
 			inc[k] = true
 		}
 	}
 
 	exc := make(map[string]bool)
-	for _, v := range b.exclude {
+	for _, v := range bc.exclude {
 		exc[v] = true
 
-		_, ok := b.dtypesAll[v]
+		_, ok := bc.dtypesAll[v]
 		if !ok {
 			msg := fmt.Sprintf("Variable '%s' does not exist\n", v)
 			panic(msg)
@@ -120,9 +120,9 @@ func (b *bcols) usenames() []string {
 	}
 
 	var use []string
-	for v, _ := range inc {
-		if !exc[v] {
-			use = append(use, v)
+	for k := range inc {
+		if !exc[k] {
+			use = append(use, k)
 		}
 	}
 
