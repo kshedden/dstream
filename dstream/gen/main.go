@@ -20,21 +20,21 @@ type Dtype struct {
 
 var (
 	NumTypes = []Dtype{
-		Dtype{"uint8", "Uint8", "i"},
-		Dtype{"uint16", "Uint16", "i"},
-		Dtype{"uint32", "Uint32", "i"},
-		Dtype{"uint64", "Uint64", "i"},
-		Dtype{"int8", "Int8", "i"},
-		Dtype{"int16", "Int16", "i"},
-		Dtype{"int32", "Int32", "i"},
-		Dtype{"int64", "Int64", "i"},
-		Dtype{"float32", "Float32", "f"},
-		Dtype{"float64", "Float64", "f"},
+		{"uint8", "Uint8", "i"},
+		{"uint16", "Uint16", "i"},
+		{"uint32", "Uint32", "i"},
+		{"uint64", "Uint64", "i"},
+		{"int8", "Int8", "i"},
+		{"int16", "Int16", "i"},
+		{"int32", "Int32", "i"},
+		{"int64", "Int64", "i"},
+		{"float32", "Float32", "f"},
+		{"float64", "Float64", "f"},
 	}
 
 	AllTypes = []Dtype{
-		Dtype{"string", "String", "s"},
-		Dtype{"time.Time", "Time", "t"},
+		{"string", "String", "s"},
+		{"time.Time", "Time", "t"},
 	}
 )
 

@@ -92,7 +92,7 @@ func (df *diffChunk) Next() bool {
 		case []float64:
 			n := len(v)
 			df.nobs += n - maxorder
-			df.bdata[jj] = v[maxorder:len(v)]
+			df.bdata[jj] = v[maxorder:]
 			jj++
 			if q > 0 {
 				var y []float64
@@ -103,7 +103,7 @@ func (df *diffChunk) Next() bool {
 				copy(y, v)
 				y = diff(y, q)
 				if q < maxorder {
-					y = y[maxorder-q : len(y)]
+					y = y[maxorder-q:]
 				}
 				df.bdata[jj] = y
 				jj++
@@ -111,7 +111,7 @@ func (df *diffChunk) Next() bool {
 		case []string:
 			n := len(v)
 			df.nobs += n - maxorder
-			df.bdata[jj] = v[maxorder:len(v)]
+			df.bdata[jj] = v[maxorder:]
 			jj++
 		default:
 			msg := fmt.Sprintf("unknown data type: %T", v)
@@ -126,7 +126,7 @@ func diff1(x []float64) []float64 {
 	for i := len(x) - 1; i > 0; i-- {
 		x[i] -= x[i-1]
 	}
-	return x[1:len(x)]
+	return x[1:]
 }
 
 func diff(x []float64, ord int) []float64 {
