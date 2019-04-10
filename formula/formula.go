@@ -363,6 +363,8 @@ func (fp *FormulaParser) checkConv(v ...string) {
 	}
 }
 
+// NumObs is needed to implement the dstream interface, but
+// calls to it will panic.
 func (fp *FormulaParser) NumObs() int {
 	panic("FormulaParser does not know the sample size")
 }

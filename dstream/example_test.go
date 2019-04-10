@@ -158,7 +158,7 @@ func ExampleSegment() {
 	// [0]
 }
 
-func ExampleApply() {
+func ExampleGenerate() {
 
 	data := `V1,V2,V3,V4
 1,2,3,4
