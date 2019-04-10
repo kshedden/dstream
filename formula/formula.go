@@ -156,8 +156,7 @@ func isOperator(tok *token) bool {
 // https://en.wikipedia.org/wiki/Shunting-yard_algorithm
 func parse(input []*token) ([]*token, error) {
 
-	var stack []*token
-	var output []*token
+	var stack, output []*token
 	var last *token
 
 	for _, tok := range input {
@@ -327,6 +326,7 @@ func NewMulti(formulas []string, rawdata dstream.Dstream) *FormulaParser {
 	return fp
 }
 
+// Close does nothing, it is here to satisfy the dstream interface.
 func (fp *FormulaParser) Close() {
 }
 
@@ -363,26 +363,23 @@ func (fp *FormulaParser) checkConv(v ...string) {
 	}
 }
 
-func (fp *FormulaParser) DropNA() {
-	panic("FormulaParser does not support missing values")
-}
-
-func (fp *FormulaParser) Missing() []bool {
-	panic("FormulaParser does not support missing values")
-}
-
 func (fp *FormulaParser) NumObs() int {
 	panic("FormulaParser does not know the sample size")
 }
 
+// NumVar returns the number of variables.
 func (fp *FormulaParser) NumVar() int {
 	return len(fp.Data.Data)
 }
 
+// GetPos returns the data slice for the current chunk, corresponding
+// to the variable in position j.
 func (fp *FormulaParser) GetPos(j int) interface{} {
 	return fp.Data.Data[j]
 }
 
+// Get returns the data slice for the current chunk, corresponding
+// the the named variable.
 func (fp *FormulaParser) Get(na string) interface{} {
 
 	for j, nm := range fp.Data.Names {
