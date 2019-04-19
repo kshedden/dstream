@@ -209,33 +209,37 @@ smaller datasets.  After substantial reduction (e.g. filtering), a
 large disk-backed Dstream may be converted to a `DataFrame` type using
 `MemCopy` (much like use of `collect` in Spark).
 
-### Data sources
+### Input/output and data sources
 
 A Dstream is created from a data source.  We provide three frameworks for
-reading data from files.  For CSV files, use the
-[StreamCSV](https://godoc.org/github.com/kshedden/dstream/dstream#StreamCSV).
-[Bcols](https://godoc.org/github.com/kshedden/dstream/dstream#DropNAhttps://godoc.org/github.com/kshedden/dstream/dstream#Bcols)
-saves the data in files in native binary format.
+serializing data to and from files.  The easiest approach is to use the
+[Load](https://godoc.org/github.com/kshedden/dstream/dstream#Load) and
+[Save](https://godoc.org/github.com/kshedden/dstream/dstream#Load)
+functions.  The whole dstream is serialized and stored in a single compressed
+file.  The file format uses Go gobs.  The files are read and written by chunk,
+so this format can be used for large data sets that do not fit into memory.
 
-A `DataFrame` is a memory-backed Dstream which can be loaded and saved
-to a file.  If `df` is a Dstream that can fit into memory,
-it can be converted to a `DataFrame` using `MemCopy`, then saved:
+[StreamCSV](https://godoc.org/github.com/kshedden/dstream/dstream#StreamCSV)
+can be used to read and write text/csv files.
 
-```
-da := dstream.MemCopy(df)
-da.Save("file.dat")
-```
-
-The data can be loaded as follows:
-
-```
-da := dstream.DataFrame{}
-da.Load("file.dat")
-```
+[Bcols](https://godoc.org/github.com/kshedden/dstream/dstream#Bcols)
+is a binary format that stores the data in a hierarchy of directories and files in raw native form.
 
 Since a Dstream is based on a minimal Go
 [interface](https://golang.org/doc/effective_go.html#interfaces_and_types),
 Dstreams readers for other data sources can be easily implemented.
+
+# Dataframes
+
+A `DataFrame` is a memory-backed Dstream.  If `df` is any Dstream that can fit into memory,
+it can be converted to a `DataFrame` using `MemCopy`:
+
+```
+da := dstream.MemCopy(df)
+```
+
+Since a DataFrame allocates independent memory for every chunk, it is safe to process
+the chunnks of a DataFrame in parallel.
 
 ### Status
 
