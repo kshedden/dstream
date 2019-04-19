@@ -34,7 +34,6 @@ func TestReplaceColumn1(t *testing.T) {
 		if !EqualReport(dx, db, true) {
 			t.Fail()
 		}
-		dx.Reset()
-		dx = MemCopy(dx)
+		dx = MemCopy(dx, true)
 	}
 }

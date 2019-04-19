@@ -5,13 +5,17 @@ import (
 )
 
 // MemCopy returns a Dstream that copies the provided Dstream into
-// in-memory storage.
-func MemCopy(data Dstream) Dstream {
+// in-memory storage.  Pass reset as true to reset the source
+// data before copying
+func MemCopy(data Dstream, reset bool) Dstream {
 
 	nvar := data.NumVar()
 	bdata := make([][]interface{}, nvar)
 
-	data.Reset()
+    if reset {
+    	data.Reset()
+    }
+
 	for data.Next() {
 		for j := 0; j < nvar; j++ {
 			var y interface{}

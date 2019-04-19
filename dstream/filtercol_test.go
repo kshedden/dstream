@@ -104,7 +104,7 @@ func TestFilter2(t *testing.T) {
 
 	dx := Filter(da, f)
 
-	if !EqualReport(dx, MemCopy(da), true) {
+	if !EqualReport(dx, MemCopy(da, true), true) {
 		t.Fail()
 	}
 }

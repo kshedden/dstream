@@ -104,7 +104,7 @@ func TestDropNA1(t *testing.T) {
 	da, de := datam1()
 	dm := DropNA(da)
 
-	dx := MemCopy(dm)
+	dx := MemCopy(dm, true)
 
 	if !EqualReport(de, dm, true) {
 		t.Fail()

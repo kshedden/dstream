@@ -3,30 +3,19 @@
 package dstream
 
 import (
-	"compress/gzip"
 	"encoding/gob"
 	"io"
-	"os"
 	"time"
 )
 
 // Save saves the dstream to a file.  It can subsequently be reloaded with Load.
-func Save(ds Dstream, fname string) {
+func Save(ds Dstream, w io.Writer) {
 
 	ds.Reset()
 
-	fid, err := os.Create(fname)
-	if err != nil {
-		panic(err)
-	}
-	defer fid.Close()
+	enc := gob.NewEncoder(w)
 
-	gid := gzip.NewWriter(fid)
-	defer gid.Close()
-
-	enc := gob.NewEncoder(gid)
-
-	err = enc.Encode(ds.Names())
+	err := enc.Encode(ds.Names())
 	if err != nil {
 		panic(err)
 	}
@@ -146,9 +135,6 @@ type load struct {
 	// done becomes true when the whole data source has been read
 	done bool
 
-	// The name of the file containing the data
-	filename string
-
 	// The variable names
 	names []string
 
@@ -161,9 +147,6 @@ type load struct {
 	// Use this to decode gob data from the file.
 	dec *gob.Decoder
 
-	// The file and gzip reader should be closed when done.
-	needsClosing []io.Closer
-
 	// namespos maps variable names to their column positions
 	namespos map[string]int
 
@@ -171,34 +154,21 @@ type load struct {
 	data []interface{}
 }
 
-// NewLoad returns a dstream that loads data from the given file.  The file must be created
-// using the Save function.
-func NewLoad(fname string) Dstream {
+// NewLoad returns a dstream that loads data from the given file.  The file must
+// have been created using the Save function.
+func NewLoad(r io.Reader) Dstream {
 
 	var ld load
-	ld.filename = fname
-	ld.init()
+	ld.init(r)
 
 	return &ld
 }
 
-func (ld *load) init() {
+func (ld *load) init(r io.Reader) {
 
-	fid, err := os.Open(ld.filename)
-	if err != nil {
-		panic(err)
-	}
-	ld.needsClosing = append(ld.needsClosing, fid)
+	ld.dec = gob.NewDecoder(r)
 
-	gid, err := gzip.NewReader(fid)
-	if err != nil {
-		panic(err)
-	}
-	ld.needsClosing = append(ld.needsClosing, gid)
-
-	ld.dec = gob.NewDecoder(gid)
-
-	err = ld.dec.Decode(&ld.names)
+	err := ld.dec.Decode(&ld.names)
 	if err != nil {
 		panic(err)
 	}
@@ -216,12 +186,9 @@ func (ld *load) init() {
 	ld.data = make([]interface{}, len(ld.names))
 }
 
-// Reset resets the loader so that the data can be re-read from the beginning.
+// Reset panics since this concrete type of Dstream cannot be reset.
 func (ld *load) Reset() {
-	ld.Close()
-	ld.done = false
-	ld.nobs = 0
-	ld.init()
+	panic("A dstream created using NewLoad cannot be reset.\n")
 }
 
 // GetPos returns the data for the variable at the given position in the current chunk.
@@ -248,14 +215,8 @@ func (ld *load) Get(na string) interface{} {
 	return ld.GetPos(ld.namespos[na])
 }
 
-// Close all io resources associated with the value.
+// Close does nothing, it is here to satisfy the Dstream interface.
 func (ld *load) Close() {
-
-	for _, f := range ld.needsClosing {
-		f.Close()
-	}
-
-	ld.needsClosing = nil
 }
 
 // NumVar returns the number of variables in the dstream.

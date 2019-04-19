@@ -213,10 +213,11 @@ large disk-backed Dstream may be converted to a `DataFrame` type using
 
 A Dstream is created from a data source.  We provide three frameworks for
 serializing data to and from files.  The easiest approach is to use the
-[Load](https://godoc.org/github.com/kshedden/dstream/dstream#Load) and
-[Save](https://godoc.org/github.com/kshedden/dstream/dstream#Load)
+[NewLoad](https://godoc.org/github.com/kshedden/dstream/dstream#NewLoad) and
+[Save](https://godoc.org/github.com/kshedden/dstream/dstream#Save)
 functions.  The whole dstream is serialized and stored in a single compressed
-file.  The file format uses Go gobs.  The files are read and written by chunk,
+file.  The file format uses Go [gobs](https://blog.golang.org/gobs-of-data).
+The files are read and written by chunk,
 so this format can be used for large data sets that do not fit into memory.
 
 [StreamCSV](https://godoc.org/github.com/kshedden/dstream/dstream#StreamCSV)

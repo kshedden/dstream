@@ -242,6 +242,6 @@ func Shallow(data Dstream) Dstream {
 		var dy DataFrame = *data
 		return &dy
 	default:
-		return MemCopy(data)
+		return MemCopy(data, true)
 	}
 }

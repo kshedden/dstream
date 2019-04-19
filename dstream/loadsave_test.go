@@ -1,6 +1,7 @@
 package dstream
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -24,32 +25,29 @@ func TestLoadSave(t *testing.T) {
 	names := []string{"x", "y", "z"}
 	data := NewFromArrays(x, names)
 
-	Save(data, "tmp.gz")
+	var buf bytes.Buffer
 
-	da := NewLoad("tmp.gz")
+	Save(data, &buf)
+	da := NewLoad(&buf)
+	db := MemCopy(da, false)
 
-	if da.NumVar() != 3 {
+	if db.NumVar() != 3 {
 		t.Fail()
 	}
 
-	for k := 0; k < 2; k++ {
-		if !EqualReport(data, da, true) {
-			t.Fail()
-		}
-
-		if da.NumObs() != 8 {
-			t.Fail()
-		}
-
-		da.Reset()
+	if !EqualReport(data, db, true) {
+		t.Fail()
 	}
 
-	da.Reset()
+	if db.NumObs() != 8 {
+		t.Fail()
+	}
 
-	for da.Next() {
-		for j := 0; j < da.NumObs(); j++ {
-			u := da.GetPos(j)
-			v := da.Get(da.Names()[j])
+	db.Reset()
+	for db.Next() {
+		for j := 0; j < db.NumVar(); j++ {
+			u := db.GetPos(j)
+			v := db.Get(db.Names()[j])
 			if !equalSlice(u, v) {
 				t.Fail()
 			}

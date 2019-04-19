@@ -28,7 +28,7 @@ func TestConcatVertical1(t *testing.T) {
 	}
 	de := NewFromArrays([][]interface{}{x1, x2}, []string{"x1", "x2"})
 
-	db := MemCopy(da)
+	db := MemCopy(da, true)
 	da.Reset()
 
 	dq := ConcatVertical(da, db)
