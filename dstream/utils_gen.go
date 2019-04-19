@@ -358,3 +358,171 @@ func GetColPos(da Dstream, j int) interface{} {
 		panic(msg)
 	}
 }
+
+// equalSlice returns true if x and y are slices of the same type and
+// hold equal values.
+func equalSlice(x, y interface{}) bool {
+
+	switch u := x.(type) {
+	case []string:
+		v, ok := y.([]string)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []time.Time:
+		v, ok := y.([]time.Time)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []uint8:
+		v, ok := y.([]uint8)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []uint16:
+		v, ok := y.([]uint16)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []uint32:
+		v, ok := y.([]uint32)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []uint64:
+		v, ok := y.([]uint64)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []int8:
+		v, ok := y.([]int8)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []int16:
+		v, ok := y.([]int16)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []int32:
+		v, ok := y.([]int32)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []int64:
+		v, ok := y.([]int64)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []float32:
+		v, ok := y.([]float32)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	case []float64:
+		v, ok := y.([]float64)
+		if !ok {
+			return false
+		}
+		if len(u) != len(v) {
+			return false
+		}
+		for i := range u {
+			if u[i] != v[i] {
+				return false
+			}
+		}
+	default:
+		panic("unkown type")
+	}
+
+	return true
+}

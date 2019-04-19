@@ -6,14 +6,14 @@ import (
 )
 
 {{- range . }}
-// Resize returns a slice of the given type having size n,
-// re-using the provided slice if it is big enough.
-func resize{{ .Utype }}(x []{{ .Type }}, n int) []{{ .Type }} {
-	if cap(x) < n {
-		x = make([]{{ .Type }}, n)
-	}
-	return x[0:n]
-}
+    // Resize returns a slice of the given type having size n,
+    // re-using the provided slice if it is big enough.
+    func resize{{ .Utype }}(x []{{ .Type }}, n int) []{{ .Type }} {
+	    if cap(x) < n {
+		    x = make([]{{ .Type }}, n)
+	    }
+	    return x[0:n]
+    }
 {{ end }}
 
 // VarTypes returns a map relating each variable by name to its corresponding
@@ -38,14 +38,14 @@ func VarTypes(d Dstream) map[string]string {
 func ilen(x interface{}) int {
 	switch x := x.(type) {
         {{- range . }}
-	case []{{ .Type }}:
-		return len(x)
+	        case []{{ .Type }}:
+		        return len(x)
         {{- end }}
         case nil:
-		return 0
-	default:
-		msg := fmt.Sprintf("unknown type: %T", x)
-		panic(msg)
+		    return 0
+	    default:
+		    msg := fmt.Sprintf("unknown type: %T", x)
+		    panic(msg)
 	}
 }
 
@@ -54,12 +54,12 @@ func truncate(z []interface{}) {
 		if x != nil {
 			switch x := x.(type) {
 			{{- range . }}
-			case []{{ .Type }}:
-				z[j] = x[0:0]
-                        {{- end }}
-                        default:
-				msg := fmt.Sprintf("unknown type %T", x)
-				panic(msg)
+			    case []{{ .Type }}:
+				    z[j] = x[0:0]
+            {{- end }}
+                default:
+				    msg := fmt.Sprintf("unknown type %T", x)
+				    panic(msg)
 			}
 		}
 	}
@@ -112,4 +112,31 @@ func GetColPos(da Dstream, j int) interface{} {
 	        msg := fmt.Sprintf("GetCol: unknown data type %T.\n", v)
 		    panic(msg)
     }
+}
+
+// equalSlice returns true if x and y are slices of the same type and
+// hold equal values.
+func equalSlice(x, y interface{}) bool {
+
+    switch u := x.(type) {
+        {{- range . }}
+        case []{{ .Type }}:
+            v, ok := y.([]{{ .Type }})
+            if !ok {
+            	return false
+            }
+            if len(u) != len(v) {
+            	return false
+            }
+            for i := range u {
+            	if u[i] != v[i] {
+            		return false
+            	}
+            }
+        {{- end }}
+        default:
+        	panic("unkown type")
+    }
+
+    return true
 }
