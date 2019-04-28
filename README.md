@@ -4,8 +4,9 @@
 
 # Documentation
 
-dstream [![GoDoc](https://godoc.org/github.com/kshedden/dstream/dstream?status.png)](https://godoc.org/github.com/kshedden/dstream/dstream)
-formula [![GoDoc](https://godoc.org/github.com/kshedden/dstream/formula?status.png)](https://godoc.org/github.com/kshedden/dstream/formula)
+__dstream__ [![GoDoc](https://godoc.org/github.com/kshedden/dstream/dstream?status.png)](https://godoc.org/github.com/kshedden/dstream/dstream)
+
+__formula__ [![GoDoc](https://godoc.org/github.com/kshedden/dstream/formula?status.png)](https://godoc.org/github.com/kshedden/dstream/formula)
 
 # Preliminaries
 
