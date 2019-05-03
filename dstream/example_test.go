@@ -15,16 +15,17 @@ Lamb,Meat,40,76
 `
 
 	b := bytes.NewBuffer([]byte(data))
-	tc := &CSVTypeConf{
-		String:  []string{"Food", "Type"},
-		Float64: []string{"Weight"},
+	types := []VarType{
+		{"Food", String},
+		{"Type", String},
+		{"Weight", Float64},
 	}
-	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
+	da := FromCSV(b).SetTypes(types).HasHeader().Done()
 
 	var buf bytes.Buffer
-	ToCSV(da).SetWriter(&buf).FloatFmt("%.0f").Done()
+	_ = ToCSV(da).SetWriter(&buf).FloatFmt("%.0f").Done()
 
-	fmt.Printf("%s\n", string(buf.Bytes()))
+	fmt.Printf("%s\n", buf.String())
 
 	// Output:
 	// Food,Type,Weight
@@ -47,11 +48,12 @@ Lamb,Meat,40,76
 	// but this can be any io.Reader, e.g. a file.
 	b := bytes.NewBuffer([]byte(data))
 
-	tc := &CSVTypeConf{
-		String:  []string{"Food", "Type"},
-		Float64: []string{"Weight"},
+	types := []VarType{
+		{"Food", String},
+		{"Type", String},
+		{"Weight", Float64},
 	}
-	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
+	da := FromCSV(b).SetTypes(types).HasHeader().Done()
 	da.Next() // Always call Next before first call to Get or GetPos
 
 	y := da.Get("Type").([]string)
@@ -82,11 +84,14 @@ func ExampleMutate() {
 		}
 	}
 
-	tc := &CSVTypeConf{
-		Float64: []string{"V1", "V2", "V3", "V4"},
+	types := []VarType{
+		{"V1", Float64},
+		{"V2", Float64},
+		{"V3", Float64},
+		{"V4", Float64},
 	}
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
+	da := FromCSV(b).SetTypes(types).HasHeader().Done()
 	da = Mutate(da, "V2", timesTwo)
 
 	da.Next() // Always call Next before first call to Get or GetPos
@@ -115,11 +120,14 @@ func ExampleFilter() {
 		}
 	}
 
-	tc := &CSVTypeConf{
-		Float64: []string{"V1", "V2", "V3", "V4"},
+	types := []VarType{
+		{"V1", Float64},
+		{"V2", Float64},
+		{"V3", Float64},
+		{"V4", Float64},
 	}
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
+	da := FromCSV(b).SetTypes(types).HasHeader().Done()
 	da = Filter(da, f)
 
 	da.Next() // Always call Next before first call to Get or GetPos
@@ -140,11 +148,14 @@ func ExampleSegment() {
 3,0,6,7
 `
 
-	tc := &CSVTypeConf{
-		Float64: []string{"V1", "V2", "V3", "V4"},
+	types := []VarType{
+		{"V1", Float64},
+		{"V2", Float64},
+		{"V3", Float64},
+		{"V4", Float64},
 	}
 	b := bytes.NewBuffer([]byte(data))
-	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
+	da := FromCSV(b).SetTypes(types).HasHeader().Done()
 	da = Segment(da, "V1")
 
 	for da.Next() {
@@ -177,10 +188,14 @@ func ExampleGenerate() {
 	}
 
 	b := bytes.NewBuffer([]byte(data))
-	tc := &CSVTypeConf{
-		Float64: []string{"V1", "V2", "V3", "V4"},
+
+	types := []VarType{
+		{"V1", Float64},
+		{"V2", Float64},
+		{"V3", Float64},
+		{"V4", Float64},
 	}
-	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
+	da := FromCSV(b).SetTypes(types).HasHeader().Done()
 	da = Generate(da, "V1p2", f, Float64)
 
 	for da.Next() {
@@ -203,10 +218,13 @@ func ExampleDiffChunk() {
 `
 
 	b := bytes.NewBuffer([]byte(data))
-	tc := &CSVTypeConf{
-		Float64: []string{"V1", "V2", "V3", "V4"},
+	types := []VarType{
+		{"V1", Float64},
+		{"V2", Float64},
+		{"V3", Float64},
+		{"V4", Float64},
 	}
-	da := FromCSV(b).TypeConf(tc).HasHeader().Done()
+	da := FromCSV(b).SetTypes(types).HasHeader().Done()
 	da = DiffChunk(da, map[string]int{"V2": 1, "V4": 2})
 
 	for da.Next() {
@@ -230,11 +248,14 @@ func ExampleLagChunk() {
 `
 
 	b := bytes.NewBuffer([]byte(data))
-	tc := &CSVTypeConf{
-		Float64:    []string{"V1", "V2", "V3", "V4"},
-		Float64Pos: []int{0, 1, 2, 3},
+
+	types := []VarType{
+		{"V1", Float64},
+		{"V2", Float64},
+		{"V3", Float64},
+		{"V4", Float64},
 	}
-	da := FromCSV(b).TypeConf(tc).Done()
+	da := FromCSV(b).SetTypes(types).Done()
 	da = LagChunk(da, map[string]int{"V2": 2})
 
 	da.Next() // Always call Next before first call to Get or GetPos
@@ -278,11 +299,15 @@ func ExampleJoin() {
 	var da []Dstream
 
 	for j, data := range []string{data1, data2, data3} {
+
 		b := bytes.NewBuffer([]byte(data))
-		tc := &CSVTypeConf{
-			Float64: names[j],
+
+		var types []VarType
+		for _, na := range names[j] {
+			types = append(types, VarType{na, Float64})
 		}
-		d := FromCSV(b).TypeConf(tc).HasHeader().Done()
+
+		d := FromCSV(b).SetTypes(types).HasHeader().Done()
 		d = Convert(d, "V1", Uint64)
 		d = Segment(d, "V1")
 		da = append(da, d)
@@ -322,10 +347,14 @@ func ExampleRegroup() {
 `
 
 	b := bytes.NewBuffer([]byte(data))
-	tc := &CSVTypeConf{
-		Float64: []string{"V1", "V2", "V3"},
+
+	types := []VarType{
+		{"V1", Float64},
+		{"V2", Float64},
+		{"V3", Float64},
 	}
-	d := FromCSV(b).TypeConf(tc).HasHeader().Done()
+
+	d := FromCSV(b).SetTypes(types).HasHeader().Done()
 	d = Convert(d, "V1", Uint64)
 	d = Regroup(d, "V1", true)
 

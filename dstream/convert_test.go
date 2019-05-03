@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestConvert(t *testing.T) {
+func TestConvert1(t *testing.T) {
 
 	x := [][]interface{}{
 		{
@@ -77,10 +77,13 @@ func TestConvert2(t *testing.T) {
 	}
 
 	b1 := bytes.NewReader([]byte(data1))
-	tc := &CSVTypeConf{
-		Float64: []string{"id", "v1", "v2", "v3"},
+	types := []VarType{
+		{"id", Float64},
+		{"v1", Float64},
+		{"v2", Float64},
+		{"v3", Float64},
 	}
-	d1 := FromCSV(b1).TypeConf(tc).HasHeader().Done()
+	d1 := FromCSV(b1).SetTypes(types).HasHeader().Done()
 
 	d1 = Generate(d1, "id100", times100, Float64)
 	d1 = Convert(d1, "id100", Uint64)

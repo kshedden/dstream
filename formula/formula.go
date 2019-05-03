@@ -107,7 +107,7 @@ func lex(input string) ([]*token, error) {
 					panic(err)
 				}
 				if !isValidContinuation(q) {
-					rdr.UnreadRune()
+					_ = rdr.UnreadRune()
 					break
 				}
 				name = append(name, q)
@@ -573,20 +573,20 @@ func (fp *FormulaParser) createIcept() bool {
 	}
 
 	// Get the length of the data set.
-	var n int
-	nvar := fp.RawData.NumVar()
-	for j := 0; j < nvar; j++ {
-		x := fp.RawData.GetPos(j)
+	var nobs int
+	{
+		x := fp.RawData.GetPos(0)
 		switch x := x.(type) {
 		case []float64:
-			n = len(x)
+			nobs = len(x)
 		case []string:
-			n = len(x)
+			nobs = len(x)
+		default:
+			panic("unknown type")
 		}
-		break
 	}
 
-	x := make([]float64, n)
+	x := make([]float64, nobs)
 	for i := range x {
 		x[i] = 1
 	}
@@ -705,7 +705,7 @@ func (fp *FormulaParser) doFormula(rpn []*token) bool {
 func (fp *FormulaParser) Next() bool {
 
 	fp.Data = new(ColSet)
-	if fp.RawData.Next() == false {
+	if !fp.RawData.Next() {
 		return false
 	}
 

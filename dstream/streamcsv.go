@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 )
 
 // CSVReader supports reading a Dstream from an io.Reader.
@@ -29,13 +30,26 @@ type CSVReader struct {
 	// panic on them.
 	skipErrors bool
 
-	comma     rune
+	// The record separator, passed to csv.Reader
+	comma rune
+
+	// The number of records to read at once
 	chunkSize int
-	nvar      int
-	nobs      int
+
+	// The number of variables
+	nvar int
+
+	// The number of observations, not known until reading is complete
+	nobs int
+
+	// If true, the first row of the data file is a header (contains column names)
 	hasheader bool
-	doneinit  bool
-	done      bool
+
+	// doneInit becomes true after init is called
+	doneinit bool
+
+	// done becomes true after configuration is complete
+	done bool
 
 	// Index of current chunk
 	chunknum int
@@ -43,10 +57,36 @@ type CSVReader struct {
 	// If limitchunk > 0, read only this many chunks, otherwise read all chunks.
 	limitchunk int
 
+	// Map from variable names to column positions in the dstream
 	namepos map[string]int
-	names   []string
 
-	typeConf *CSVTypeConf
+	// Map from variable names to column positions in the file
+	filenamepos map[string]int
+
+	// The positions in the file of the variables in the dstream, in dstream order
+	filepos []int
+
+	// The names of the dstream variables
+	names []string
+
+	// The variable name/type structs, provided by the caller
+	types []VarType
+
+	// The variable types
+	dtypes []Dtype
+
+	// A function for parsing time values
+	parseTime func(string) time.Time
+}
+
+// VarType defines the name and type of one column of the CSV file.
+type VarType struct {
+
+	// The variable name
+	Name string
+
+	// The data type of the variable
+	Type Dtype
 }
 
 // FromCSV returns a Dstream that reads from a CSV source.  Call at
@@ -76,10 +116,12 @@ func (cs *CSVReader) SkipErrors() *CSVReader {
 	return cs
 }
 
-// TypeConf sets the type configuration information for reading the
-// CSV file.
-func (cs *CSVReader) TypeConf(tc *CSVTypeConf) *CSVReader {
-	cs.typeConf = tc
+// SetTypes species the types of the variables.  If the CSV file has a header,
+// these values may appear in any order, and variables not included in types
+// are omitted. If the CSV file does not have a header, then
+// types must match the columns in the file, in the correct order.
+func (cs *CSVReader) SetTypes(types []VarType) *CSVReader {
+	cs.types = types
 	return cs
 }
 
@@ -139,29 +181,50 @@ func (cs *CSVReader) init() {
 		panic(err)
 	}
 
-	// Create a variable name to column index map
+	if len(cs.types) == 0 {
+		panic("SetTypes must be called.")
+	}
+	cs.nvar = len(cs.types)
+
+	cs.filenamepos = make(map[string]int)
 	if cs.hasheader {
-		cs.typeConf.SetPos(firstrow)
+		for pos, na := range firstrow {
+			cs.filenamepos[na] = pos
+		}
 	} else {
 		// Save the first row since it contains data
 		cs.firstrow = firstrow
 
-		if !cs.typeConf.hasValidPositions() {
-			panic("When no header is provided in a csv file, the positions must be set manually.")
+		if len(firstrow) != len(cs.types) {
+			msg := fmt.Sprintf("File has %d columns and no header, but types has %d values.", len(firstrow), len(cs.types))
+			panic(msg)
+		}
+
+		// If no header, types contains the names in the proper order
+		for pos, vt := range cs.types {
+			cs.filenamepos[vt.Name] = pos
 		}
 	}
 
 	cs.setNames()
-	cs.nvar = len(cs.names)
-
-	cs.namepos = make(map[string]int)
-	for k, na := range cs.names {
-		cs.namepos[na] = k
-	}
-
 	cs.setbdata()
 
 	cs.doneinit = true
+}
+
+func (cs *CSVReader) setNames() {
+
+	// By the time this is called, dtypes is guaranteed to exist.
+	cs.dtypes = make([]Dtype, len(cs.types))
+	cs.names = make([]string, len(cs.types))
+	cs.namepos = make(map[string]int)
+	cs.filepos = make([]int, len(cs.types))
+	for pos, vt := range cs.types {
+		cs.names[pos] = vt.Name
+		cs.dtypes[pos] = vt.Type
+		cs.namepos[vt.Name] = pos
+		cs.filepos[pos] = cs.filenamepos[vt.Name]
+	}
 }
 
 // ChunkSize sets the size of chunks for this Dstream, it can only

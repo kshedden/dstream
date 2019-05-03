@@ -260,7 +260,7 @@ func (bw *BColsWriter) init() {
 			bw.needsClosing = append(bw.needsClosing, g)
 			bw.wtrs = append(bw.wtrs, g)
 		case "sz":
-			g := snappy.NewWriter(f)
+			g := snappy.NewBufferedWriter(f)
 			bw.needsClosing = append(bw.needsClosing, g)
 			bw.wtrs = append(bw.wtrs, g)
 		default:

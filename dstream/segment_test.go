@@ -165,7 +165,7 @@ func gensegdat(a, b, n int) Dstream {
 
 		if k%a == 0 {
 			chunks = append(chunks, x1)
-			x1 = make([]uint16, 0, 0)
+			x1 = make([]uint16, 0)
 		}
 	}
 

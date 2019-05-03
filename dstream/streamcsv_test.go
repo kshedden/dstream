@@ -36,11 +36,13 @@ func TestStreamCSV1(t *testing.T) {
 
 	rdr := bytes.NewReader(bbuf.Bytes())
 
-	tc := &CSVTypeConf{
-		Float64: []string{"Id", "Age"},
-		String:  []string{"Country"},
+	// Test that it works in a different order, and omitting a column
+	types := []VarType{
+		{"Id", Float64},
+		{"Age", Float64},
+		{"Country", String},
 	}
-	da := FromCSV(rdr).TypeConf(tc).ChunkSize(3).HasHeader().Done()
+	da := FromCSV(rdr).SetTypes(types).ChunkSize(3).HasHeader().Done()
 
 	// Check first read
 	if !EqualReport(ex, da, true) {
@@ -91,10 +93,13 @@ func TestStreamCSV2(t *testing.T) {
 	bbuf.Write([]byte("5,44\n"))
 
 	rdr := bytes.NewReader(bbuf.Bytes())
-	tc := &CSVTypeConf{
-		Float64: []string{"Id", "Age"},
+
+	types := []VarType{
+		{"Id", Float64},
+		{"Age", Float64},
 	}
-	da := FromCSV(rdr).TypeConf(tc).ChunkSize(3).HasHeader().Done()
+
+	da := FromCSV(rdr).SetTypes(types).ChunkSize(3).HasHeader().Done()
 
 	// Check first read
 	if !EqualReport(ex, da, true) {
@@ -149,10 +154,13 @@ func TestStreamCSV3(t *testing.T) {
 	bbuf.Write([]byte("5,44\n"))
 
 	rdr := bytes.NewReader(bbuf.Bytes())
-	tc := &CSVTypeConf{
-		String: []string{"Id", "Age"},
+
+	types := []VarType{
+		{"Id", String},
+		{"Age", String},
 	}
-	da := FromCSV(rdr).TypeConf(tc).ChunkSize(3).HasHeader().Done()
+
+	da := FromCSV(rdr).SetTypes(types).ChunkSize(3).HasHeader().Done()
 
 	// Check first read
 	if !EqualReport(ex, da, true) {
@@ -196,10 +204,15 @@ func TestCSVWriter1(t *testing.T) {
 `
 
 	r := strings.NewReader(data1)
-	tc := &CSVTypeConf{
-		Float64: []string{"id", "v1", "v2", "v3"},
+
+	types := []VarType{
+		{"id", Float64},
+		{"v1", Float64},
+		{"v2", Float64},
+		{"v3", Float64},
 	}
-	ds := FromCSV(r).TypeConf(tc).ChunkSize(2).HasHeader().Done()
+
+	ds := FromCSV(r).SetTypes(types).ChunkSize(2).HasHeader().Done()
 
 	var buf bytes.Buffer
 	fm := map[string]string{"v1": "%.1f"}
@@ -218,7 +231,7 @@ func TestCSVWriter1(t *testing.T) {
 4,200.0,201,202
 `
 
-	if es != string(buf.Bytes()) {
+	if es != buf.String() {
 		t.Fail()
 	}
 }

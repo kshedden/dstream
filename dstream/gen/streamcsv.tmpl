@@ -9,43 +9,6 @@ import (
     "math"
 )
 
-type CSVTypeConf struct {
-
-	// Names of the variables
-	{{- range . }}
-	    {{ .Utype }} []string
-	{{- end }}
-
-    // Positions of the variables in the CSV file
-	{{- range . }}
-  	    {{ .Utype }}Pos []int
-	{{- end }}
-
-	// Function used to parse time strings
-	ParseTime func(string)time.Time
-}
-
-func (tc *CSVTypeConf) hasValidPositions() bool {
-
-	{{- range . }}
-	if len(tc.{{ .Utype}}) != len(tc.{{ .Utype }}Pos) {
-		return false
-	}
-	{{- end }}
-
-	return true
-}
-
-func (cs *CSVReader) setNames() {
-
-	tc := cs.typeConf
-
-	cs.names = cs.names[0:0]
-	{{- range . }}
-        cs.names = append(cs.names, tc.{{ .Utype }}...)
-    {{- end }}
-}
-
 // Next advances to the next chunk.
 func (cs *CSVReader) Next() bool {
 
@@ -60,7 +23,6 @@ func (cs *CSVReader) Next() bool {
 
 	cs.chunknum++
 
-	tc := cs.typeConf
 	truncate(cs.bdata)
 
 	for j := 0; j < cs.chunkSize; j++ {
@@ -86,69 +48,51 @@ func (cs *CSVReader) Next() bool {
 		}
 		cs.nobs++
 
-		i := 0
-		{{- range . }}
-			for _, pos := range tc.{{ .Utype }}Pos {
-			    {{- if eq .ConvGroup "i" }}
-				    x, err := strconv.Atoi(rec[pos])
-				    if err != nil {
-					    panic(err)
-				    }
-				{{- else if eq .ConvGroup "f" }}
-				    x, err := strconv.ParseFloat(rec[pos], 64)
-				    if err != nil {
-					    x = math.NaN()
-				    }
-				{{- else if eq .ConvGroup "s" }}
-				    x := rec[pos]
-				{{- else }}
-				    x := tc.ParseTime(rec[pos])
+		for pos, typ := range cs.types {
+			fpos := cs.filepos[pos]
+			switch typ.Type {
+			    {{- range . }}
+				    case {{ .Utype }}:
+					    {{- if eq .ConvGroup "i" }}
+						    x, err := strconv.Atoi(rec[fpos])
+						    if err != nil {
+							    panic(err)
+						    }
+						{{- else if eq .ConvGroup "f" }}
+						    x, err := strconv.ParseFloat(rec[fpos], 64)
+						    if err != nil {
+							    x = math.NaN()
+						    }
+						{{- else if eq .ConvGroup "s" }}
+						    x := rec[fpos]
+						{{- else }}
+						    x := cs.parseTime(rec[fpos])
+						{{- end }}
+						u := cs.bdata[pos].([]{{ .Type }})
+						cs.bdata[pos] = append(u, {{ .Type }}(x))
 				{{- end }}
-				u := cs.bdata[i].([]{{ .Type }})
-				cs.bdata[i] = append(u, {{ .Type }}(x))
-				i++
+				default:
+					panic("unknown type")
 			}
-		{{- end }}
+		}
     }
 
 	return true
 }
 
-
-// SetPos determines the positions in the provided list of column names
-// of all configured variables.  The configured variables are given
-// in the type-specific slices named Float64, Int64, etc.
-func (tc *CSVTypeConf) SetPos(h []string) {
-
-	m := make(map[string]int)
-	for k, v := range h {
-		m[v] = k
-	}
-
-	{{- range . }}
-	tc.{{ .Utype }}Pos = tc.{{ .Utype }}Pos[0:0]
-	for _, v := range tc.{{ .Utype }} {
-		p, ok := m[v]
-		if !ok {
-			msg := fmt.Sprintf("{{ .Utype }} variable '%s' not found.\n", v)
-			panic(msg)
-		}
-		tc.{{ .Utype }}Pos = append(tc.{{ .Utype }}Pos, p)
-	}
-	{{ end }}
-}
-
 func (cs *CSVReader) setbdata() {
-
-	tc := cs.typeConf
 
 	cs.bdata = make([]interface{}, len(cs.names))
 
-	{{ range . }}
-	for _, na := range tc.{{ .Utype }} {
-		p := cs.namepos[na]
-		cs.bdata[p] = make([]{{ .Type }}, 0)
+	for pos, dtype := range cs.dtypes {
+		switch dtype {
+            {{- range . }}
+                case {{ .Utype }}:
+     		        cs.bdata[pos] = make([]{{ .Type }}, 0)
+		    {{- end }}
+		    default:
+		        panic("Unknown type")
+		}
 	}
-	{{- end}}
 }
 

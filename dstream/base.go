@@ -192,7 +192,7 @@ func CheckValid(data Dstream) bool {
 			if n1 != n0 {
 				msg := fmt.Sprintf("Length mismatch in chunk %d: len(%s) = %d, len(%s) = %d\n",
 					c, names[0], n0, names[j], n1)
-				io.WriteString(os.Stderr, msg)
+				_, _ = io.WriteString(os.Stderr, msg)
 				return false
 			}
 		}
@@ -204,7 +204,8 @@ func CheckValid(data Dstream) bool {
 }
 
 // NewFromFlat creates a Dstream from raw data stored as contiguous
-// (flat) arrays.  data[i] is the data for the i^th variable.
+// (flat) arrays.  data[i] is the data for the i^th variable, it is
+// a slice of fixed-width values, e.g. a []float64.
 func NewFromFlat(data []interface{}, names []string) Dstream {
 
 	if len(data) != len(names) {

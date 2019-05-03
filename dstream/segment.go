@@ -125,10 +125,7 @@ func (sd *segmentedData) Next() bool {
 			// No more data, whatever is left in bdata is
 			// the last segment, or we are done if adata
 			// is empty.
-			if ilen(sd.bdata[0]) == 0 {
-				return false
-			}
-			return true
+			return ilen(sd.bdata[0]) > 0
 		}
 		sd.setb()
 
