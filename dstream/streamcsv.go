@@ -102,6 +102,12 @@ func FromCSV(r io.Reader) *CSVReader {
 	return dr
 }
 
+// ParseTime sets the time parsing function./
+func (cs *CSVReader) ParseTime(f func(string) time.Time) *CSVReader {
+	cs.parseTime = f
+	return cs
+}
+
 // Done is called when all configuration is complete.  After calling
 // Done, the DStream can be used.
 func (cs *CSVReader) Done() Dstream {
